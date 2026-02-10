@@ -19,6 +19,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "concurrently": "^9.2.1",
     "tailwindcss": "^4.1.18",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }
