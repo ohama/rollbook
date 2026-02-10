@@ -29,6 +29,7 @@
     <Compile Include="Components/TeamMemberCard.fs" />
     <Compile Include="Components/PhotoUpload.fs" />
     <Compile Include="Components/PhotoGallery.fs" />
+    <Compile Include="Components/OfflineIndicator.fs" />
     <!-- Admin UI components -->
     <Compile Include="admin/MemberList.fs" />
     <Compile Include="admin/MemberActions.fs" />

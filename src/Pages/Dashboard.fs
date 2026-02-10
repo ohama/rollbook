@@ -9,6 +9,10 @@ open Pages.ProgressView
 open Pages.TeamView
 open Components.PhotoUpload
 open Components.PhotoGallery
+open Offline.NetworkStatus
+open Offline.Queue
+open Offline.Types
+open Offline.Sync
 
 /// Tab mode for dashboard navigation
 type TabMode = Home | Progress | Team
@@ -42,21 +46,46 @@ let WorkoutToggle (userId: string) (refreshKey: int) =
             let today = getTodayDateString()
             let newState = not hasWorkedOut
 
-            promise {
-                try
-                    if hasWorkedOut then
-                        let! _ = deleteWorkout userId today
-                        ()
-                    else
-                        let! _ = upsertWorkout userId today
-                        ()
+            // Check if online or offline
+            if isOnline () then
+                // Online: direct API call
+                promise {
+                    try
+                        if hasWorkedOut then
+                            let! _ = deleteWorkout userId today
+                            ()
+                        else
+                            let! _ = upsertWorkout userId today
+                            ()
 
-                    setHasWorkedOut newState
-                    setLoading false
-                with ex ->
-                    setError (Some "저장 실패. 다시 시도해주세요.")
-                    setLoading false
-            } |> Promise.start
+                        setHasWorkedOut newState
+                        setLoading false
+                    with ex ->
+                        setError (Some "저장 실패. 다시 시도해주세요.")
+                        setLoading false
+                } |> Promise.start
+            else
+                // Offline: queue for later sync
+                promise {
+                    try
+                        let operationType =
+                            if hasWorkedOut then DeleteWorkout else CreateWorkout
+                        let! result = enqueue operationType userId today
+                        match result with
+                        | Queued _ ->
+                            // Optimistically update UI
+                            setHasWorkedOut newState
+                            setLoading false
+                            // Try to register background sync
+                            let! _ = registerBackgroundSync ()
+                            ()
+                        | QueueError msg ->
+                            setError (Some msg)
+                            setLoading false
+                    with ex ->
+                        setError (Some "저장 실패. 다시 시도해주세요.")
+                        setLoading false
+                } |> Promise.start
 
     Html.div [
         prop.className "flex flex-col items-center gap-6 p-8"

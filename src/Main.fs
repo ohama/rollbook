@@ -9,6 +9,8 @@ open Pages.Signup
 open Pages.ForgotPassword
 open Pages.ResetPassword
 open Pages.Dashboard
+open Components.OfflineIndicator
+open Offline.Sync
 
 /// Application auth state
 type AuthState =
@@ -38,6 +40,9 @@ let App () =
 
     // Subscribe to auth state changes on mount
     React.useEffectOnce(fun () ->
+        // Initialize offline sync listeners
+        initializeSync ()
+
         // Check for password recovery mode (from email link)
         let hash = window.location.hash
         if hash.Contains("type=recovery") then
@@ -88,35 +93,39 @@ let App () =
         setState { state with authState = Anonymous; currentPage = LoginPage }
 
     // Render based on auth state
-    match state.authState with
-    | Loading ->
-        Html.div [
-            prop.className "min-h-screen bg-gray-100 flex items-center justify-center"
-            prop.children [
-                Html.div [
-                    prop.className "text-center"
-                    prop.children [
-                        Html.div [
-                            prop.className "animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"
-                        ]
-                        Html.p [
-                            prop.className "text-gray-600"
-                            prop.text "로딩 중..."
+    React.fragment [
+        OfflineIndicator ()
+
+        match state.authState with
+        | Loading ->
+            Html.div [
+                prop.className "min-h-screen bg-gray-100 flex items-center justify-center"
+                prop.children [
+                    Html.div [
+                        prop.className "text-center"
+                        prop.children [
+                            Html.div [
+                                prop.className "animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"
+                            ]
+                            Html.p [
+                                prop.className "text-gray-600"
+                                prop.text "로딩 중..."
+                            ]
                         ]
                     ]
                 ]
             ]
-        ]
 
-    | Anonymous ->
-        match state.currentPage with
-        | LoginPage -> Pages.Login.LoginPage navigateTo onLoginSuccess
-        | SignupPage -> Pages.Signup.SignupPage navigateTo
-        | ForgotPasswordPage -> Pages.ForgotPassword.ForgotPasswordPage navigateTo
-        | ResetPasswordPage -> Pages.ResetPassword.ResetPasswordPage navigateTo
+        | Anonymous ->
+            match state.currentPage with
+            | LoginPage -> Pages.Login.LoginPage navigateTo onLoginSuccess
+            | SignupPage -> Pages.Signup.SignupPage navigateTo
+            | ForgotPasswordPage -> Pages.ForgotPassword.ForgotPasswordPage navigateTo
+            | ResetPasswordPage -> Pages.ResetPassword.ResetPasswordPage navigateTo
 
-    | Authenticated user ->
-        Pages.Dashboard.DashboardPage user onLogout
+        | Authenticated user ->
+            Pages.Dashboard.DashboardPage user onLogout
+    ]
 
 // Mount the app
 let root = ReactDOM.createRoot(document.getElementById "app")
