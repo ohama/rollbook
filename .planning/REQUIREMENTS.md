@@ -45,7 +45,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Documentation
 
-- [ ] **DOCS-01**: 각 Phase별 튜토리얼 문서 작성 (tutorial/*.md, 한글, 초보 개발자 대상, UML 다이어그램 포함)
+- [ ] **DOCS-01**: 각 Plan별 튜토리얼 문서 작성 (tutorial/{phase}-{plan}-{topic}.md, 한글, 초보 개발자 대상, UML 다이어그램 포함)
 
 ## v2 Requirements
 
