@@ -10,28 +10,29 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 2 of 6 (Core Loop)
-Plan: 0 of ? (not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-10 — Completed Phase 1 Foundation (all 6 plans verified)
+Plan: 1 of ? (in progress)
+Status: In progress
+Last activity: 2026-02-10 — Completed 02-01-PLAN.md
 
-Progress: [██████████] Phase 1 COMPLETE
+Progress: [██████████░░░░░░░░░░] Phase 1 complete, Phase 2 started
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 3.2min
-- Total execution time: 0.32 hours
+- Total plans completed: 7
+- Average duration: 3.0min
+- Total execution time: 0.35 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan | Status |
 |-------|-------|-------|----------|--------|
 | 01-foundation | 6 | 19min | 3.2min | ✅ Complete |
+| 02-core-loop | 1 | 2min | 2.0min | 🔄 In progress |
 
 **Recent Trend:**
-- Last 6 plans: 01-01 (4min), 01-02 (5min), 01-03 (3min), 01-04 (3min), 01-05 (2min), 01-06 (manual)
-- Trend: Fast execution maintained
+- Last 6 plans: 01-02 (5min), 01-03 (3min), 01-04 (3min), 01-05 (2min), 01-06 (manual), 02-01 (2min)
+- Trend: Fast execution maintained, Phase 2 started strong
 
 *Updated after each plan completion*
 
@@ -58,6 +59,10 @@ Recent decisions affecting current work:
 - **01-06**: Fable 4.28.0 as local dotnet tool (4.25.0 had source file detection bug)
 - **01-06**: Supabase createClient binding uses tuple-style args, not curried
 - **01-06**: email confirmations enabled in config.toml
+- **02-01**: DATE type for workout_date (not TIMESTAMPTZ) - matches calendar-day semantics, no timezone confusion
+- **02-01**: Compound primary key (user_id, workout_date) enforces one workout per user per date at DB level
+- **02-01**: Four separate RLS policies (not FOR ALL) - clearer intent, easier debugging
+- **02-01**: (SELECT auth.uid()) wrapping for ~95% performance improvement via result caching
 
 ### Pending Todos
 
@@ -70,9 +75,9 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Phase 1 Foundation COMPLETE
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
-Next: Plan Phase 2 Core Loop
+Next: Continue Phase 2 Core Loop
 
 ---
 *Last updated: 2026-02-10*
