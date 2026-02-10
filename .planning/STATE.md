@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 5 of 6 (Photo Upload)
-Plan: 0 of ? (not started)
-Status: Ready to plan
-Last activity: 2026-02-10 — Completed Phase 4 (Team Features)
+Plan: 1 of ? (in progress)
+Status: In progress
+Last activity: 2026-02-10 — Completed 05-01-PLAN.md
 
-Progress: [████████████████████░░░░░] Phase 1-4 complete
+Progress: [████████████████████░░░░░] Phase 1-4 complete, Phase 5 started
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: 2.5min
-- Total execution time: 0.88 hours
+- Total execution time: 0.90 hours
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: [████████████████████░░░
 | 02-core-loop | 5 | 12min | 2.4min | ✅ Complete |
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
 | 04-team-features | 6 | 10min | 1.7min | ✅ Complete |
+| 05-photo-upload | 1 | 2min | 2.0min | 🚧 In progress |
 
 **Recent Trend:**
-- Last 6 plans: 04-01 (3min), 04-02 (2min), 04-03 (2min), 04-04 (1min), 04-05 (X), 04-06 (4min)
-- Trend: Phase 4 complete with fast execution times
+- Last 6 plans: 04-02 (2min), 04-03 (2min), 04-04 (1min), 04-05 (X), 04-06 (4min), 05-01 (2min)
+- Trend: Phase 5 started; consistent execution times
 
 *Updated after each plan completion*
 
@@ -112,6 +113,13 @@ Recent decisions affecting current work:
 - **04-06**: 1242-line Korean tutorial with 3 Mermaid diagrams
 - **04-06**: 6 key concepts documented: RLS, FK joins, groupBy, Option handling, parallel fetch, zero-workout handling
 - **04-06**: RLS modification pattern: DROP POLICY IF EXISTS + CREATE POLICY
+- **05-01**: Private storage bucket (public = false) for user photo isolation
+- **05-01**: Path pattern {user_id}/{date}.jpg enables folder-based RLS
+- **05-01**: 5MB file size limit balances quality and storage costs
+- **05-01**: MIME types restricted to jpeg/png/webp for security
+- **05-01**: Three separate policies (INSERT/SELECT/DELETE) for storage.objects
+- **05-01**: storage.foldername(name)[1] extracts user_id from path
+- **05-01**: COMMENT statements fail on storage.buckets (system table permissions)
 
 ### Pending Todos
 
@@ -123,10 +131,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 06:02:00 UTC
-Stopped at: Completed 04-06-PLAN.md (Team Features Tutorial)
+Last session: 2026-02-10 06:06:34 UTC
+Stopped at: Completed 05-01-PLAN.md (Storage Bucket with RLS)
 Resume file: None
-Next: Phase 5 - Photo Upload or Phase 6 - Production
+Next: Continue Phase 5 - Photo Upload (05-02 onwards)
 
 ---
 *Last updated: 2026-02-10*
