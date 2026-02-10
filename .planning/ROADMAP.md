@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Core Loop** - One-tap workout logging (core value proposition)
 - [x] **Phase 3: Progress Tracking** - Personal calendar, stats, history views
 - [x] **Phase 4: Team Features** - Team workout visibility (members can view each other's records)
-- [ ] **Phase 5: Photo Upload** - Photo-based workout logging
+- [x] **Phase 5: Photo Upload** - Photo-based workout logging
 - [ ] **Phase 6: Production Ready** - Offline PWA, admin tools, performance optimization
 
 ## Phase Details
@@ -111,13 +111,13 @@ Plans:
 **Plans**: 7 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Create storage bucket migration with RLS policies
-- [ ] 05-02-PLAN.md — Install browser-image-compression and create Storage.fs bindings
-- [ ] 05-03-PLAN.md — Create PhotoUpload component with progress indicator
-- [ ] 05-04-PLAN.md — Create PhotoGallery component for viewing photos
-- [ ] 05-05-PLAN.md — Integrate photo upload into Dashboard (auto-creates workout)
-- [ ] 05-06-PLAN.md — Human verification of photo features and RLS
-- [ ] 05-07-PLAN.md — Write Phase 5 tutorial (tutorial/05-photo-upload.md)
+- [x] 05-01-PLAN.md — Create storage bucket migration with RLS policies
+- [x] 05-02-PLAN.md — Install browser-image-compression and create Storage.fs bindings
+- [x] 05-03-PLAN.md — Create PhotoUpload component with progress indicator
+- [x] 05-04-PLAN.md — Create PhotoGallery component for viewing photos
+- [x] 05-05-PLAN.md — Integrate photo upload into Dashboard (auto-creates workout)
+- [x] 05-06-PLAN.md — Automated verification of photo features and RLS
+- [x] 05-07-PLAN.md — Write Phase 5 tutorial (tutorial/05-photo-upload.md)
 
 ### Phase 6: Production Ready
 **Goal**: Offline capability, admin tools, production hardening
@@ -158,9 +158,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Core Loop | 5/5 | ✅ Complete | 2026-02-10 |
 | 3. Progress Tracking | 5/5 | ✅ Complete | 2026-02-10 |
 | 4. Team Features | 6/6 | ✅ Complete | 2026-02-10 |
-| 5. Photo Upload | 0/7 | Planned | - |
+| 5. Photo Upload | 7/7 | ✅ Complete | 2026-02-10 |
 | 6. Production Ready | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10 (Phase 5 planned)*
+*Last updated: 2026-02-10 (Phase 5 complete)*

@@ -19,7 +19,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **WORK-01**: "오늘 운동했다" 원탭으로 기록 생성
 - [ ] **WORK-02**: 운동 기록 수정 가능
 - [x] **WORK-03**: 운동 기록 삭제 가능
-- [ ] **WORK-04**: 사진 업로드 시 자동으로 해당 날짜 운동 기록 생성
+- [x] **WORK-04**: 사진 업로드 시 자동으로 해당 날짜 운동 기록 생성
 - [ ] **WORK-05**: 오늘 외 다른 날짜에도 기록 가능
 
 ### Progress Tracking
@@ -109,7 +109,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROG-02 | Phase 3 | Complete |
 | PROG-03 | Phase 3 | Complete |
 | TEAM-01 | Phase 4 | Complete |
-| WORK-04 | Phase 5 | Pending |
+| WORK-04 | Phase 5 | Complete |
 | TECH-02 | Phase 6 | Pending |
 | TECH-03 | Phase 6 | Pending |
 | ADMN-01 | Phase 6 | Pending |
@@ -119,9 +119,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 **Coverage:**
 - v1 requirements: 19 total
-- Complete: 12
-- Pending: 7
+- Complete: 13
+- Pending: 6
 
 ---
 *Requirements defined: 2025-02-10*
-*Last updated: 2026-02-10 (Phase 4 complete)*
+*Last updated: 2026-02-10 (Phase 5 complete)*
