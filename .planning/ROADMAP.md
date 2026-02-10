@@ -45,17 +45,21 @@ Plans:
 ### Phase 2: Core Loop
 **Goal**: One-tap workout logging (core value delivery)
 **Depends on**: Phase 1
-**Requirements**: WORK-01, WORK-02, WORK-03, WORK-05
+**Requirements**: WORK-01, WORK-02, WORK-03, WORK-05, DOCS-01
 **Success Criteria** (what must be TRUE):
   1. User can toggle "오늘 운동했다" with one tap to create/delete today's record (WORK-01)
   2. User can log workout for any date (not just today) (WORK-05)
   3. User can edit existing workout records (WORK-02)
   4. User can delete workout records (WORK-03)
   5. Workout record per day is enforced (no duplicates for same user+date)
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 02-01-PLAN.md — Create workouts table with RLS policies
+- [ ] 02-02-PLAN.md — Create F# bindings for Supabase workout CRUD operations
+- [ ] 02-03-PLAN.md — Implement one-tap workout toggle UI on Dashboard
+- [ ] 02-04-PLAN.md — Human verification of core loop functionality
+- [ ] 02-05-PLAN.md — Write Phase 2 tutorial (tutorial/02-core-loop.md)
 
 ### Phase 3: Progress Tracking
 **Goal**: Personal progress views (calendar, stats, history)
@@ -136,7 +140,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 6/6 | ✅ Complete | 2026-02-10 |
-| 2. Core Loop | 0/? | Not started | - |
+| 2. Core Loop | 0/5 | Not started | - |
 | 3. Progress Tracking | 0/? | Not started | - |
 | 4. Team Features | 0/? | Not started | - |
 | 5. Photo Upload | 0/? | Not started | - |
@@ -144,4 +148,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10 (Phase 1 planned)*
+*Last updated: 2026-02-10 (Phase 2 planned)*
