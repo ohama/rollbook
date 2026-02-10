@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Progress Tracking** - Personal calendar, stats, history views
 - [x] **Phase 4: Team Features** - Team workout visibility (members can view each other's records)
 - [x] **Phase 5: Photo Upload** - Photo-based workout logging
-- [ ] **Phase 6: Production Ready** - Offline PWA, admin tools, performance optimization
+- [x] **Phase 6: Production Ready** - Offline PWA, admin tools, performance optimization
 
 ## Phase Details
 
@@ -131,10 +131,17 @@ Plans:
   5. Admin can delete members (ADMN-02)
   6. App bundle size optimized (<500KB initial load)
   7. Security audit passed (Supabase Security Advisor)
-**Plans**: TBD
+**Plans**: 8 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [x] 06-01-PLAN.md — PWA setup with vite-plugin-pwa (icons, manifest, service worker)
+- [x] 06-02-PLAN.md — Admin RBAC schema (user_roles table, RLS policies)
+- [x] 06-03-PLAN.md — Offline queue with IndexedDB (idb library)
+- [x] 06-04-PLAN.md — Admin UI (member list, delete action)
+- [x] 06-05-PLAN.md — Background sync with fallback for non-Chromium browsers
+- [x] 06-06-PLAN.md — Bundle optimization and security audit
+- [x] 06-07-PLAN.md — Automated verification of production readiness
+- [x] 06-08-PLAN.md — Write Phase 6 tutorial (tutorial/06-production-ready.md)
 
 ## Documentation Requirement
 
@@ -159,8 +166,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Progress Tracking | 5/5 | ✅ Complete | 2026-02-10 |
 | 4. Team Features | 6/6 | ✅ Complete | 2026-02-10 |
 | 5. Photo Upload | 7/7 | ✅ Complete | 2026-02-10 |
-| 6. Production Ready | 0/? | Not started | - |
+| 6. Production Ready | 8/8 | ✅ Complete | 2026-02-10 |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10 (Phase 5 complete)*
+*Last updated: 2026-02-10 (All phases complete! Milestone 1.0 achieved)*

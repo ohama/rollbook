@@ -34,18 +34,18 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Admin
 
-- [ ] **ADMN-01**: 관리자가 회원 목록 조회 가능
-- [ ] **ADMN-02**: 관리자가 회원 삭제 가능
+- [x] **ADMN-01**: 관리자가 회원 목록 조회 가능
+- [x] **ADMN-02**: 관리자가 회원 삭제 가능
 
 ### Technical
 
 - [x] **TECH-01**: 모바일에서 잘 동작하는 반응형 UI
-- [ ] **TECH-02**: 오프라인에서도 운동 기록 가능 (PWA)
-- [ ] **TECH-03**: 홈화면에 앱으로 설치 가능 (PWA)
+- [x] **TECH-02**: 오프라인에서도 운동 기록 가능 (PWA)
+- [x] **TECH-03**: 홈화면에 앱으로 설치 가능 (PWA)
 
 ### Documentation
 
-- [ ] **DOCS-01**: 각 Phase별 튜토리얼 문서 작성 (tutorial/{phase}-{name}.md, 한글, 초보 개발자 대상, UML 다이어그램 포함) — Phase 마지막 Plan으로 작성
+- [x] **DOCS-01**: 각 Phase별 튜토리얼 문서 작성 (tutorial/{phase}-{name}.md, 한글, 초보 개발자 대상, UML 다이어그램 포함) — Phase 마지막 Plan으로 작성
 
 ## v2 Requirements
 
@@ -102,26 +102,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-03 | Phase 1 | Complete |
 | AUTH-04 | Phase 1 | Complete |
 | WORK-01 | Phase 2 | Complete |
-| WORK-02 | Phase 2 | Pending |
+| WORK-02 | Phase 2 | Pending (v2) |
 | WORK-03 | Phase 2 | Complete |
-| WORK-05 | Phase 2 | Pending |
+| WORK-05 | Phase 2 | Pending (v2) |
 | PROG-01 | Phase 3 | Complete |
 | PROG-02 | Phase 3 | Complete |
 | PROG-03 | Phase 3 | Complete |
 | TEAM-01 | Phase 4 | Complete |
 | WORK-04 | Phase 5 | Complete |
-| TECH-02 | Phase 6 | Pending |
-| TECH-03 | Phase 6 | Pending |
-| ADMN-01 | Phase 6 | Pending |
-| ADMN-02 | Phase 6 | Pending |
+| TECH-02 | Phase 6 | Complete |
+| TECH-03 | Phase 6 | Complete |
+| ADMN-01 | Phase 6 | Complete |
+| ADMN-02 | Phase 6 | Complete |
 | TECH-01 | Phase 1 | Complete |
-| DOCS-01 | All Phases | In Progress |
+| DOCS-01 | All Phases | Complete |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Complete: 13
-- Pending: 6
+- Complete: 17
+- Pending (deferred to v2): 2 (WORK-02, WORK-05)
 
 ---
 *Requirements defined: 2025-02-10*
-*Last updated: 2026-02-10 (Phase 5 complete)*
+*Last updated: 2026-02-10 (Milestone 1.0 complete!)*
