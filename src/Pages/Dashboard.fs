@@ -7,20 +7,23 @@ open Supabase.Types
 open Supabase.Workouts
 open Pages.ProgressView
 open Pages.TeamView
+open Components.PhotoUpload
+open Components.PhotoGallery
 
 /// Tab mode for dashboard navigation
 type TabMode = Home | Progress | Team
 
 [<ReactComponent>]
-let WorkoutToggle (userId: string) =
+let WorkoutToggle (userId: string) (refreshKey: int) =
     let (hasWorkedOut, setHasWorkedOut) = React.useState(false)
     let (loading, setLoading) = React.useState(true)
     let (error, setError) = React.useState<string option>(None)
 
-    // Load initial state on mount
+    // Load initial state on mount AND when refreshKey changes
     React.useEffect((fun () ->
         promise {
             try
+                setLoading true
                 let today = getTodayDateString()
                 let! workout = getWorkout userId today
                 setHasWorkedOut (Option.isSome workout)
@@ -29,7 +32,7 @@ let WorkoutToggle (userId: string) =
                 setError (Some "운동 기록을 불러올 수 없습니다")
                 setLoading false
         } |> Promise.start
-    ), [||])
+    ), [| box refreshKey |])
 
     let handleToggle () =
         if not loading then
@@ -106,6 +109,7 @@ let WorkoutToggle (userId: string) =
 let DashboardPage (user: User) (onLogout: unit -> unit) =
     let loading, setLoading = React.useState(false)
     let (activeTab, setActiveTab) = React.useState(Home)
+    let (refreshKey, setRefreshKey) = React.useState(0)
 
     let handleLogout () =
         setLoading true
@@ -215,11 +219,38 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                     ]
                                 ]
 
-                                // Workout toggle (Phase 2)
+                                // Workout toggle (with refresh key)
                                 Html.div [
-                                    prop.className "bg-white rounded-2xl shadow-sm p-6 text-center"
+                                    prop.className "bg-white rounded-2xl shadow-sm p-6 text-center mb-6"
                                     prop.children [
-                                        WorkoutToggle user.id
+                                        WorkoutToggle user.id refreshKey
+                                    ]
+                                ]
+
+                                // Photo upload (NEW)
+                                Html.div [
+                                    prop.className "bg-white rounded-2xl shadow-sm p-6 mb-6"
+                                    prop.children [
+                                        Html.h3 [
+                                            prop.className "text-lg font-semibold text-gray-800 mb-4"
+                                            prop.text "사진으로 운동 기록"
+                                        ]
+                                        Html.p [
+                                            prop.className "text-sm text-gray-500 mb-4"
+                                            prop.text "사진을 올리면 자동으로 오늘 운동 기록이 생성됩니다"
+                                        ]
+                                        PhotoUploadButton user.id (fun () ->
+                                            // Increment refresh key to trigger re-fetch
+                                            setRefreshKey (refreshKey + 1)
+                                        )
+                                    ]
+                                ]
+
+                                // Photo gallery (NEW)
+                                Html.div [
+                                    prop.className "bg-white rounded-2xl shadow-sm p-6"
+                                    prop.children [
+                                        PhotoGallery user.id
                                     ]
                                 ]
                             ]
