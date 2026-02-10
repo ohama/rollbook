@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 5 of 6 (Photo Upload)
-Plan: 4 of ? (in progress)
+Plan: 5 of ? (in progress)
 Status: In progress
-Last activity: 2026-02-10 — Completed 05-04-PLAN.md
+Last activity: 2026-02-10 — Completed 05-05-PLAN.md
 
 Progress: [████████████████████░░░░░] Phase 1-4 complete, Phase 5 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
+- Total plans completed: 26
 - Average duration: 2.5min
-- Total execution time: 1.08 hours
+- Total execution time: 1.11 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [████████████████████░░░
 | 02-core-loop | 5 | 12min | 2.4min | ✅ Complete |
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
 | 04-team-features | 6 | 10min | 1.7min | ✅ Complete |
-| 05-photo-upload | 4 | 14min | 3.5min | 🚧 In progress |
+| 05-photo-upload | 5 | 16min | 3.2min | 🚧 In progress |
 
 **Recent Trend:**
-- Last 6 plans: 04-05 (X), 04-06 (4min), 05-01 (2min), 05-02 (3min), 05-03 (4min), 05-04 (5min)
+- Last 6 plans: 04-06 (4min), 05-01 (2min), 05-02 (3min), 05-03 (4min), 05-04 (5min), 05-05 (2min)
 - Trend: Phase 5 in progress; consistent execution times
 
 *Updated after each plan completion*
@@ -136,6 +136,9 @@ Recent decisions affecting current work:
 - **05-03**: capture="environment" attribute opens rear camera on mobile devices
 - **05-03**: Empty string URL on Success state if signed URL fails (upload still succeeded)
 - **05-03**: Retry button in Error state resets to Idle for easy re-attempt
+- **05-05**: refreshKey pattern for component re-fetch triggering (int state + useEffect dependency)
+- **05-05**: Photo upload callback increments refreshKey to trigger WorkoutToggle refresh
+- **05-05**: Home tab layout: Welcome → WorkoutToggle → Photo upload → Photo gallery
 
 ### Pending Todos
 
@@ -147,10 +150,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 06:36:03 UTC
-Stopped at: Completed 05-04-PLAN.md (PhotoGallery Component)
+Last session: 2026-02-10 06:40:28 UTC
+Stopped at: Completed 05-05-PLAN.md (Dashboard Photo Integration)
 Resume file: None
-Next: Continue Phase 5 - Photo Upload (05-05 onwards)
+Next: Continue Phase 5 - Photo Upload (05-06 onwards if exists)
 
 ---
 *Last updated: 2026-02-10*
