@@ -5,13 +5,17 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Supabase bindings (order matters!) -->
     <Compile Include="Supabase/Types.fs" />
     <Compile Include="Supabase/Client.fs" />
+    <Compile Include="Supabase/Auth.fs" />
+    <!-- Entry point last -->
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fable.Core" Version="4.3.0" />
     <PackageReference Include="Feliz" Version="2.9.0" />
     <PackageReference Include="Fable.Browser.Dom" Version="2.17.0" />
+    <PackageReference Include="Fable.Promise" Version="3.*" />
   </ItemGroup>
 </Project>
