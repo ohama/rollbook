@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 2 of 6 (Core Loop)
-Plan: 1 of ? (in progress)
+Plan: 2 of ? (in progress)
 Status: In progress
-Last activity: 2026-02-10 — Completed 02-01-PLAN.md
+Last activity: 2026-02-10 — Completed 02-02-PLAN.md
 
-Progress: [██████████░░░░░░░░░░] Phase 1 complete, Phase 2 started
+Progress: [██████████░░░░░░░░░░] Phase 1 complete, Phase 2 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 3.0min
-- Total execution time: 0.35 hours
+- Total plans completed: 8
+- Average duration: 2.8min
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan | Status |
 |-------|-------|-------|----------|--------|
 | 01-foundation | 6 | 19min | 3.2min | ✅ Complete |
-| 02-core-loop | 1 | 2min | 2.0min | 🔄 In progress |
+| 02-core-loop | 2 | 4min | 2.0min | 🔄 In progress |
 
 **Recent Trend:**
-- Last 6 plans: 01-02 (5min), 01-03 (3min), 01-04 (3min), 01-05 (2min), 01-06 (manual), 02-01 (2min)
-- Trend: Fast execution maintained, Phase 2 started strong
+- Last 6 plans: 01-03 (3min), 01-04 (3min), 01-05 (2min), 01-06 (manual), 02-01 (2min), 02-02 (2min)
+- Trend: Consistent 2-3min execution, Phase 2 maintaining velocity
 
 *Updated after each plan completion*
 
@@ -63,6 +63,10 @@ Recent decisions affecting current work:
 - **02-01**: Compound primary key (user_id, workout_date) enforces one workout per user per date at DB level
 - **02-01**: Four separate RLS policies (not FOR ALL) - clearer intent, easier debugging
 - **02-01**: (SELECT auth.uid()) wrapping for ~95% performance improvement via result caching
+- **02-02**: workout_date as string (YYYY-MM-DD) not DateTime - matches Supabase DATE serialization
+- **02-02**: getTodayDateString uses en-CA locale for consistent YYYY-MM-DD format in local timezone
+- **02-02**: upsertWorkout with onConflict for idempotent toggle (handles double-clicks)
+- **02-02**: getWorkouts supports optional date filtering for future calendar views
 
 ### Pending Todos
 
@@ -75,7 +79,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 02-01-PLAN.md
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
 Next: Continue Phase 2 Core Loop
 
