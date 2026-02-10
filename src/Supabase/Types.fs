@@ -45,3 +45,16 @@ type AuthChangeEvent =
     | [<CompiledName("USER_UPDATED")>] UserUpdated
     | [<CompiledName("PASSWORD_RECOVERY")>] PasswordRecovery
     | [<CompiledName("INITIAL_SESSION")>] InitialSession
+
+/// Workout record from workouts table
+type WorkoutRecord = {
+    user_id: string
+    workout_date: string  // YYYY-MM-DD format (ISO date string)
+    created_at: string option
+}
+
+/// Response from workout operations
+type WorkoutResponse = {
+    data: WorkoutRecord array option
+    error: obj option
+}
