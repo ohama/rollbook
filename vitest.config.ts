@@ -1,11 +1,12 @@
 import { defineConfig } from 'vitest/config';
-import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  plugins: [tailwindcss()],
+  plugins: [],
   test: {
-    environment: 'jsdom',
+    environment: 'node', // Use node environment for file-based tests
     globals: true,
     setupFiles: [],
+    pool: 'threads',
+    isolate: false,
   },
 });
