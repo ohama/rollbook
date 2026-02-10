@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 5 of 6 (Photo Upload)
-Plan: 5 of ? (in progress)
-Status: In progress
-Last activity: 2026-02-10 — Completed 05-05-PLAN.md
+Plan: 6 of 6 (complete)
+Status: Phase complete
+Last activity: 2026-02-10 — Completed 05-06-PLAN.md (Storage Security Verification)
 
-Progress: [████████████████████░░░░░] Phase 1-4 complete, Phase 5 in progress
+Progress: [████████████████████████░] Phase 1-5 complete, Phase 6 pending
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 26
+- Total plans completed: 27
 - Average duration: 2.5min
-- Total execution time: 1.11 hours
+- Total execution time: 1.16 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [████████████████████░░░
 | 02-core-loop | 5 | 12min | 2.4min | ✅ Complete |
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
 | 04-team-features | 6 | 10min | 1.7min | ✅ Complete |
-| 05-photo-upload | 5 | 16min | 3.2min | 🚧 In progress |
+| 05-photo-upload | 6 | 19min | 3.2min | ✅ Complete |
 
 **Recent Trend:**
-- Last 6 plans: 04-06 (4min), 05-01 (2min), 05-02 (3min), 05-03 (4min), 05-04 (5min), 05-05 (2min)
-- Trend: Phase 5 in progress; consistent execution times
+- Last 6 plans: 05-01 (2min), 05-02 (3min), 05-03 (4min), 05-04 (5min), 05-05 (2min), 05-06 (3min)
+- Trend: Phase 5 complete; consistent 2-5min execution times
 
 *Updated after each plan completion*
 
@@ -139,6 +139,9 @@ Recent decisions affecting current work:
 - **05-05**: refreshKey pattern for component re-fetch triggering (int state + useEffect dependency)
 - **05-05**: Photo upload callback increments refreshKey to trigger WorkoutToggle refresh
 - **05-05**: Home tab layout: Welcome → WorkoutToggle → Photo upload → Photo gallery
+- **05-06**: SQL RLS tests require BEGIN/COMMIT transactions for SET LOCAL to work
+- **05-06**: Storage API enforces deletion via trigger (prevents direct SQL DELETE) for data safety
+- **05-06**: RLS testing pattern: BEGIN + SET LOCAL ROLE + SET LOCAL request.jwt.claims + test query + COMMIT
 
 ### Pending Todos
 
@@ -150,10 +153,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 06:40:28 UTC
-Stopped at: Completed 05-05-PLAN.md (Dashboard Photo Integration)
+Last session: 2026-02-10 06:46:19 UTC
+Stopped at: Completed 05-06-PLAN.md (Storage Security Verification)
 Resume file: None
-Next: Continue Phase 5 - Photo Upload (05-06 onwards if exists)
+Next: Phase 5 complete. Ready for Phase 6 (Polish & Deploy)
 
 ---
 *Last updated: 2026-02-10*
