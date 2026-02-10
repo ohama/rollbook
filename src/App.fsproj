@@ -15,6 +15,7 @@
     <Compile Include="Components/Layout.fs" />
     <Compile Include="Components/Calendar.fs" />
     <Compile Include="Components/WorkoutList.fs" />
+    <Compile Include="Components/MonthlyStats.fs" />
     <!-- Pages (depend on Components and Supabase) -->
     <Compile Include="Pages/Login.fs" />
     <Compile Include="Pages/Signup.fs" />
