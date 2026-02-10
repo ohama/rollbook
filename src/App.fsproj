@@ -10,9 +10,12 @@
     <Compile Include="Supabase/Storage.fs" />
     <Compile Include="Supabase/Workouts.fs" />
     <Compile Include="Supabase/Team.fs" />
+    <Compile Include="Supabase/Admin.fs" />
     <Compile Include="Supabase/Auth.fs" />
     <!-- Utilities -->
     <Compile Include="Utils/DateHelpers.fs" />
+    <!-- Offline Queue -->
+    <Compile Include="offline/Types.fs" />
     <!-- Service Worker -->
     <Compile Include="sw/Registration.fs" />
     <!-- Components -->
