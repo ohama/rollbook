@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 6 of 6 (Production Ready)
-Plan: 4 of 8
+Plan: 5 of 8
 Status: In progress
-Last activity: 2026-02-10 — Completed 06-04-PLAN.md (Admin UI for member management)
+Last activity: 2026-02-10 — Completed 06-05-PLAN.md (Offline sync with Background Sync)
 
-Progress: [████████████████████████▓▓] Phase 1-5 complete, Phase 6 in progress (4/8)
+Progress: [█████████████████████████▓] Phase 1-5 complete, Phase 6 in progress (5/8)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31
+- Total plans completed: 32
 - Average duration: 2.6min
-- Total execution time: 1.44 hours
+- Total execution time: 1.52 hours
 
 **By Phase:**
 
@@ -32,11 +32,11 @@ Progress: [███████████████████████
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
 | 04-team-features | 6 | 10min | 1.7min | ✅ Complete |
 | 05-photo-upload | 7 | 24min | 3.4min | ✅ Complete |
-| 06-production-ready | 4 | 12min | 3.0min | 🔄 In progress |
+| 06-production-ready | 5 | 17min | 3.4min | 🔄 In progress |
 
 **Recent Trend:**
-- Last 7 plans: 05-05 (2min), 05-06 (3min), 05-07 (5min), 06-01 (6min), 06-03 (2min), 06-04 (4min)
-- Trend: Phase 6 progressing; admin UI complete, offline queue ready
+- Last 7 plans: 05-06 (3min), 05-07 (5min), 06-01 (6min), 06-03 (2min), 06-04 (4min), 06-05 (5min)
+- Trend: Phase 6 progressing; offline sync complete, TECH-02 fulfilled
 
 *Updated after each plan completion*
 
@@ -167,6 +167,12 @@ Recent decisions affecting current work:
 - **06-04**: refreshKey pattern for auto-reload after mutations (int state + useEffect dependency)
 - **06-04**: AdminState DU for role-based UI rendering (Loading, NotAdmin, Ready, Error)
 - **06-04**: Promise.start for fire-and-forget async (consistent with Dashboard/ProgressView pattern)
+- **06-05**: Background Sync API with feature detection for Chromium browsers
+- **06-05**: Visibility change + online events as universal fallback (covers Safari/Firefox)
+- **06-05**: Optimistic UI updates for offline operations (immediate feedback, matches online behavior)
+- **06-05**: Emit attribute for navigator access (consistent with 06-01 service worker pattern)
+- **06-05**: React useEffect cleanup via IDisposable (not unit -> unit)
+- **06-05**: OfflineIndicator polls pending count every 2 seconds when offline
 
 ### Pending Todos
 
@@ -179,9 +185,9 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 06-04-PLAN.md
+Stopped at: Completed 06-05-PLAN.md
 Resume file: None
-Next: Continue Phase 6 execution (06-05 Error Boundaries, 06-06 Performance, etc.)
+Next: Continue Phase 6 execution (06-06 Performance, 06-07 Error Boundaries, etc.)
 
 ---
 *Last updated: 2026-02-10*
