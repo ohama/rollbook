@@ -9,6 +9,8 @@
     <Compile Include="Supabase/Client.fs" />
     <Compile Include="Supabase/Workouts.fs" />
     <Compile Include="Supabase/Auth.fs" />
+    <!-- Utilities -->
+    <Compile Include="Utils/DateHelpers.fs" />
     <!-- Components -->
     <Compile Include="Components/Layout.fs" />
     <!-- Pages (depend on Components and Supabase) -->
