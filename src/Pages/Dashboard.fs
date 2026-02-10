@@ -7,6 +7,7 @@ open Supabase.Types
 open Supabase.Workouts
 open Pages.ProgressView
 open Pages.TeamView
+open Pages.AdminPage
 open Components.PhotoUpload
 open Components.PhotoGallery
 open Offline.NetworkStatus
@@ -15,7 +16,7 @@ open Offline.Types
 open Offline.Sync
 
 /// Tab mode for dashboard navigation
-type TabMode = Home | Progress | Team
+type TabMode = Home | Progress | Team | Admin
 
 [<ReactComponent>]
 let WorkoutToggle (userId: string) (refreshKey: int) =
@@ -219,6 +220,17 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                 )
                                 prop.text "팀"
                             ]
+                            Html.button [
+                                prop.onClick (fun _ -> setActiveTab Admin)
+                                prop.className (
+                                    "px-6 py-3 rounded-lg font-medium transition-colors " +
+                                    if activeTab = Admin then
+                                        "bg-indigo-600 text-white"
+                                    else
+                                        "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                )
+                                prop.text "관리자"
+                            ]
                         ]
                     ]
 
@@ -288,6 +300,8 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                         ProgressViewPage user.id
                     | Team ->
                         TeamViewPage()
+                    | Admin ->
+                        AdminPage()
                 ]
             ]
         ]
