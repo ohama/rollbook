@@ -5,6 +5,10 @@ open Fable.Core.JsInterop
 open Supabase.Auth
 open Supabase.Types
 open Supabase.Workouts
+open Pages.ProgressView
+
+/// Tab mode for dashboard navigation
+type TabMode = Home | Progress
 
 [<ReactComponent>]
 let WorkoutToggle (userId: string) =
@@ -100,6 +104,7 @@ let WorkoutToggle (userId: string) =
 [<ReactComponent>]
 let DashboardPage (user: User) (onLogout: unit -> unit) =
     let loading, setLoading = React.useState(false)
+    let (activeTab, setActiveTab) = React.useState(Home)
 
     let handleLogout () =
         setLoading true
@@ -143,34 +148,72 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
             Html.main [
                 prop.className "max-w-4xl mx-auto px-4 py-8"
                 prop.children [
-                    // Welcome card
+                    // Tab navigation
                     Html.div [
-                        prop.className "bg-white rounded-2xl shadow-sm p-6 mb-6"
+                        prop.className "flex gap-2 mb-6"
                         prop.children [
-                            Html.h2 [
-                                prop.className "text-lg font-semibold text-gray-800 mb-2"
-                                prop.text "환영합니다!"
+                            Html.button [
+                                prop.onClick (fun _ -> setActiveTab Home)
+                                prop.className (
+                                    "px-6 py-3 rounded-lg font-medium transition-colors " +
+                                    if activeTab = Home then
+                                        "bg-indigo-600 text-white"
+                                    else
+                                        "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                )
+                                prop.text "홈"
                             ]
-                            Html.p [
-                                prop.className "text-gray-600"
-                                prop.children [
-                                    Html.text "로그인 이메일: "
-                                    Html.span [
-                                        prop.className "font-medium"
-                                        prop.text (user.email |> Option.defaultValue "N/A")
-                                    ]
-                                ]
+                            Html.button [
+                                prop.onClick (fun _ -> setActiveTab Progress)
+                                prop.className (
+                                    "px-6 py-3 rounded-lg font-medium transition-colors " +
+                                    if activeTab = Progress then
+                                        "bg-indigo-600 text-white"
+                                    else
+                                        "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                )
+                                prop.text "내 기록"
                             ]
                         ]
                     ]
 
-                    // Workout toggle (Phase 2)
-                    Html.div [
-                        prop.className "bg-white rounded-2xl shadow-sm p-6 text-center"
-                        prop.children [
-                            WorkoutToggle user.id
+                    // Conditional content based on active tab
+                    match activeTab with
+                    | Home ->
+                        Html.div [
+                            prop.children [
+                                // Welcome card
+                                Html.div [
+                                    prop.className "bg-white rounded-2xl shadow-sm p-6 mb-6"
+                                    prop.children [
+                                        Html.h2 [
+                                            prop.className "text-lg font-semibold text-gray-800 mb-2"
+                                            prop.text "환영합니다!"
+                                        ]
+                                        Html.p [
+                                            prop.className "text-gray-600"
+                                            prop.children [
+                                                Html.text "로그인 이메일: "
+                                                Html.span [
+                                                    prop.className "font-medium"
+                                                    prop.text (user.email |> Option.defaultValue "N/A")
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+
+                                // Workout toggle (Phase 2)
+                                Html.div [
+                                    prop.className "bg-white rounded-2xl shadow-sm p-6 text-center"
+                                    prop.children [
+                                        WorkoutToggle user.id
+                                    ]
+                                ]
+                            ]
                         ]
-                    ]
+                    | Progress ->
+                        ProgressViewPage user.id
                 ]
             ]
         ]

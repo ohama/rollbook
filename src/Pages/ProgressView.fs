@@ -1,0 +1,126 @@
+module Pages.ProgressView
+
+open Feliz
+open Fable.Core.JsInterop
+open Supabase.Types
+open Supabase.Workouts
+open Utils.DateHelpers
+open Components.Calendar
+open Components.WorkoutList
+open Components.MonthlyStats
+
+/// View mode for progress tracking
+type ViewMode = Calendar | List
+
+[<ReactComponent>]
+let ProgressViewPage (userId: string) =
+    // View mode state
+    let (viewMode, setViewMode) = React.useState(Calendar)
+
+    // Date navigation state
+    let (currentYear, setCurrentYear) = React.useState(System.DateTime.Now.Year)
+    let (currentMonth, setCurrentMonth) = React.useState(System.DateTime.Now.Month)
+
+    // Data state
+    let (workouts, setWorkouts) = React.useState<WorkoutRecord array>([||])
+    let (loading, setLoading) = React.useState(true)
+    let (error, setError) = React.useState<string option>(None)
+
+    // Month navigation functions
+    let goToNextMonth () =
+        if currentMonth = 12 then
+            setCurrentYear (currentYear + 1)
+            setCurrentMonth 1
+        else
+            setCurrentMonth (currentMonth + 1)
+
+    let goToPrevMonth () =
+        if currentMonth = 1 then
+            setCurrentYear (currentYear - 1)
+            setCurrentMonth 12
+        else
+            setCurrentMonth (currentMonth - 1)
+
+    // Load workouts when month changes
+    React.useEffect((fun () ->
+        promise {
+            try
+                setLoading true
+                setError None
+
+                // Calculate date range for current month
+                let startDate = formatDateString currentYear currentMonth 1
+                let daysInMonth = getDaysInMonth currentYear currentMonth
+                let endDate = formatDateString currentYear currentMonth daysInMonth
+
+                // Fetch workouts for this month
+                let! monthWorkouts = getWorkouts userId (Some startDate) (Some endDate)
+                setWorkouts monthWorkouts
+                setLoading false
+            with ex ->
+                setError (Some "운동 기록을 불러올 수 없습니다")
+                setLoading false
+        } |> Promise.start
+    ), [| box currentYear; box currentMonth |])
+
+    Html.div [
+        prop.className "max-w-4xl mx-auto px-4 py-8"
+        prop.children [
+            // View toggle buttons
+            Html.div [
+                prop.className "flex gap-2 mb-4"
+                prop.children [
+                    Html.button [
+                        prop.onClick (fun _ -> setViewMode Calendar)
+                        prop.className (
+                            "px-4 py-2 rounded-lg font-medium transition-colors " +
+                            if viewMode = Calendar then
+                                "bg-indigo-600 text-white"
+                            else
+                                "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        )
+                        prop.text "달력"
+                    ]
+                    Html.button [
+                        prop.onClick (fun _ -> setViewMode List)
+                        prop.className (
+                            "px-4 py-2 rounded-lg font-medium transition-colors " +
+                            if viewMode = List then
+                                "bg-indigo-600 text-white"
+                            else
+                                "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        )
+                        prop.text "목록"
+                    ]
+                ]
+            ]
+
+            // Monthly stats (always visible)
+            Html.div [
+                prop.className "mb-6"
+                prop.children [
+                    MonthlyStatsView workouts currentYear currentMonth
+                ]
+            ]
+
+            // Loading state
+            if loading then
+                Html.div [
+                    prop.className "text-center text-gray-600 py-8"
+                    prop.text "로딩 중..."
+                ]
+            // Error state
+            elif error.IsSome then
+                Html.div [
+                    prop.className "text-center text-red-600 py-8"
+                    prop.text error.Value
+                ]
+            // Content based on view mode
+            else
+                match viewMode with
+                | Calendar ->
+                    CalendarGrid userId currentYear currentMonth workouts goToPrevMonth goToNextMonth
+                | List ->
+                    WorkoutListView workouts
+        ]
+    ]
