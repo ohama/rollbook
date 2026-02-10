@@ -119,14 +119,14 @@ Plans:
 
 ## Documentation Requirement
 
-**DOCS-01**: Each plan includes tutorial documentation
-- **Location**: `tutorial/{phase}-{plan}-{topic}.md` (예: `tutorial/02-01-workout-schema.md`)
+**DOCS-01**: Each phase ends with a tutorial plan
+- **Location**: `tutorial/{phase}-{name}.md` (예: `tutorial/02-core-loop.md`)
 - **Language**: 한글
 - **Audience**: 초보 개발자
 - **Content**: 개념 위주 설명, 중요 코드 포함, UML 다이어그램 활용
-- **Timing**: Created when each plan completes (not just phase)
+- **Timing**: Phase의 마지막 Plan으로 튜토리얼 작성
 
-Each plan execution must include a tutorial task as the final step, documenting the concepts, code patterns, and architecture decisions from that plan.
+Each phase planning must include a final plan for writing the tutorial that covers all concepts from that phase.
 
 ## Progress
 

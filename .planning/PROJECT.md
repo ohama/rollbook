@@ -49,12 +49,12 @@
 
 ### 튜토리얼 요구사항
 
-- **위치**: `tutorial/{phase}-{plan}-{topic}.md` (예: `tutorial/02-01-workout-schema.md`)
+- **위치**: `tutorial/{phase}-{name}.md` (예: `tutorial/02-core-loop.md`)
 - **언어**: 한글
 - **대상**: 초보 개발자
 - **내용**: 개념 위주 설명, 중요 코드 포함
 - **다이어그램**: 흐름 설명 시 UML 다이어그램 적극 활용
-- **생성 시점**: 각 Plan 완료 시 해당 Plan 튜토리얼 작성 (마지막 Task로 포함)
+- **생성 시점**: 각 Phase 마지막 Plan으로 튜토리얼 작성
 
 ### 기술 배경
 
