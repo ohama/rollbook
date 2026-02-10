@@ -13,6 +13,8 @@
     <Compile Include="Supabase/Auth.fs" />
     <!-- Utilities -->
     <Compile Include="Utils/DateHelpers.fs" />
+    <!-- Service Worker -->
+    <Compile Include="sw/Registration.fs" />
     <!-- Components -->
     <Compile Include="Components/Layout.fs" />
     <Compile Include="Components/Calendar.fs" />
