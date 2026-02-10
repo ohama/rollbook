@@ -58,3 +58,40 @@ type WorkoutResponse = {
     data: WorkoutRecord array option
     error: obj option
 }
+
+/// Profile record from profiles table
+type ProfileRecord = {
+    id: string           // user_id (UUID)
+    email: string
+    display_name: string option
+}
+
+/// Nested profile data from Supabase join (uses "profiles" key from foreign key join)
+[<AllowNullLiteral>]
+type NestedProfile =
+    abstract id: string
+    abstract email: string
+    abstract display_name: string option
+
+/// Workout record with nested profile from join query
+[<AllowNullLiteral>]
+type WorkoutWithProfileRaw =
+    abstract user_id: string
+    abstract workout_date: string
+    abstract profiles: NestedProfile
+
+/// Parsed workout with profile for F# consumption
+type WorkoutWithProfile = {
+    user_id: string
+    workout_date: string
+    profile: ProfileRecord option
+}
+
+/// Team member summary for display (aggregated data)
+type TeamMemberSummary = {
+    UserId: string
+    DisplayName: string
+    Email: string
+    WorkoutCount: int
+    WorkoutDates: string array  // YYYY-MM-DD format
+}
