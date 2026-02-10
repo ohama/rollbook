@@ -115,3 +115,16 @@ type SignedUrlResult = {
     signedUrl: string option
     error: string option
 }
+
+/// User role record from user_roles table
+type UserRole = {
+    user_id: string
+    role: string  // "admin" | "member"
+    created_at: string option
+}
+
+/// Admin operations result
+type AdminResult<'T> =
+    | Success of 'T
+    | NotAdmin
+    | Error of message: string
