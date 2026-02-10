@@ -9,6 +9,8 @@
     <Compile Include="Supabase/Types.fs" />
     <Compile Include="Supabase/Client.fs" />
     <Compile Include="Supabase/Auth.fs" />
+    <!-- Components -->
+    <Compile Include="Components/Layout.fs" />
     <!-- Entry point last -->
     <Compile Include="Main.fs" />
   </ItemGroup>
