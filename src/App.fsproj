@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Supabase/Types.fs" />
+    <Compile Include="Supabase/Client.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
