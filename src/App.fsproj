@@ -17,6 +17,7 @@
     <!-- Offline Queue -->
     <Compile Include="offline/Types.fs" />
     <Compile Include="offline/Queue.fs" />
+    <Compile Include="offline/NetworkStatus.fs" />
     <!-- Service Worker -->
     <Compile Include="sw/Registration.fs" />
     <!-- Components -->
