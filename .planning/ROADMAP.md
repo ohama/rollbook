@@ -12,7 +12,7 @@ Rollbook delivers a privacy-first workout tracking app for small teams in 6 phas
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Database schema, RLS security, authentication
+- [x] **Phase 1: Foundation** - Database schema, RLS security, authentication
 - [ ] **Phase 2: Core Loop** - One-tap workout logging (core value proposition)
 - [ ] **Phase 3: Progress Tracking** - Personal calendar, stats, history views
 - [ ] **Phase 4: Team Features** - Privacy-first team stats (monthly counts only)
@@ -35,12 +35,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 6 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Initialize Fable + Vite + Tailwind project structure
-- [ ] 01-02-PLAN.md — Initialize Supabase local development with RLS-enabled schema
-- [ ] 01-03-PLAN.md — Create F# bindings for Supabase Auth SDK
-- [ ] 01-04-PLAN.md — Create responsive auth UI components (Login, Signup, Password Reset)
-- [ ] 01-05-PLAN.md — Integrate auth state management and route protection in main app
-- [ ] 01-06-PLAN.md — Human verification of complete Phase 01 authentication flow
+- [x] 01-01-PLAN.md — Initialize Fable + Vite + Tailwind project structure
+- [x] 01-02-PLAN.md — Initialize Supabase local development with RLS-enabled schema
+- [x] 01-03-PLAN.md — Create F# bindings for Supabase Auth SDK
+- [x] 01-04-PLAN.md — Create responsive auth UI components (Login, Signup, Password Reset)
+- [x] 01-05-PLAN.md — Integrate auth state management and route protection in main app
+- [x] 01-06-PLAN.md — Human verification of complete Phase 01 authentication flow
 
 ### Phase 2: Core Loop
 **Goal**: One-tap workout logging (core value delivery)
@@ -135,7 +135,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/6 | Planned | - |
+| 1. Foundation | 6/6 | ✅ Complete | 2026-02-10 |
 | 2. Core Loop | 0/? | Not started | - |
 | 3. Progress Tracking | 0/? | Not started | - |
 | 4. Team Features | 0/? | Not started | - |
