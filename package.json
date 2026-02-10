@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "concurrently \"npm run fable:watch\" \"npm run vite:dev\"",
+    "fable:watch": "dotnet fable watch src/App.fsproj -o src --noCache",
+    "vite:dev": "vite",
+    "build": "dotnet fable src/App.fsproj -o src && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -14,8 +16,8 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "concurrently": "^9.2.1",
     "tailwindcss": "^4.1.18",
-    "vite": "^6.0.7",
-    "vite-plugin-fable": "^0.1.1"
+    "vite": "^6.0.7"
   }
 }
