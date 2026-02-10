@@ -17,12 +17,14 @@
     <Compile Include="Components/Calendar.fs" />
     <Compile Include="Components/WorkoutList.fs" />
     <Compile Include="Components/MonthlyStats.fs" />
+    <Compile Include="Components/TeamMemberCard.fs" />
     <!-- Pages (depend on Components and Supabase) -->
     <Compile Include="Pages/Login.fs" />
     <Compile Include="Pages/Signup.fs" />
     <Compile Include="Pages/ForgotPassword.fs" />
     <Compile Include="Pages/ResetPassword.fs" />
     <Compile Include="Pages/ProgressView.fs" />
+    <Compile Include="Pages/TeamView.fs" />
     <Compile Include="Pages/Dashboard.fs" />
     <!-- Entry point last -->
     <Compile Include="Main.fs" />
