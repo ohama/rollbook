@@ -9,8 +9,8 @@ type SupabaseClient =
     abstract auth: obj
 
 /// Import createClient from @supabase/supabase-js
-[<Import("createClient", from="@supabase/supabase-js")>]
-let private createClient: string -> string -> obj -> SupabaseClient = jsNative
+[<ImportMember("@supabase/supabase-js")>]
+let private createClient (url: string, key: string, options: obj): SupabaseClient = jsNative
 
 /// Get environment variables (Vite injects these at build time)
 [<Emit("import.meta.env.VITE_SUPABASE_URL")>]
@@ -30,4 +30,4 @@ let private clientOptions =
     ]
 
 /// Singleton Supabase client instance
-let supabase = createClient supabaseUrl supabaseAnonKey clientOptions
+let supabase = createClient(supabaseUrl, supabaseAnonKey, clientOptions)
