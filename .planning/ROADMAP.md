@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Database schema, RLS security, authentication
 - [x] **Phase 2: Core Loop** - One-tap workout logging (core value proposition)
 - [x] **Phase 3: Progress Tracking** - Personal calendar, stats, history views
-- [ ] **Phase 4: Team Features** - Privacy-first team stats (monthly counts only)
+- [x] **Phase 4: Team Features** - Team workout visibility (members can view each other's records)
 - [ ] **Phase 5: Photo Upload** - Photo-based workout logging
 - [ ] **Phase 6: Production Ready** - Offline PWA, admin tools, performance optimization
 
@@ -80,23 +80,23 @@ Plans:
 - [x] 03-05-PLAN.md — Write Phase 3 tutorial (tutorial/03-progress-tracking.md)
 
 ### Phase 4: Team Features
-**Goal**: Privacy-first team motivation (aggregated stats only)
+**Goal**: Team workout visibility (members can view each other's workout records)
 **Depends on**: Phase 3
 **Requirements**: TEAM-01, DOCS-01
 **Success Criteria** (what must be TRUE):
   1. User can view team roster (all members)
   2. User can see each team member's monthly workout count (TEAM-01)
-  3. User CANNOT see other members' workout dates, photos, or notes (privacy enforced by RLS)
+  3. User can see other members' workout dates, photos, or notes (team visibility via RLS)
   4. Team stats update immediately when workouts logged
 **Plans**: 6 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Create SECURITY DEFINER function and profiles RLS policy for team stats
-- [ ] 04-02-PLAN.md — Create F# bindings for team API (Types.fs + Team.fs)
-- [ ] 04-03-PLAN.md — Build TeamView page with month navigation and roster display
-- [ ] 04-04-PLAN.md — Integrate Team tab into Dashboard navigation
-- [ ] 04-05-PLAN.md — Human verification of team features and privacy
-- [ ] 04-06-PLAN.md — Write Phase 4 tutorial (tutorial/04-team-features.md)
+- [x] 04-01-PLAN.md — Update RLS policies for team visibility (workouts + profiles)
+- [x] 04-02-PLAN.md — Create F# bindings for team API (Types.fs + Team.fs)
+- [x] 04-03-PLAN.md — Build TeamView page with month navigation and roster display
+- [x] 04-04-PLAN.md — Integrate Team tab into Dashboard navigation
+- [x] 04-05-PLAN.md — Human verification of team features and privacy
+- [x] 04-06-PLAN.md — Write Phase 4 tutorial (tutorial/04-team-features.md)
 
 ### Phase 5: Photo Upload
 **Goal**: Photo-based workout logging
@@ -151,10 +151,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation | 6/6 | ✅ Complete | 2026-02-10 |
 | 2. Core Loop | 5/5 | ✅ Complete | 2026-02-10 |
 | 3. Progress Tracking | 5/5 | ✅ Complete | 2026-02-10 |
-| 4. Team Features | 0/6 | Planned | - |
+| 4. Team Features | 6/6 | ✅ Complete | 2026-02-10 |
 | 5. Photo Upload | 0/? | Not started | - |
 | 6. Production Ready | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10 (Phase 4 planned)*
+*Last updated: 2026-02-10 (Phase 4 complete)*

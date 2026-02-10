@@ -30,7 +30,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Team Features
 
-- [ ] **TEAM-01**: 팀원별 월별 운동 횟수 조회
+- [x] **TEAM-01**: 팀원별 월별 운동 횟수 조회
 
 ### Admin
 
@@ -108,7 +108,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROG-01 | Phase 3 | Complete |
 | PROG-02 | Phase 3 | Complete |
 | PROG-03 | Phase 3 | Complete |
-| TEAM-01 | Phase 4 | Pending |
+| TEAM-01 | Phase 4 | Complete |
 | WORK-04 | Phase 5 | Pending |
 | TECH-02 | Phase 6 | Pending |
 | TECH-03 | Phase 6 | Pending |
@@ -119,9 +119,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 **Coverage:**
 - v1 requirements: 19 total
-- Complete: 11
-- Pending: 8
+- Complete: 12
+- Pending: 7
 
 ---
 *Requirements defined: 2025-02-10*
-*Last updated: 2026-02-10 (Phase 3 complete)*
+*Last updated: 2026-02-10 (Phase 4 complete)*
