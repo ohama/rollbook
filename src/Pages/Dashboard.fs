@@ -6,9 +6,10 @@ open Supabase.Auth
 open Supabase.Types
 open Supabase.Workouts
 open Pages.ProgressView
+open Pages.TeamView
 
 /// Tab mode for dashboard navigation
-type TabMode = Home | Progress
+type TabMode = Home | Progress | Team
 
 [<ReactComponent>]
 let WorkoutToggle (userId: string) =
@@ -174,6 +175,17 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                 )
                                 prop.text "내 기록"
                             ]
+                            Html.button [
+                                prop.onClick (fun _ -> setActiveTab Team)
+                                prop.className (
+                                    "px-6 py-3 rounded-lg font-medium transition-colors " +
+                                    if activeTab = Team then
+                                        "bg-indigo-600 text-white"
+                                    else
+                                        "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                )
+                                prop.text "팀"
+                            ]
                         ]
                     ]
 
@@ -214,6 +226,8 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                         ]
                     | Progress ->
                         ProgressViewPage user.id
+                    | Team ->
+                        TeamViewPage()
                 ]
             ]
         ]

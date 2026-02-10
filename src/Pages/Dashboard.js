@@ -1,20 +1,115 @@
+import { Union } from "../fable_modules/fable-library-js.4.28.0/Types.js";
+import { union_type } from "../fable_modules/fable-library-js.4.28.0/Reflection.js";
 import { createElement } from "react";
 import React from "react";
 import { reactApi } from "../fable_modules/Feliz.2.9.0/Interop.fs.js";
-import { createObj } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "../fable_modules/Fable.Promise.3.2.0/Promise.fs.js";
 import { promise } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
+import { upsertWorkout, deleteWorkout, getWorkout, getTodayDateString } from "../Supabase/Workouts.js";
+import { equals, createObj } from "../fable_modules/fable-library-js.4.28.0/Util.js";
+import { singleton, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
+import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
+import { singleton as singleton_1, ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 import { signOut } from "../Supabase/Auth.js";
-import { ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
+import { ProgressViewPage } from "./ProgressView.js";
 import { defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 
+export class TabMode extends Union {
+    constructor(tag, fields) {
+        super();
+        this.tag = tag;
+        this.fields = fields;
+    }
+    cases() {
+        return ["Home", "Progress"];
+    }
+}
+
+export function TabMode_$reflection() {
+    return union_type("Pages.Dashboard.TabMode", [], TabMode, () => [[], []]);
+}
+
+export function WorkoutToggle(workoutToggleInputProps) {
+    let elems;
+    const userId = workoutToggleInputProps.userId;
+    const patternInput = reactApi.useState(false);
+    const setHasWorkedOut = patternInput[1];
+    const hasWorkedOut = patternInput[0];
+    const patternInput_1 = reactApi.useState(true);
+    const setLoading = patternInput_1[1];
+    const loading = patternInput_1[0];
+    const patternInput_2 = reactApi.useState(undefined);
+    const setError = patternInput_2[1];
+    reactApi.useEffect(() => {
+        const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
+            const today = getTodayDateString();
+            return getWorkout(userId, today).then((_arg) => {
+                setHasWorkedOut(_arg != null);
+                setLoading(false);
+                return Promise.resolve();
+            });
+        }).catch((_arg_1) => {
+            setError("운동 기록을 불러올 수 없습니다");
+            setLoading(false);
+            return Promise.resolve();
+        }))));
+        void pr;
+    }, []);
+    const handleToggle = () => {
+        if (!loading) {
+            setLoading(true);
+            setError(undefined);
+            const today_1 = getTodayDateString();
+            const newState = !hasWorkedOut;
+            const pr_1 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => ((hasWorkedOut ? (deleteWorkout(userId, today_1).then((_arg_2) => {
+                return Promise.resolve();
+            })) : (upsertWorkout(userId, today_1).then((_arg_3) => {
+                return Promise.resolve();
+            }))).then(() => PromiseBuilder__Delay_62FBFDE1(promise, () => {
+                setHasWorkedOut(newState);
+                setLoading(false);
+                return Promise.resolve();
+            })))).catch((_arg_4) => {
+                setError("저장 실패. 다시 시도해주세요.");
+                setLoading(false);
+                return Promise.resolve();
+            }))));
+            void pr_1;
+        }
+    };
+    return createElement("div", createObj(ofArray([["className", "flex flex-col items-center gap-6 p-8"], (elems = toList(delay(() => append(singleton(createElement("button", {
+        onClick: (_arg_5) => {
+            handleToggle();
+        },
+        disabled: loading,
+        className: "text-8xl transition-all duration-200 " + (loading ? "opacity-50 cursor-wait" : (hasWorkedOut ? "scale-110" : "hover:scale-105")),
+        children: hasWorkedOut ? "💪" : "⭕",
+    })), delay(() => append(singleton(createElement("button", {
+        onClick: (_arg_6) => {
+            handleToggle();
+        },
+        disabled: loading,
+        className: "px-8 py-4 rounded-xl text-xl font-semibold transition-all " + (loading ? "bg-gray-300 text-gray-500 cursor-wait" : (hasWorkedOut ? "bg-green-600 text-white hover:bg-green-700 active:scale-95" : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95")),
+        children: loading ? "..." : (hasWorkedOut ? "운동 완료!" : "오늘 운동했다"),
+    })), delay(() => {
+        const matchValue = patternInput_2[0];
+        return (matchValue == null) ? singleton(defaultOf()) : singleton(createElement("p", {
+            className: "text-sm text-red-600",
+            children: matchValue,
+        }));
+    })))))), ["children", reactApi.Children.toArray(Array.from(elems))])])));
+}
+
 export function DashboardPage(dashboardPageInputProps) {
-    let elems_6, elems_1, elems, elems_5, elems_3, elems_2, elems_4;
+    let elems_8, elems_1, elems, elems_7;
     const onLogout = dashboardPageInputProps.onLogout;
     const user = dashboardPageInputProps.user;
     const patternInput = reactApi.useState(false);
     const loading = patternInput[0];
-    return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100"], (elems_6 = [createElement("header", createObj(ofArray([["className", "bg-white shadow-sm"], (elems_1 = [createElement("div", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-4 flex items-center justify-between"], (elems = [createElement("h1", {
+    const patternInput_1 = reactApi.useState(new TabMode(0, []));
+    const setActiveTab = patternInput_1[1];
+    const activeTab = patternInput_1[0];
+    return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100"], (elems_8 = [createElement("header", createObj(ofArray([["className", "bg-white shadow-sm"], (elems_1 = [createElement("div", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-4 flex items-center justify-between"], (elems = [createElement("h1", {
         className: "text-xl font-bold text-indigo-600",
         children: "Rollbook",
     }), createElement("button", {
@@ -29,21 +124,34 @@ export function DashboardPage(dashboardPageInputProps) {
         disabled: loading,
         className: "px-4 py-2 rounded-lg text-sm font-medium transition-colors " + (loading ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"),
         children: loading ? "로그아웃 중..." : "로그아웃",
-    })], ["children", reactApi.Children.toArray(Array.from(elems))])])))], ["children", reactApi.Children.toArray(Array.from(elems_1))])]))), createElement("main", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-8"], (elems_5 = [createElement("div", createObj(ofArray([["className", "bg-white rounded-2xl shadow-sm p-6 mb-6"], (elems_3 = [createElement("h2", {
-        className: "text-lg font-semibold text-gray-800 mb-2",
-        children: "환영합니다!",
-    }), createElement("p", createObj(ofArray([["className", "text-gray-600"], (elems_2 = ["로그인 이메일: ", createElement("span", {
-        className: "font-medium",
-        children: defaultArg(user.email, "N/A"),
-    })], ["children", reactApi.Children.toArray(Array.from(elems_2))])])))], ["children", reactApi.Children.toArray(Array.from(elems_3))])]))), createElement("div", createObj(ofArray([["className", "bg-white rounded-2xl shadow-sm p-6 text-center"], (elems_4 = [createElement("div", {
-        className: "text-6xl mb-4",
-        children: "💪",
-    }), createElement("h3", {
-        className: "text-lg font-semibold text-gray-800 mb-2",
-        children: "운동 기록 준비 중",
-    }), createElement("p", {
-        className: "text-gray-600",
-        children: "Phase 2에서 \'오늘 운동했다\' 원탭 기록 기능이 추가됩니다.",
-    })], ["children", reactApi.Children.toArray(Array.from(elems_4))])])))], ["children", reactApi.Children.toArray(Array.from(elems_5))])])))], ["children", reactApi.Children.toArray(Array.from(elems_6))])])));
+    })], ["children", reactApi.Children.toArray(Array.from(elems))])])))], ["children", reactApi.Children.toArray(Array.from(elems_1))])]))), createElement("main", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-8"], (elems_7 = toList(delay(() => {
+        let elems_2;
+        return append(singleton(createElement("div", createObj(ofArray([["className", "flex gap-2 mb-6"], (elems_2 = [createElement("button", {
+            onClick: (_arg_2) => {
+                setActiveTab(new TabMode(0, []));
+            },
+            className: "px-6 py-3 rounded-lg font-medium transition-colors " + (equals(activeTab, new TabMode(0, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
+            children: "홈",
+        }), createElement("button", {
+            onClick: (_arg_3) => {
+                setActiveTab(new TabMode(1, []));
+            },
+            className: "px-6 py-3 rounded-lg font-medium transition-colors " + (equals(activeTab, new TabMode(1, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
+            children: "내 기록",
+        })], ["children", reactApi.Children.toArray(Array.from(elems_2))])])))), delay(() => {
+            let elems_6, elems_4, elems_3, elems_5;
+            return (activeTab.tag === 1) ? singleton(createElement(ProgressViewPage, {
+                userId: user.id,
+            })) : singleton(createElement("div", createObj(singleton_1((elems_6 = [createElement("div", createObj(ofArray([["className", "bg-white rounded-2xl shadow-sm p-6 mb-6"], (elems_4 = [createElement("h2", {
+                className: "text-lg font-semibold text-gray-800 mb-2",
+                children: "환영합니다!",
+            }), createElement("p", createObj(ofArray([["className", "text-gray-600"], (elems_3 = ["로그인 이메일: ", createElement("span", {
+                className: "font-medium",
+                children: defaultArg(user.email, "N/A"),
+            })], ["children", reactApi.Children.toArray(Array.from(elems_3))])])))], ["children", reactApi.Children.toArray(Array.from(elems_4))])]))), createElement("div", createObj(ofArray([["className", "bg-white rounded-2xl shadow-sm p-6 text-center"], (elems_5 = [createElement(WorkoutToggle, {
+                userId: user.id,
+            })], ["children", reactApi.Children.toArray(Array.from(elems_5))])])))], ["children", reactApi.Children.toArray(Array.from(elems_6))])))));
+        }));
+    })), ["children", reactApi.Children.toArray(Array.from(elems_7))])])))], ["children", reactApi.Children.toArray(Array.from(elems_8))])])));
 }
 
