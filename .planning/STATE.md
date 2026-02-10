@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-02-10)
 
 **Core value:** 원탭 운동 기록 — 앱을 열고 "오늘 운동했다" 버튼 하나로 기록 완료
-**Current focus:** Phase 5 - Photo Upload
+**Current focus:** Phase 6 - Production Ready
 
 ## Current Position
 
-Phase: 5 of 6 (Photo Upload)
-Plan: 7 of 7 (complete)
-Status: Phase complete
-Last activity: 2026-02-10 — Completed 05-07-PLAN.md (Photo Upload Tutorial)
+Phase: 6 of 6 (Production Ready)
+Plan: 1 of 8
+Status: In progress
+Last activity: 2026-02-10 — Completed 06-02-PLAN.md (Admin RBAC schema)
 
-Progress: [████████████████████████░] Phase 1-5 complete, Phase 6 pending
+Progress: [████████████████████████▓] Phase 1-5 complete, Phase 6 started (1/8)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28
+- Total plans completed: 29
 - Average duration: 2.5min
-- Total execution time: 1.25 hours
+- Total execution time: 1.27 hours
 
 **By Phase:**
 
@@ -32,10 +32,11 @@ Progress: [███████████████████████
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
 | 04-team-features | 6 | 10min | 1.7min | ✅ Complete |
 | 05-photo-upload | 7 | 24min | 3.4min | ✅ Complete |
+| 06-production-ready | 1 | 2min | 2.0min | 🔄 In progress |
 
 **Recent Trend:**
-- Last 7 plans: 05-01 (2min), 05-02 (3min), 05-03 (4min), 05-04 (5min), 05-05 (2min), 05-06 (3min), 05-07 (5min)
-- Trend: Phase 5 complete; documentation tasks 5min (comprehensive tutorials)
+- Last 7 plans: 05-02 (3min), 05-03 (4min), 05-04 (5min), 05-05 (2min), 05-06 (3min), 05-07 (5min), 06-02 (2min)
+- Trend: Phase 6 started; RBAC foundation complete
 
 *Updated after each plan completion*
 
@@ -145,6 +146,11 @@ Recent decisions affecting current work:
 - **05-07**: Tutorial structure: 개요, 아키텍처, 핵심 개념, 중요 코드, 배운 점, 흔한 실수, 테스트, 다음 단계 (consistent with Phase 3-4)
 - **05-07**: Comprehensive Korean tutorials: 1633 lines with 3+ Mermaid diagrams for visual learning
 - **05-07**: Documentation covers all implementation details with beginner-friendly explanations and real code examples
+- **06-02**: user_roles table with composite primary key (user_id, role) for RBAC and future multi-role support
+- **06-02**: is_admin() function as SECURITY DEFINER STABLE for RLS policy optimization (~95% performance gain)
+- **06-02**: Manual admin role assignment via SQL INSERT for MVP (no UI yet, per research recommendation)
+- **06-02**: Separate DELETE policy for profiles (admin-only, clearer than merged policy)
+- **06-02**: AdminResult<'T> DU for type-safe admin operation handling (Success | NotAdmin | Error)
 
 ### Pending Todos
 
@@ -156,10 +162,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 06:54:00 UTC
-Stopped at: Completed 05-07-PLAN.md (Photo Upload Tutorial)
+Last session: 2026-02-10T07:33:17Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
-Next: Phase 5 complete with documentation. Ready for Phase 6 (Polish & Deploy)
+Next: Execute next plan in Phase 6
 
 ---
 *Last updated: 2026-02-10*
