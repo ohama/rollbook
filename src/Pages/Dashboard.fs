@@ -4,6 +4,98 @@ open Feliz
 open Fable.Core.JsInterop
 open Supabase.Auth
 open Supabase.Types
+open Supabase.Workouts
+
+[<ReactComponent>]
+let WorkoutToggle (userId: string) =
+    let (hasWorkedOut, setHasWorkedOut) = React.useState(false)
+    let (loading, setLoading) = React.useState(true)
+    let (error, setError) = React.useState<string option>(None)
+
+    // Load initial state on mount
+    React.useEffect((fun () ->
+        promise {
+            try
+                let today = getTodayDateString()
+                let! workout = getWorkout userId today
+                setHasWorkedOut (Option.isSome workout)
+                setLoading false
+            with ex ->
+                setError (Some "운동 기록을 불러올 수 없습니다")
+                setLoading false
+        } |> Promise.start
+    ), [||])
+
+    let handleToggle () =
+        if not loading then
+            setLoading true
+            setError None
+
+            let today = getTodayDateString()
+            let newState = not hasWorkedOut
+
+            promise {
+                try
+                    if hasWorkedOut then
+                        let! _ = deleteWorkout userId today
+                        ()
+                    else
+                        let! _ = upsertWorkout userId today
+                        ()
+
+                    setHasWorkedOut newState
+                    setLoading false
+                with ex ->
+                    setError (Some "저장 실패. 다시 시도해주세요.")
+                    setLoading false
+            } |> Promise.start
+
+    Html.div [
+        prop.className "flex flex-col items-center gap-6 p-8"
+        prop.children [
+            // Large emoji button (visual indicator)
+            Html.button [
+                prop.onClick (fun _ -> handleToggle())
+                prop.disabled loading
+                prop.className (
+                    "text-8xl transition-all duration-200 " +
+                    if loading then "opacity-50 cursor-wait"
+                    elif hasWorkedOut then "scale-110"
+                    else "hover:scale-105"
+                )
+                prop.text (if hasWorkedOut then "💪" else "⭕")
+            ]
+
+            // Text button (main interaction)
+            Html.button [
+                prop.onClick (fun _ -> handleToggle())
+                prop.disabled loading
+                prop.className (
+                    "px-8 py-4 rounded-xl text-xl font-semibold transition-all " +
+                    if loading then
+                        "bg-gray-300 text-gray-500 cursor-wait"
+                    elif hasWorkedOut then
+                        "bg-green-600 text-white hover:bg-green-700 active:scale-95"
+                    else
+                        "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95"
+                )
+                prop.text (
+                    if loading then "..."
+                    elif hasWorkedOut then "운동 완료!"
+                    else "오늘 운동했다"
+                )
+            ]
+
+            // Error message
+            match error with
+            | Some msg ->
+                Html.p [
+                    prop.className "text-sm text-red-600"
+                    prop.text msg
+                ]
+            | None -> Html.none
+        ]
+    ]
 
 [<ReactComponent>]
 let DashboardPage (user: User) (onLogout: unit -> unit) =
@@ -72,22 +164,11 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                         ]
                     ]
 
-                    // Placeholder for workout logging (Phase 2)
+                    // Workout toggle (Phase 2)
                     Html.div [
                         prop.className "bg-white rounded-2xl shadow-sm p-6 text-center"
                         prop.children [
-                            Html.div [
-                                prop.className "text-6xl mb-4"
-                                prop.text "💪"
-                            ]
-                            Html.h3 [
-                                prop.className "text-lg font-semibold text-gray-800 mb-2"
-                                prop.text "운동 기록 준비 중"
-                            ]
-                            Html.p [
-                                prop.className "text-gray-600"
-                                prop.text "Phase 2에서 '오늘 운동했다' 원탭 기록 기능이 추가됩니다."
-                            ]
+                            WorkoutToggle user.id
                         ]
                     ]
                 ]
