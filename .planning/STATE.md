@@ -5,34 +5,35 @@
 See: .planning/PROJECT.md (updated 2025-02-10)
 
 **Core value:** 원탭 운동 기록 — 앱을 열고 "오늘 운동했다" 버튼 하나로 기록 완료
-**Current focus:** Phase 2 - Core Loop
+**Current focus:** Phase 3 - Progress Tracking
 
 ## Current Position
 
-Phase: 2 of 6 (Core Loop)
-Plan: 3 of ? (in progress)
+Phase: 3 of 6 (Progress Tracking)
+Plan: 1 of ? (in progress)
 Status: In progress
-Last activity: 2026-02-10 — Completed 02-03-PLAN.md
+Last activity: 2026-02-10 — Completed 03-01-PLAN.md
 
-Progress: [██████████░░░░░░░░░░] Phase 1 complete, Phase 2 in progress
+Progress: [████████████████░░░░] Phase 1-2 complete, Phase 3 plan 1 complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 12
 - Average duration: 2.7min
-- Total execution time: 0.42 hours
+- Total execution time: 0.55 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan | Status |
 |-------|-------|-------|----------|--------|
 | 01-foundation | 6 | 19min | 3.2min | ✅ Complete |
-| 02-core-loop | 3 | 6min | 2.0min | 🔄 In progress |
+| 02-core-loop | 5 | 12min | 2.4min | ✅ Complete |
+| 03-progress-tracking | 1 | 2min | 2.0min | 🏗️ In progress |
 
 **Recent Trend:**
-- Last 6 plans: 01-04 (3min), 01-05 (2min), 01-06 (manual), 02-01 (2min), 02-02 (2min), 02-03 (2min)
-- Trend: Consistent 2min execution, Phase 2 maintaining excellent velocity
+- Last 6 plans: 02-02 (2min), 02-03 (2min), 02-04 (5min), 02-05 (3min), 03-01 (2min)
+- Trend: Consistent fast execution, Phase 3 started
 
 *Updated after each plan completion*
 
@@ -72,6 +73,12 @@ Recent decisions affecting current work:
 - **02-03**: useEffect with empty deps [||] for mount-only data loading
 - **02-03**: Guard clause (if not loading) prevents concurrent toggle operations
 - **02-03**: Large emoji buttons (text-8xl) for mobile-first tap targets (💪/⭕)
+- **03-01**: JavaScript Date via emitJsExpr for month calculations (getDaysInMonth, getFirstDayOfMonth)
+- **03-01**: JS months 0-indexed (subtract 1 when passing to Date constructor)
+- **03-01**: formatDateString uses sprintf for YYYY-MM-DD (matches database DATE format)
+- **03-01**: CSS Grid grid-column-start for first day positioning (CSS is 1-indexed, add 1 to JS getDay)
+- **03-01**: CalendarDay record type separates calculation from rendering logic
+- **03-01**: Korean UI text for day headers (일 월 화 수 목 금 토) and month format (YYYY년 M월)
 
 ### Pending Todos
 
@@ -83,10 +90,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-02-10 04:33:48 UTC
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
-Next: Continue Phase 2 Core Loop
+Next: Continue Phase 3 planning
 
 ---
 *Last updated: 2026-02-10*
