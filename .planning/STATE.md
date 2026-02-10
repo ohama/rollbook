@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 1 of 6 (Foundation)
-Plan: 4 of ? (phase in progress)
+Plan: 5 of ? (phase in progress)
 Status: In progress
-Last activity: 2026-02-10 — Completed 01-04-PLAN.md (Responsive Auth UI)
+Last activity: 2026-02-10 — Completed 01-05-PLAN.md (Auth State Management)
 
-Progress: [████░░░░░░] ~40%
+Progress: [█████░░░░░] ~50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 3.75min
-- Total execution time: 0.25 hours
+- Total plans completed: 5
+- Average duration: 3.4min
+- Total execution time: 0.28 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation | 4 | 15min | 3.75min |
+| 01-foundation | 5 | 17min | 3.4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (5min), 01-03 (3min), 01-04 (3min)
+- Last 5 plans: 01-01 (4min), 01-02 (5min), 01-03 (3min), 01-04 (3min), 01-05 (2min)
 - Trend: Fast execution maintained
 
 *Updated after each plan completion*
@@ -55,6 +55,9 @@ Recent decisions affecting current work:
 - **01-03**: Promise-based async API with unbox<T> for JS interop
 - **01-04**: Korean UI text throughout auth pages
 - **01-04**: Navigation via callbacks (onNavigate) for routing flexibility
+- **01-05**: AuthState DU (Loading | Anonymous | Authenticated) for clear state transitions
+- **01-05**: onAuthStateChange subscription handles all auth events including InitialSession
+- **01-05**: Password recovery detection from URL hash (type=recovery)
 
 ### Pending Todos
 
@@ -66,10 +69,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10T01:53:35Z
-Stopped at: Completed 01-04-PLAN.md (Responsive Auth UI)
+Last session: 2026-02-10T01:57:26Z
+Stopped at: Completed 01-05-PLAN.md (Auth State Management)
 Resume file: None
-Next: Continue with Phase 1 Foundation plans (routing, integration)
+Next: Continue with Phase 1 Foundation plans
 
 ---
 *Last updated: 2026-02-10*
