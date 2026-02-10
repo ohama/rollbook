@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Database schema, RLS security, authentication
 - [x] **Phase 2: Core Loop** - One-tap workout logging (core value proposition)
-- [ ] **Phase 3: Progress Tracking** - Personal calendar, stats, history views
+- [x] **Phase 3: Progress Tracking** - Personal calendar, stats, history views
 - [ ] **Phase 4: Team Features** - Privacy-first team stats (monthly counts only)
 - [ ] **Phase 5: Photo Upload** - Photo-based workout logging
 - [ ] **Phase 6: Production Ready** - Offline PWA, admin tools, performance optimization
@@ -73,11 +73,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Create DateHelpers and Calendar component with month navigation
-- [ ] 03-02-PLAN.md — Build WorkoutList and MonthlyStats components
-- [ ] 03-03-PLAN.md — Integrate ProgressView with multi-view toggle into Dashboard
-- [ ] 03-04-PLAN.md — Human verification of progress tracking functionality
-- [ ] 03-05-PLAN.md — Write Phase 3 tutorial (tutorial/03-progress-tracking.md)
+- [x] 03-01-PLAN.md — Create DateHelpers and Calendar component with month navigation
+- [x] 03-02-PLAN.md — Build WorkoutList and MonthlyStats components
+- [x] 03-03-PLAN.md — Integrate ProgressView with multi-view toggle into Dashboard
+- [x] 03-04-PLAN.md — Human verification of progress tracking functionality
+- [x] 03-05-PLAN.md — Write Phase 3 tutorial (tutorial/03-progress-tracking.md)
 
 ### Phase 4: Team Features
 **Goal**: Privacy-first team motivation (aggregated stats only)
@@ -145,11 +145,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 6/6 | ✅ Complete | 2026-02-10 |
 | 2. Core Loop | 5/5 | ✅ Complete | 2026-02-10 |
-| 3. Progress Tracking | 0/5 | Not started | - |
+| 3. Progress Tracking | 5/5 | ✅ Complete | 2026-02-10 |
 | 4. Team Features | 0/? | Not started | - |
 | 5. Photo Upload | 0/? | Not started | - |
 | 6. Production Ready | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10 (Phase 3 planned)*
+*Last updated: 2026-02-10 (Phase 3 complete)*

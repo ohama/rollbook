@@ -9,24 +9,24 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: Email/password로 회원가입 가능
-- [ ] **AUTH-02**: 가입 후 이메일 인증 필요
-- [ ] **AUTH-03**: 이메일로 비밀번호 재설정 가능
-- [ ] **AUTH-04**: 브라우저 새로고침해도 로그인 상태 유지
+- [x] **AUTH-01**: Email/password로 회원가입 가능
+- [x] **AUTH-02**: 가입 후 이메일 인증 필요
+- [x] **AUTH-03**: 이메일로 비밀번호 재설정 가능
+- [x] **AUTH-04**: 브라우저 새로고침해도 로그인 상태 유지
 
 ### Workout Logging
 
-- [ ] **WORK-01**: "오늘 운동했다" 원탭으로 기록 생성
+- [x] **WORK-01**: "오늘 운동했다" 원탭으로 기록 생성
 - [ ] **WORK-02**: 운동 기록 수정 가능
-- [ ] **WORK-03**: 운동 기록 삭제 가능
+- [x] **WORK-03**: 운동 기록 삭제 가능
 - [ ] **WORK-04**: 사진 업로드 시 자동으로 해당 날짜 운동 기록 생성
 - [ ] **WORK-05**: 오늘 외 다른 날짜에도 기록 가능
 
 ### Progress Tracking
 
-- [ ] **PROG-01**: 내 기록을 월별 캘린더로 보기
-- [ ] **PROG-02**: 내 기록을 리스트로 보기
-- [ ] **PROG-03**: 월별 운동 횟수 통계 확인
+- [x] **PROG-01**: 내 기록을 월별 캘린더로 보기
+- [x] **PROG-02**: 내 기록을 리스트로 보기
+- [x] **PROG-03**: 월별 운동 횟수 통계 확인
 
 ### Team Features
 
@@ -39,7 +39,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Technical
 
-- [ ] **TECH-01**: 모바일에서 잘 동작하는 반응형 UI
+- [x] **TECH-01**: 모바일에서 잘 동작하는 반응형 UI
 - [ ] **TECH-02**: 오프라인에서도 운동 기록 가능 (PWA)
 - [ ] **TECH-03**: 홈화면에 앱으로 설치 가능 (PWA)
 
@@ -97,31 +97,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| WORK-01 | Phase 2 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
+| AUTH-04 | Phase 1 | Complete |
+| WORK-01 | Phase 2 | Complete |
 | WORK-02 | Phase 2 | Pending |
-| WORK-03 | Phase 2 | Pending |
+| WORK-03 | Phase 2 | Complete |
 | WORK-05 | Phase 2 | Pending |
-| PROG-01 | Phase 3 | Pending |
-| PROG-02 | Phase 3 | Pending |
-| PROG-03 | Phase 3 | Pending |
+| PROG-01 | Phase 3 | Complete |
+| PROG-02 | Phase 3 | Complete |
+| PROG-03 | Phase 3 | Complete |
 | TEAM-01 | Phase 4 | Pending |
 | WORK-04 | Phase 5 | Pending |
 | TECH-02 | Phase 6 | Pending |
 | TECH-03 | Phase 6 | Pending |
 | ADMN-01 | Phase 6 | Pending |
 | ADMN-02 | Phase 6 | Pending |
-| TECH-01 | Phase 1 | Pending |
-| DOCS-01 | All Phases | Pending |
+| TECH-01 | Phase 1 | Complete |
+| DOCS-01 | All Phases | In Progress |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Mapped to phases: 19
-- Unmapped: 0
+- Complete: 11
+- Pending: 8
 
 ---
 *Requirements defined: 2025-02-10*
-*Last updated: 2026-02-10 after roadmap creation (traceability updated)*
+*Last updated: 2026-02-10 (Phase 3 complete)*
