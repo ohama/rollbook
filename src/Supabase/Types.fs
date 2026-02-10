@@ -95,3 +95,23 @@ type TeamMemberSummary = {
     WorkoutCount: int
     WorkoutDates: string array  // YYYY-MM-DD format
 }
+
+/// Photo upload progress state
+type PhotoUploadState =
+    | Idle
+    | Compressing
+    | Uploading of progress: float  // 0.0 to 100.0
+    | Success of url: string
+    | Error of message: string
+
+/// Storage upload result
+type StorageUploadResult = {
+    path: string option
+    error: string option
+}
+
+/// Signed URL result
+type SignedUrlResult = {
+    signedUrl: string option
+    error: string option
+}
