@@ -17,19 +17,19 @@ let private buildPath (userId: string) (date: string) : string =
 
 [<ReactComponent>]
 let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
-    let (uploadState, setUploadState) = React.useState<PhotoUploadState>(Idle)
+    let (uploadState, setUploadState) = React.useState<PhotoUploadState>(PhotoUploadState.Idle)
 
     let handleFileSelected (file: File) =
         async {
             try
                 // Start compression
-                setUploadState Compressing
+                setUploadState PhotoUploadState.Compressing
 
                 // Compress image
                 let! compressed = compressImage file |> Async.AwaitPromise
 
                 // Start upload
-                setUploadState (Uploading 0.0)
+                setUploadState (PhotoUploadState.Uploading 0.0)
 
                 // Build path with today's date
                 let today = getTodayDateString()
@@ -38,7 +38,7 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
                 // Upload with progress tracking
                 let! uploadResult =
                     upload bucketName path compressed (fun progress ->
-                        setUploadState (Uploading progress)
+                        setUploadState (PhotoUploadState.Uploading progress)
                     )
                     |> Async.AwaitPromise
 
@@ -84,14 +84,14 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
                 )
                 prop.disabled (
                     match uploadState with
-                    | Compressing | Uploading _ -> true
+                    | PhotoUploadState.Compressing | PhotoUploadState.Uploading _ -> true
                     | _ -> false
                 )
             ]
 
             // Visual button - render all states
             match uploadState with
-            | Idle ->
+            | PhotoUploadState.Idle ->
                 Html.div [
                     prop.className "flex items-center gap-2 px-4 py-3 bg-indigo-100 text-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-200 transition-colors"
                     prop.children [
@@ -106,7 +106,7 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
                     ]
                 ]
 
-            | Compressing ->
+            | PhotoUploadState.Compressing ->
                 Html.div [
                     prop.className "flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 rounded-lg cursor-wait"
                     prop.children [
@@ -120,7 +120,7 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
                     ]
                 ]
 
-            | Uploading progress ->
+            | PhotoUploadState.Uploading progress ->
                 Html.div [
                     prop.className "px-4 py-3 bg-gray-100 rounded-lg"
                     prop.children [
@@ -152,7 +152,7 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
                     ]
                 ]
 
-            | Success url ->
+            | PhotoUploadState.Success url ->
                 Html.div [
                     prop.className "flex items-center gap-2 px-4 py-3 bg-green-100 text-green-700 rounded-lg"
                     prop.children [
@@ -167,7 +167,7 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
                     ]
                 ]
 
-            | Error msg ->
+            | PhotoUploadState.Error msg ->
                 Html.div [
                     prop.className "space-y-2"
                     prop.children [
@@ -184,7 +184,7 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
                             ]
                         ]
                         Html.button [
-                            prop.onClick (fun _ -> setUploadState Idle)
+                            prop.onClick (fun _ -> setUploadState PhotoUploadState.Idle)
                             prop.className "text-sm text-indigo-600 hover:text-indigo-800 underline"
                             prop.text "다시 시도"
                         ]
