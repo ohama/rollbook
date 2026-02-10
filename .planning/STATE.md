@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 5 of 6 (Photo Upload)
-Plan: 3 of ? (in progress)
+Plan: 4 of ? (in progress)
 Status: In progress
-Last activity: 2026-02-10 — Completed 05-03-PLAN.md
+Last activity: 2026-02-10 — Completed 05-04-PLAN.md
 
 Progress: [████████████████████░░░░░] Phase 1-4 complete, Phase 5 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: 2.5min
-- Total execution time: 1.02 hours
+- Total execution time: 1.08 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [████████████████████░░░
 | 02-core-loop | 5 | 12min | 2.4min | ✅ Complete |
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
 | 04-team-features | 6 | 10min | 1.7min | ✅ Complete |
-| 05-photo-upload | 3 | 9min | 3.0min | 🚧 In progress |
+| 05-photo-upload | 4 | 14min | 3.5min | 🚧 In progress |
 
 **Recent Trend:**
-- Last 6 plans: 04-04 (1min), 04-05 (X), 04-06 (4min), 05-01 (2min), 05-02 (3min), 05-03 (4min)
-- Trend: Phase 5 in progress; steady execution times
+- Last 6 plans: 04-05 (X), 04-06 (4min), 05-01 (2min), 05-02 (3min), 05-03 (4min), 05-04 (5min)
+- Trend: Phase 5 in progress; consistent execution times
 
 *Updated after each plan completion*
 
@@ -126,6 +126,10 @@ Recent decisions affecting current work:
 - **05-02**: Progress callback in upload function for UI feedback (0-100%)
 - **05-02**: PhotoUploadState DU for state machine UI integration
 - **05-02**: Signed URLs for private file access (time-limited URLs)
+- **05-04**: Promise.all for parallel signed URL generation (O(1) vs O(n) time)
+- **05-04**: Photo filtering by extension (.jpg, .jpeg, .png, .webp)
+- **05-04**: Korean date formatting (YYYY년 M월 D일) for photo overlays
+- **05-04**: Grid layout: 2 cols mobile, 3 cols desktop (grid-cols-2 md:grid-cols-3)
 - **05-03**: Async computation expression with Async.AwaitPromise for JS Promise interop
 - **05-03**: Qualified Result.Ok/Result.Error patterns to avoid DU name collision with PhotoUploadState.Error
 - **05-03**: File input overlay pattern (hidden input with visible button) for custom styling
@@ -143,10 +147,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 06:34:59 UTC
-Stopped at: Completed 05-03-PLAN.md (PhotoUpload Component)
+Last session: 2026-02-10 06:36:03 UTC
+Stopped at: Completed 05-04-PLAN.md (PhotoGallery Component)
 Resume file: None
-Next: Continue Phase 5 - Photo Upload (05-04 onwards)
+Next: Continue Phase 5 - Photo Upload (05-05 onwards)
 
 ---
 *Last updated: 2026-02-10*
