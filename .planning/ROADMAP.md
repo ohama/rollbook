@@ -13,7 +13,7 @@ Rollbook delivers a privacy-first workout tracking app for small teams in 6 phas
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Database schema, RLS security, authentication
-- [ ] **Phase 2: Core Loop** - One-tap workout logging (core value proposition)
+- [x] **Phase 2: Core Loop** - One-tap workout logging (core value proposition)
 - [ ] **Phase 3: Progress Tracking** - Personal calendar, stats, history views
 - [ ] **Phase 4: Team Features** - Privacy-first team stats (monthly counts only)
 - [ ] **Phase 5: Photo Upload** - Photo-based workout logging
@@ -55,11 +55,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Create workouts table with RLS policies
-- [ ] 02-02-PLAN.md — Create F# bindings for Supabase workout CRUD operations
-- [ ] 02-03-PLAN.md — Implement one-tap workout toggle UI on Dashboard
-- [ ] 02-04-PLAN.md — Human verification of core loop functionality
-- [ ] 02-05-PLAN.md — Write Phase 2 tutorial (tutorial/02-core-loop.md)
+- [x] 02-01-PLAN.md — Create workouts table with RLS policies
+- [x] 02-02-PLAN.md — Create F# bindings for Supabase workout CRUD operations
+- [x] 02-03-PLAN.md — Implement one-tap workout toggle UI on Dashboard
+- [x] 02-04-PLAN.md — Human verification of core loop functionality
+- [x] 02-05-PLAN.md — Write Phase 2 tutorial (tutorial/02-core-loop.md)
 
 ### Phase 3: Progress Tracking
 **Goal**: Personal progress views (calendar, stats, history)
@@ -70,10 +70,14 @@ Plans:
   2. User can view workout history as a list (PROG-02)
   3. User can see monthly workout count statistics (PROG-03)
   4. User can navigate between months in both views
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 03-01-PLAN.md — Create DateHelpers and Calendar component with month navigation
+- [ ] 03-02-PLAN.md — Build WorkoutList and MonthlyStats components
+- [ ] 03-03-PLAN.md — Integrate ProgressView with multi-view toggle into Dashboard
+- [ ] 03-04-PLAN.md — Human verification of progress tracking functionality
+- [ ] 03-05-PLAN.md — Write Phase 3 tutorial (tutorial/03-progress-tracking.md)
 
 ### Phase 4: Team Features
 **Goal**: Privacy-first team motivation (aggregated stats only)
@@ -140,12 +144,12 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 6/6 | ✅ Complete | 2026-02-10 |
-| 2. Core Loop | 0/5 | Not started | - |
-| 3. Progress Tracking | 0/? | Not started | - |
+| 2. Core Loop | 5/5 | ✅ Complete | 2026-02-10 |
+| 3. Progress Tracking | 0/5 | Not started | - |
 | 4. Team Features | 0/? | Not started | - |
 | 5. Photo Upload | 0/? | Not started | - |
 | 6. Production Ready | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10 (Phase 2 planned)*
+*Last updated: 2026-02-10 (Phase 3 planned)*
