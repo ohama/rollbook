@@ -7,6 +7,7 @@
     <!-- Supabase bindings (order matters!) -->
     <Compile Include="Supabase/Types.fs" />
     <Compile Include="Supabase/Client.fs" />
+    <Compile Include="Supabase/Storage.fs" />
     <Compile Include="Supabase/Workouts.fs" />
     <Compile Include="Supabase/Team.fs" />
     <Compile Include="Supabase/Auth.fs" />
