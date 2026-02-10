@@ -26,3 +26,11 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# F# build artifacts
+src/bin/
+src/obj/
+
+# Supabase local development
+supabase/.branches/
+supabase/.temp/
