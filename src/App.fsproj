@@ -14,6 +14,8 @@
     <!-- Pages (depend on Components and Supabase) -->
     <Compile Include="Pages/Login.fs" />
     <Compile Include="Pages/Signup.fs" />
+    <Compile Include="Pages/ForgotPassword.fs" />
+    <Compile Include="Pages/ResetPassword.fs" />
     <!-- Entry point last -->
     <Compile Include="Main.fs" />
   </ItemGroup>
