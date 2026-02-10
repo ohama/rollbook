@@ -37,6 +37,7 @@
     <Compile Include="Pages/ResetPassword.fs" />
     <Compile Include="Pages/ProgressView.fs" />
     <Compile Include="Pages/TeamView.fs" />
+    <Compile Include="Pages/AdminPage.fs" />
     <Compile Include="Pages/Dashboard.fs" />
     <!-- Entry point last -->
     <Compile Include="Main.fs" />
