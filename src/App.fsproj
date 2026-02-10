@@ -5,6 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Supabase/Types.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
