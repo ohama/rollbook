@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 5 of 6 (Photo Upload)
-Plan: 1 of ? (in progress)
+Plan: 2 of ? (in progress)
 Status: In progress
-Last activity: 2026-02-10 — Completed 05-01-PLAN.md
+Last activity: 2026-02-10 — Completed 05-02-PLAN.md
 
-Progress: [████████████████████░░░░░] Phase 1-4 complete, Phase 5 started
+Progress: [████████████████████░░░░░] Phase 1-4 complete, Phase 5 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 2.5min
-- Total execution time: 0.90 hours
+- Total execution time: 0.95 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [████████████████████░░░
 | 02-core-loop | 5 | 12min | 2.4min | ✅ Complete |
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
 | 04-team-features | 6 | 10min | 1.7min | ✅ Complete |
-| 05-photo-upload | 1 | 2min | 2.0min | 🚧 In progress |
+| 05-photo-upload | 2 | 5min | 2.5min | 🚧 In progress |
 
 **Recent Trend:**
-- Last 6 plans: 04-02 (2min), 04-03 (2min), 04-04 (1min), 04-05 (X), 04-06 (4min), 05-01 (2min)
-- Trend: Phase 5 started; consistent execution times
+- Last 6 plans: 04-03 (2min), 04-04 (1min), 04-05 (X), 04-06 (4min), 05-01 (2min), 05-02 (3min)
+- Trend: Phase 5 in progress; consistent execution times
 
 *Updated after each plan completion*
 
@@ -120,6 +120,12 @@ Recent decisions affecting current work:
 - **05-01**: Three separate policies (INSERT/SELECT/DELETE) for storage.objects
 - **05-01**: storage.foldername(name)[1] extracts user_id from path
 - **05-01**: COMMENT statements fail on storage.buckets (system table permissions)
+- **05-02**: browser-image-compression for client-side optimization before upload
+- **05-02**: Normalize all photos to JPEG, max 1920px, 1MB for consistent storage
+- **05-02**: Result types for all storage operations (F# safe handling)
+- **05-02**: Progress callback in upload function for UI feedback (0-100%)
+- **05-02**: PhotoUploadState DU for state machine UI integration
+- **05-02**: Signed URLs for private file access (time-limited URLs)
 
 ### Pending Todos
 
@@ -131,10 +137,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 06:06:34 UTC
-Stopped at: Completed 05-01-PLAN.md (Storage Bucket with RLS)
+Last session: 2026-02-10 06:27:36 UTC
+Stopped at: Completed 05-02-PLAN.md (Storage Bindings)
 Resume file: None
-Next: Continue Phase 5 - Photo Upload (05-02 onwards)
+Next: Continue Phase 5 - Photo Upload (05-03 onwards)
 
 ---
 *Last updated: 2026-02-10*
