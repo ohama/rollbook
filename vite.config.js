@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   plugins: [
@@ -72,9 +73,38 @@ export default defineConfig({
       devOptions: {
         enabled: false // Disable in dev to avoid caching issues
       }
+    }),
+    visualizer({
+      filename: 'dist/stats.html',
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
     })
   ],
   server: {
     port: 3000,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunk for React
+          'vendor-react': ['react', 'react-dom'],
+          // Supabase client in its own chunk
+          'vendor-supabase': ['@supabase/supabase-js'],
+          // IDB for offline (small, but separate)
+          'vendor-offline': ['idb'],
+        }
+      }
+    },
+    // Warn if any chunk exceeds 500KB
+    chunkSizeWarningLimit: 500,
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,  // Remove console.log in production
+      }
+    }
+  }
 });
