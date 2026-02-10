@@ -32,10 +32,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. User stays logged in across browser sessions (AUTH-04)
   5. App works on mobile and desktop (responsive UI) (TECH-01)
   6. Database has RLS enabled on all tables (security foundation)
-**Plans**: TBD
+**Plans**: 6 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 01-01-PLAN.md — Initialize Fable + Vite + Tailwind project structure
+- [ ] 01-02-PLAN.md — Initialize Supabase local development with RLS-enabled schema
+- [ ] 01-03-PLAN.md — Create F# bindings for Supabase Auth SDK
+- [ ] 01-04-PLAN.md — Create responsive auth UI components (Login, Signup, Password Reset)
+- [ ] 01-05-PLAN.md — Integrate auth state management and route protection in main app
+- [ ] 01-06-PLAN.md — Human verification of complete Phase 01 authentication flow
 
 ### Phase 2: Core Loop
 **Goal**: One-tap workout logging (core value delivery)
@@ -130,7 +135,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/? | Not started | - |
+| 1. Foundation | 0/6 | Planned | - |
 | 2. Core Loop | 0/? | Not started | - |
 | 3. Progress Tracking | 0/? | Not started | - |
 | 4. Team Features | 0/? | Not started | - |
@@ -139,4 +144,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10*
+*Last updated: 2026-02-10 (Phase 1 planned)*
