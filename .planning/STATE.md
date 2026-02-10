@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 4 of 6 (Team Features)
-Plan: 1 of 6 completed
+Plan: 2 of 6 completed
 Status: In progress
-Last activity: 2026-02-10 — Completed 04-01-PLAN.md (Team Visibility RLS)
+Last activity: 2026-02-10 — Completed 04-02-PLAN.md (Team API Bindings)
 
-Progress: [████████████████████░] 16/21 plans complete
+Progress: [█████████████████████] 17/21 plans complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 2.6min
-- Total execution time: 0.75 hours
+- Total execution time: 0.78 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [████████████████████░] 16/2
 | 01-foundation | 6 | 19min | 3.2min | ✅ Complete |
 | 02-core-loop | 5 | 12min | 2.4min | ✅ Complete |
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
-| 04-team-features | 1 | 3min | 3.0min | In progress |
+| 04-team-features | 2 | 5min | 2.5min | In progress |
 
 **Recent Trend:**
-- Last 6 plans: 03-01 (2min), 03-02 (2min), 03-03 (2min), 03-05 (6min), 04-01 (3min)
-- Trend: Phase 4 started with team visibility RLS
+- Last 6 plans: 03-02 (2min), 03-03 (2min), 03-05 (6min), 04-01 (3min), 04-02 (2min)
+- Trend: Team features progressing quickly
 
 *Updated after each plan completion*
 
@@ -99,6 +99,10 @@ Recent decisions affecting current work:
 - **04-01**: Team visibility pattern: permissive SELECT with USING (true), restrictive INSERT/UPDATE/DELETE
 - **04-01**: Migration timestamp format with full HHMMSS (20260210140000) for proper ordering
 - **04-01**: DROP POLICY IF EXISTS for idempotent migration execution
+- **04-02**: WorkoutWithProfileRaw.profiles matches Supabase FK join key name
+- **04-02**: TeamMemberSummary.WorkoutDates stores dates only (not full records)
+- **04-02**: groupWorkoutsByUser includes zero-workout members from allProfiles
+- **04-02**: Display name fallback: display_name -> email -> "Unknown"
 
 ### Pending Todos
 
@@ -110,10 +114,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 05:30:07 UTC
-Stopped at: Completed 04-01-PLAN.md (Team Visibility RLS)
+Last session: 2026-02-10 05:34:41 UTC
+Stopped at: Completed 04-02-PLAN.md (Team API Bindings)
 Resume file: None
-Next: Continue Phase 4 - 04-02 (Team API endpoints)
+Next: Continue Phase 4 - 04-03 (TeamView component)
 
 ---
 *Last updated: 2026-02-10*
