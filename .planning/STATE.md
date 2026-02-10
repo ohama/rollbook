@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 5 of 6 (Photo Upload)
-Plan: 2 of ? (in progress)
+Plan: 3 of ? (in progress)
 Status: In progress
-Last activity: 2026-02-10 — Completed 05-02-PLAN.md
+Last activity: 2026-02-10 — Completed 05-03-PLAN.md
 
 Progress: [████████████████████░░░░░] Phase 1-4 complete, Phase 5 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: 2.5min
-- Total execution time: 0.95 hours
+- Total execution time: 1.02 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [████████████████████░░░
 | 02-core-loop | 5 | 12min | 2.4min | ✅ Complete |
 | 03-progress-tracking | 4 | 12min | 3.0min | ✅ Complete |
 | 04-team-features | 6 | 10min | 1.7min | ✅ Complete |
-| 05-photo-upload | 2 | 5min | 2.5min | 🚧 In progress |
+| 05-photo-upload | 3 | 9min | 3.0min | 🚧 In progress |
 
 **Recent Trend:**
-- Last 6 plans: 04-03 (2min), 04-04 (1min), 04-05 (X), 04-06 (4min), 05-01 (2min), 05-02 (3min)
-- Trend: Phase 5 in progress; consistent execution times
+- Last 6 plans: 04-04 (1min), 04-05 (X), 04-06 (4min), 05-01 (2min), 05-02 (3min), 05-03 (4min)
+- Trend: Phase 5 in progress; steady execution times
 
 *Updated after each plan completion*
 
@@ -126,6 +126,12 @@ Recent decisions affecting current work:
 - **05-02**: Progress callback in upload function for UI feedback (0-100%)
 - **05-02**: PhotoUploadState DU for state machine UI integration
 - **05-02**: Signed URLs for private file access (time-limited URLs)
+- **05-03**: Async computation expression with Async.AwaitPromise for JS Promise interop
+- **05-03**: Qualified Result.Ok/Result.Error patterns to avoid DU name collision with PhotoUploadState.Error
+- **05-03**: File input overlay pattern (hidden input with visible button) for custom styling
+- **05-03**: capture="environment" attribute opens rear camera on mobile devices
+- **05-03**: Empty string URL on Success state if signed URL fails (upload still succeeded)
+- **05-03**: Retry button in Error state resets to Idle for easy re-attempt
 
 ### Pending Todos
 
@@ -137,10 +143,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 06:27:36 UTC
-Stopped at: Completed 05-02-PLAN.md (Storage Bindings)
+Last session: 2026-02-10 06:34:59 UTC
+Stopped at: Completed 05-03-PLAN.md (PhotoUpload Component)
 Resume file: None
-Next: Continue Phase 5 - Photo Upload (05-03 onwards)
+Next: Continue Phase 5 - Photo Upload (05-04 onwards)
 
 ---
 *Last updated: 2026-02-10*
