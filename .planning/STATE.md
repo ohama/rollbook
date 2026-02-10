@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2025-02-10)
 ## Current Position
 
 Phase: 1 of 6 (Foundation)
-Plan: 3 of ? (phase in progress)
+Plan: 2 of ? (phase in progress)
 Status: In progress
-Last activity: 2026-02-10 — Completed 01-03-PLAN.md (Supabase Auth Bindings)
+Last activity: 2026-02-10 — Completed 01-02-PLAN.md (Supabase Local Development)
 
-Progress: [███░░░░░░░] ~30%
+Progress: [██░░░░░░░░] ~20%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 2
-- Average duration: 3.5min
-- Total execution time: 0.12 hours
+- Average duration: 4.5min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation | 2 | 7min | 3.5min |
+| 01-foundation | 2 | 9min | 4.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-03 (3min)
+- Last 5 plans: 01-01 (4min), 01-02 (5min)
 - Trend: Consistent fast execution
 
 *Updated after each plan completion*
@@ -49,9 +49,9 @@ Recent decisions affecting current work:
 - **01-01**: vite-plugin-fable 0.1.1 for Vite 6.x compatibility (0.2.1 requires Vite 7)
 - **01-01**: React 18 createRoot API for modern rendering (eliminates deprecation warnings)
 - **01-01**: Tailwind 4.x with new Vite plugin architecture
-- **01-03**: unbox<T> for JS object coercion in promise contexts (F# type system requirement)
-- **01-03**: Manual JsInterop bindings over auto-generation for Supabase SDK
-- **01-03**: Promise-based async API surface for auth operations
+- **01-02**: RLS enabled from day one per CVE-2025-48757 prevention
+- **01-02**: Supabase local development via Docker for fast iteration
+- **01-02**: Auto-profile creation via trigger on auth.users insert
 
 ### Pending Todos
 
@@ -59,14 +59,12 @@ None yet.
 
 ### Blockers/Concerns
 
-**Environment Setup Required:**
-- Supabase project URL and anon key needed before auth testing
-- Need to create `.env` file with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10T01:45:13Z
-Stopped at: Completed 01-03-PLAN.md (Supabase Auth Bindings)
+Last session: 2026-02-10T01:47:28Z
+Stopped at: Completed 01-02-PLAN.md (Supabase Local Development)
 Resume file: None
 Next: Continue with Phase 1 Foundation plans
 
