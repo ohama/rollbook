@@ -18,6 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Team Features** - Team workout visibility (members can view each other's records)
 - [x] **Phase 5: Photo Upload** - Photo-based workout logging
 - [x] **Phase 6: Production Ready** - Offline PWA, admin tools, performance optimization
+- [ ] **Phase 7: Cloud Deployment** - Vercel 배포 + Supabase Cloud 연동
 
 ## Phase Details
 
@@ -143,6 +144,28 @@ Plans:
 - [x] 06-07-PLAN.md — Automated verification of production readiness
 - [x] 06-08-PLAN.md — Write Phase 6 tutorial (tutorial/06-production-ready.md)
 
+### Phase 7: Cloud Deployment
+**Goal**: Vercel 배포 및 Supabase Cloud 연동으로 프로덕션 서비스 운영
+**Depends on**: Phase 6
+**Requirements**: DEPLOY-01, DEPLOY-02, DOCS-01
+**Success Criteria** (what must be TRUE):
+  1. Supabase Cloud 프로젝트 생성 및 스키마 마이그레이션 완료
+  2. Vercel에 프론트엔드 배포 완료
+  3. 환경변수 설정 (Supabase Cloud URL/Key)
+  4. 커스텀 도메인 연결 (선택)
+  5. 외부에서 앱 접근 및 회원가입/로그인 동작 확인
+  6. Phase 7 튜토리얼 작성 완료 (tutorial/07-cloud-deployment.md)
+**Plans**: 4 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Supabase Cloud project setup and migration push
+- [ ] 07-02-PLAN.md — Vercel deployment with environment variables
+- [ ] 07-03-PLAN.md — Production verification (authentication, RLS, PWA, offline)
+- [ ] 07-04-PLAN.md — Write Phase 7 tutorial (tutorial/07-cloud-deployment.md)
+
+**Details:**
+Phase 7 transitions from local Supabase development to production cloud infrastructure. Plan 07-01 creates a Supabase Cloud project and pushes all 5 database migrations using the Supabase CLI. Plan 07-02 deploys the frontend to Vercel and configures production environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY). Plan 07-03 performs comprehensive manual verification including authentication flow, RLS policy enforcement, photo upload, PWA installability, and offline sync. Plan 07-04 documents the entire deployment process in a Korean tutorial for beginners.
+
 ## Documentation Requirement
 
 **DOCS-01**: Each phase ends with a tutorial plan
@@ -157,7 +180,7 @@ Each phase planning must include a final plan for writing the tutorial that cove
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -167,7 +190,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Team Features | 6/6 | ✅ Complete | 2026-02-10 |
 | 5. Photo Upload | 7/7 | ✅ Complete | 2026-02-10 |
 | 6. Production Ready | 8/8 | ✅ Complete | 2026-02-10 |
+| 7. Cloud Deployment | 0/4 | ⏳ Not Started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10 (All phases complete! Milestone 1.0 achieved)*
+*Last updated: 2026-02-11 (Phase 7 planned with 4 plans)*
