@@ -108,37 +108,324 @@ npm run preview
 | Supabase API | http://localhost:54321 | REST API |
 | Inbucket | http://localhost:54324 | 이메일 테스트 |
 
-## 4. 외부 접근 설정 (옵션)
+## 4. 외부 접근 설정
 
-Mac Mini를 홈 네트워크에서 서비스할 경우:
+외부에서 Rollbook 서비스에 접근하는 방법을 설명합니다.
 
-### Mac Mini IP 확인
+### 4.1 접근 시나리오별 설정
 
-```bash
-ipconfig getifaddr en0  # Wi-Fi
-# 또는
-ipconfig getifaddr en1  # Ethernet
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        접근 시나리오                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. 같은 Wi-Fi/LAN     →  내부 IP 직접 접근 (192.168.x.x)            │
+│  2. 외부 인터넷        →  포트 포워딩 + DDNS 또는 터널링 서비스       │
+│  3. 임시 공유          →  ngrok / Cloudflare Tunnel (가장 간편)      │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Vite 외부 접근 허용
+---
+
+### 4.2 같은 네트워크 (LAN) 접근
+
+집이나 사무실의 같은 Wi-Fi/유선 네트워크에서 접근하는 경우입니다.
+
+#### Step 1: Mac Mini IP 확인
 
 ```bash
-# package.json의 preview 스크립트 수정
+# Wi-Fi IP
+ipconfig getifaddr en0
+
+# Ethernet IP
+ipconfig getifaddr en1
+
+# 모든 인터페이스 확인
+ifconfig | grep "inet " | grep -v 127.0.0.1
+```
+
+예시 출력: `192.168.0.10`
+
+#### Step 2: 서비스를 외부 IP에 바인딩
+
+**프론트엔드 (Vite Preview)**
+
+```bash
+# 일회성 실행
+npm run preview -- --host 0.0.0.0
+
+# 또는 package.json 수정 (영구 적용)
+```
+
+package.json:
+```json
+{
+  "scripts": {
+    "preview": "vite preview --host 0.0.0.0"
+  }
+}
+```
+
+**Supabase API**
+
+Supabase는 기본적으로 `0.0.0.0`에 바인딩되어 있어 추가 설정 불필요합니다.
+
+#### Step 3: 환경 변수 수정
+
+`.env` 파일에서 Supabase URL을 Mac Mini IP로 변경:
+
+```bash
+# 기존 (localhost)
+VITE_SUPABASE_URL=http://localhost:54321
+
+# 변경 (Mac Mini IP)
+VITE_SUPABASE_URL=http://192.168.0.10:54321
+```
+
+**중요:** 앱을 다시 빌드해야 합니다:
+```bash
+npm run build
 npm run preview -- --host 0.0.0.0
 ```
 
-### 방화벽 설정
+#### Step 4: macOS 방화벽 설정
 
 ```bash
-# 시스템 환경설정 > 보안 및 개인 정보 보호 > 방화벽
-# 4173, 54321 포트 허용
+# 방화벽 상태 확인
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+
+# 방화벽 비활성화 (테스트용, 비권장)
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+
+# 또는 GUI에서 설정
+# 시스템 설정 > 네트워크 > 방화벽 > 옵션 > 들어오는 연결 허용
 ```
 
-### 접근 URL
+#### Step 5: 다른 기기에서 접근
 
 ```
-http://<mac-mini-ip>:4173
+앱:       http://192.168.0.10:4173
+Studio:   http://192.168.0.10:54323
+API:      http://192.168.0.10:54321
 ```
+
+---
+
+### 4.3 외부 인터넷 접근 (포트 포워딩)
+
+집 밖에서 인터넷을 통해 접근하는 경우입니다.
+
+#### 필요 조건
+
+- 공유기 관리자 접근 권한
+- ISP가 포트 포워딩 허용 (일부 ISP는 차단)
+- 고정 IP 또는 DDNS 서비스
+
+#### Step 1: 공유기 포트 포워딩 설정
+
+공유기 관리 페이지 접속 (보통 `192.168.0.1` 또는 `192.168.1.1`):
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    포트 포워딩 규칙                               │
+├──────────────┬──────────────┬──────────────┬───────────────────┤
+│ 서비스 이름   │ 외부 포트     │ 내부 IP       │ 내부 포트         │
+├──────────────┼──────────────┼──────────────┼───────────────────┤
+│ Rollbook-App │ 4173         │ 192.168.0.10 │ 4173              │
+│ Rollbook-API │ 54321        │ 192.168.0.10 │ 54321             │
+└──────────────┴──────────────┴──────────────┴───────────────────┘
+```
+
+#### Step 2: 공인 IP 확인
+
+```bash
+curl -s ifconfig.me
+# 또는
+curl -s ipinfo.io/ip
+```
+
+예시: `123.456.78.90`
+
+#### Step 3: DDNS 설정 (권장)
+
+가정용 인터넷은 IP가 변경될 수 있으므로 DDNS 사용을 권장합니다.
+
+**무료 DDNS 서비스:**
+- [No-IP](https://www.noip.com/) - 무료 플랜 제공
+- [DuckDNS](https://www.duckdns.org/) - 완전 무료
+- [FreeDNS](https://freedns.afraid.org/) - 완전 무료
+
+**DuckDNS 설정 예시:**
+
+1. https://www.duckdns.org 에서 가입
+2. 도메인 생성 (예: `my-rollbook.duckdns.org`)
+3. Mac Mini에서 자동 업데이트 설정:
+
+```bash
+# crontab에 추가 (5분마다 IP 업데이트)
+crontab -e
+
+# 아래 줄 추가 (토큰은 DuckDNS에서 확인)
+*/5 * * * * curl -s "https://www.duckdns.org/update?domains=my-rollbook&token=YOUR_TOKEN&ip="
+```
+
+#### Step 4: 환경 변수 수정
+
+```bash
+# .env
+VITE_SUPABASE_URL=http://my-rollbook.duckdns.org:54321
+```
+
+빌드 후 재시작:
+```bash
+npm run build && npm run preview -- --host 0.0.0.0
+```
+
+#### Step 5: 외부에서 접근
+
+```
+앱: http://my-rollbook.duckdns.org:4173
+API: http://my-rollbook.duckdns.org:54321
+```
+
+---
+
+### 4.4 터널링 서비스 (가장 간편)
+
+포트 포워딩 없이 외부 접근을 설정하는 방법입니다. 테스트나 데모에 적합합니다.
+
+#### 옵션 A: ngrok (권장)
+
+```bash
+# 설치
+brew install ngrok
+
+# 계정 설정 (https://ngrok.com 에서 가입)
+ngrok config add-authtoken YOUR_AUTH_TOKEN
+
+# 프론트엔드 터널 (별도 터미널)
+ngrok http 4173
+
+# Supabase API 터널 (별도 터미널)
+ngrok http 54321
+```
+
+출력 예시:
+```
+Forwarding  https://abc123.ngrok.io -> http://localhost:4173
+```
+
+**환경 변수 수정:**
+```bash
+# .env (ngrok API URL로 변경)
+VITE_SUPABASE_URL=https://xyz789.ngrok.io
+```
+
+빌드 후 ngrok 앱 URL로 접근합니다.
+
+**장점:** 설정 간편, HTTPS 자동 제공
+**단점:** 무료 플랜은 URL이 매번 변경됨, 세션 제한
+
+#### 옵션 B: Cloudflare Tunnel (무료, 고정 URL)
+
+```bash
+# 설치
+brew install cloudflared
+
+# 로그인 (Cloudflare 계정 필요)
+cloudflared tunnel login
+
+# 터널 생성
+cloudflared tunnel create rollbook
+
+# 설정 파일 생성
+cat > ~/.cloudflared/config.yml << 'EOF'
+tunnel: rollbook
+credentials-file: ~/.cloudflared/jeju_rollbook.json
+
+ingress:
+  - hostname: rollbook.yourdomain.com
+    service: http://localhost:4173
+  - hostname: api.rollbook.yourdomain.com
+    service: http://localhost:54321
+  - service: http_status:404
+EOF
+
+# DNS 레코드 생성 (Cloudflare DNS 필요)
+cloudflared tunnel route dns rollbook rollbook.yourdomain.com
+cloudflared tunnel route dns rollbook api.rollbook.yourdomain.com
+
+# 터널 실행
+cloudflared tunnel run rollbook
+```
+
+**장점:** 무료, 고정 URL, HTTPS 자동, DDoS 보호
+**단점:** 자체 도메인 필요, 설정이 ngrok보다 복잡
+
+#### 옵션 C: Tailscale (VPN 기반)
+
+개인 VPN 네트워크를 구성하여 안전하게 접근합니다.
+
+```bash
+# 설치 (Mac Mini와 접속 기기 모두)
+brew install tailscale
+
+# 로그인
+tailscale up
+
+# Tailscale IP 확인
+tailscale ip -4
+# 예: 100.100.100.10
+```
+
+Tailscale 네트워크 내에서 접근:
+```
+http://100.100.100.10:4173
+```
+
+**장점:** 암호화된 연결, 외부 노출 없음, 무료 (개인 사용)
+**단점:** 모든 기기에 Tailscale 설치 필요
+
+---
+
+### 4.5 보안 고려사항
+
+⚠️ **외부 접근 시 주의사항:**
+
+| 위험 | 대응 |
+|------|------|
+| 인증 없는 접근 | Rollbook은 Supabase Auth로 보호됨 ✓ |
+| 데이터 전송 암호화 | HTTPS 사용 권장 (ngrok/Cloudflare) |
+| Supabase Studio 노출 | 54323 포트는 포워딩하지 말 것! |
+| 서비스 키 노출 | `.env`에 service_role key 없음 ✓ |
+| 무차별 대입 공격 | Supabase Auth rate limiting ✓ |
+
+**권장 설정:**
+
+```bash
+# 포트 포워딩 시 최소한의 포트만 열기
+4173   ✓ 프론트엔드 (필수)
+54321  ✓ Supabase API (필수)
+54323  ✗ Studio (열지 말 것 - 관리 도구)
+54324  ✗ Inbucket (열지 말 것 - 테스트 도구)
+```
+
+---
+
+### 4.6 접근 방법 비교
+
+| 방법 | 난이도 | 비용 | HTTPS | 고정 URL | 적합한 용도 |
+|------|--------|------|-------|----------|-------------|
+| LAN 직접 접근 | ⭐ | 무료 | ✗ | ✓ | 집/사무실 내부 |
+| 포트 포워딩 + DDNS | ⭐⭐ | 무료 | ✗ | ✓ | 24/7 서비스 |
+| ngrok | ⭐ | 무료/유료 | ✓ | ✗/✓ | 테스트/데모 |
+| Cloudflare Tunnel | ⭐⭐⭐ | 무료 | ✓ | ✓ | 프로덕션 서비스 |
+| Tailscale | ⭐⭐ | 무료 | ✓ | ✓ | 개인/팀 전용 |
+
+**추천:**
+- 집에서만 사용 → LAN 직접 접근
+- 친구/팀원과 공유 → Tailscale
+- 임시 데모 → ngrok
+- 정식 서비스 → Cloudflare Tunnel + 자체 도메인
 
 ## 5. 자동 시작 설정 (launchd)
 

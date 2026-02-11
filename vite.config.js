@@ -84,6 +84,9 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  preview: {
+    allowedHosts: ['localhost', '.trycloudflare.com'],
+  },
   build: {
     rollupOptions: {
       output: {
