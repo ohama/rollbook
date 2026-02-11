@@ -2,9 +2,13 @@ import { Record, Union } from "./fable_modules/fable-library-js.4.28.0/Types.js"
 import { record_type, union_type, class_type } from "./fable_modules/fable-library-js.4.28.0/Reflection.js";
 import { createElement } from "react";
 import React from "react";
+import * as react from "react";
 import { reactApi } from "./fable_modules/Feliz.2.9.0/Interop.fs.js";
 import { useEffectDisposableOnce } from "./fable_modules/Feliz.2.9.0/Internal.fs.js";
+import { initializeSync } from "./offline/Sync.js";
 import { onAuthStateChange } from "./Supabase/Auth.js";
+import { singleton, append, delay, toList } from "./fable_modules/fable-library-js.4.28.0/Seq.js";
+import { OfflineIndicator } from "./Components/OfflineIndicator.js";
 import { SignupPage } from "./Pages/Signup.js";
 import { ForgotPasswordPage } from "./Pages/ForgotPassword.js";
 import { ResetPasswordPage } from "./Pages/ResetPassword.js";
@@ -57,13 +61,13 @@ export function AppState_$reflection() {
 }
 
 export function App() {
-    let elems_1, elems;
     let patternInput;
     const initial = new AppState(new AuthState(0, []), new Page(0, []));
     patternInput = reactApi.useState(initial);
     const state = patternInput[0];
     const setState = patternInput[1];
     useEffectDisposableOnce(() => {
+        initializeSync();
         const hash = window.location.hash;
         if (hash.indexOf("type=recovery") >= 0) {
             setState(new AppState(state.authState, new Page(3, [])));
@@ -106,46 +110,41 @@ export function App() {
     const navigateTo = (page) => {
         setState(new AppState(state.authState, (page === "signup") ? (new Page(1, [])) : ((page === "forgot-password") ? (new Page(2, [])) : ((page === "reset-password") ? (new Page(3, [])) : (new Page(0, []))))));
     };
-    const matchValue = state.authState;
-    switch (matchValue.tag) {
-        case 1: {
-            const matchValue_1 = state.currentPage;
-            switch (matchValue_1.tag) {
-                case 1:
-                    return createElement(SignupPage, {
-                        onNavigate: navigateTo,
-                    });
-                case 2:
-                    return createElement(ForgotPasswordPage, {
-                        onNavigate: navigateTo,
-                    });
-                case 3:
-                    return createElement(ResetPasswordPage, {
-                        onNavigate: navigateTo,
-                    });
-                default:
-                    return createElement(LoginPage, {
-                        onNavigate: navigateTo,
-                        onLoginSuccess: () => {
-                        },
-                    });
+    const xs_4 = toList(delay(() => append(singleton(createElement(OfflineIndicator, null)), delay(() => {
+        let elems_1, elems;
+        const matchValue = state.authState;
+        switch (matchValue.tag) {
+            case 1: {
+                const matchValue_1 = state.currentPage;
+                return (matchValue_1.tag === 1) ? singleton(createElement(SignupPage, {
+                    onNavigate: navigateTo,
+                })) : ((matchValue_1.tag === 2) ? singleton(createElement(ForgotPasswordPage, {
+                    onNavigate: navigateTo,
+                })) : ((matchValue_1.tag === 3) ? singleton(createElement(ResetPasswordPage, {
+                    onNavigate: navigateTo,
+                })) : singleton(createElement(LoginPage, {
+                    onNavigate: navigateTo,
+                    onLoginSuccess: () => {
+                    },
+                }))));
             }
+            case 2:
+                return singleton(createElement(DashboardPage, {
+                    user: matchValue.fields[0],
+                    onLogout: () => {
+                        setState(new AppState(new AuthState(1, []), new Page(0, [])));
+                    },
+                }));
+            default:
+                return singleton(createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100 flex items-center justify-center"], (elems_1 = [createElement("div", createObj(ofArray([["className", "text-center"], (elems = [createElement("div", {
+                    className: "animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4",
+                }), createElement("p", {
+                    className: "text-gray-600",
+                    children: "로딩 중...",
+                })], ["children", reactApi.Children.toArray(Array.from(elems))])])))], ["children", reactApi.Children.toArray(Array.from(elems_1))])]))));
         }
-        case 2:
-            return createElement(DashboardPage, {
-                user: matchValue.fields[0],
-                onLogout: () => {
-                    setState(new AppState(new AuthState(1, []), new Page(0, [])));
-                },
-            });
-        default:
-            return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100 flex items-center justify-center"], (elems_1 = [createElement("div", createObj(ofArray([["className", "text-center"], (elems = [createElement("div", {
-                className: "animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4",
-            }), createElement("p", {
-                className: "text-gray-600",
-                children: "로딩 중...",
-            })], ["children", reactApi.Children.toArray(Array.from(elems))])])))], ["children", reactApi.Children.toArray(Array.from(elems_1))])])));
-    }
+    }))));
+    return react.createElement(react.Fragment, {}, ...xs_4);
 }
 
 export const root = createRoot(document.getElementById("app"));
