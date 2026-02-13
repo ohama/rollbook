@@ -2,7 +2,7 @@
 
 ## Overview
 
-Rollbook delivers a privacy-first workout tracking app for small teams in 6 phases. Starting with secure foundation (database + auth), building the core one-tap logging loop, adding progress views and team stats, then enhancing with photo uploads, offline PWA capabilities, and admin tools. Each phase delivers a complete, verifiable capability that builds toward the core value: "원탭 운동 기록 — 앱을 열고 '오늘 운동했다' 버튼 하나로 기록 완료."
+Rollbook delivers a privacy-first workout tracking app for small teams in 6 phases. Starting with secure foundation (database + auth), building the core one-tap logging loop, adding progress views and team stats, then enhancing with photo uploads, offline PWA capabilities, and admin tools. Phase 7 deploys the complete app to production on Mac Mini via Cloudflare Tunnel. Each phase delivers a complete, verifiable capability that builds toward the core value: "원탭 운동 기록 — 앱을 열고 '오늘 운동했다' 버튼 하나로 기록 완료."
 
 ## Phases
 
@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Team Features** - Team workout visibility (members can view each other's records)
 - [x] **Phase 5: Photo Upload** - Photo-based workout logging
 - [x] **Phase 6: Production Ready** - Offline PWA, admin tools, performance optimization
-- [ ] **Phase 7: Cloud Deployment** - Vercel 배포 + Supabase Cloud 연동
+- [ ] **Phase 7: Local Deployment** - Mac Mini + Cloudflare Tunnel로 포트 노출 없이 프로덕션 서비스 운영
 
 ## Phase Details
 
@@ -144,27 +144,28 @@ Plans:
 - [x] 06-07-PLAN.md — Automated verification of production readiness
 - [x] 06-08-PLAN.md — Write Phase 6 tutorial (tutorial/06-production-ready.md)
 
-### Phase 7: Cloud Deployment
-**Goal**: Vercel 배포 및 Supabase Cloud 연동으로 프로덕션 서비스 운영
+### Phase 7: Local Deployment
+**Goal**: Mac Mini에서 Cloudflare Tunnel로 포트 노출 없이 프로덕션 서비스 운영
 **Depends on**: Phase 6
-**Requirements**: DEPLOY-01, DEPLOY-02, DOCS-01
+**Requirements**: TUNL-01, TUNL-02, TUNL-03, TUNL-04, PROD-01, PROD-02, PROD-03, AUTO-01, AUTO-02, AUTO-03, DOCS-02
 **Success Criteria** (what must be TRUE):
-  1. Supabase Cloud 프로젝트 생성 및 스키마 마이그레이션 완료
-  2. Vercel에 프론트엔드 배포 완료
-  3. 환경변수 설정 (Supabase Cloud URL/Key)
-  4. 커스텀 도메인 연결 (선택)
-  5. 외부에서 앱 접근 및 회원가입/로그인 동작 확인
-  6. Phase 7 튜토리얼 작성 완료 (tutorial/07-cloud-deployment.md)
-**Plans**: 4 plans
+  1. Cloudflare Tunnel established with custom domain routing (HTTPS automatic)
+  2. Production build serves via tunnel domain without port exposure
+  3. All services (Supabase, Frontend, Tunnel) auto-start on Mac Mini boot
+  4. Google Workspace MX records remain functional (DNS unchanged)
+  5. End-to-end flow works: signup, login, workout log, photo upload, team view
+  6. Tutorial documents complete deployment process for beginners
+**Plans**: 5 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Supabase Cloud project setup and migration push
-- [ ] 07-02-PLAN.md — Vercel deployment with environment variables
-- [ ] 07-03-PLAN.md — Production verification (authentication, RLS, PWA, offline)
-- [ ] 07-04-PLAN.md — Write Phase 7 tutorial (tutorial/07-cloud-deployment.md)
+- [ ] 07-01-PLAN.md — Cloudflare Tunnel setup (install cloudflared, create tunnel, configure DNS)
+- [ ] 07-02-PLAN.md — Production build configuration (.env.production, vite.config.js, build test)
+- [ ] 07-03-PLAN.md — launchd service automation (Supabase, Frontend, Tunnel)
+- [ ] 07-04-PLAN.md — End-to-end verification (HTTPS, MX records, full user flow)
+- [ ] 07-05-PLAN.md — Write Phase 7 tutorial (tutorial/07-local-deployment.md)
 
 **Details:**
-Phase 7 transitions from local Supabase development to production cloud infrastructure. Plan 07-01 creates a Supabase Cloud project and pushes all 5 database migrations using the Supabase CLI. Plan 07-02 deploys the frontend to Vercel and configures production environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY). Plan 07-03 performs comprehensive manual verification including authentication flow, RLS policy enforcement, photo upload, PWA installability, and offline sync. Plan 07-04 documents the entire deployment process in a Korean tutorial for beginners.
+Phase 7 transitions from local development to production deployment on Mac Mini. Plan 07-01 installs cloudflared, creates a named tunnel, configures config.yml for routing, and sets DNS records for frontend and API subdomains with automatic HTTPS. Plan 07-02 creates .env.production with tunnel domain URLs, updates vite.config.js allowedHosts, builds production bundle, and tests via tunnel. Plan 07-03 creates three launchd plist files for Supabase, Frontend (vite preview), and cloudflared to auto-start on boot with proper dependency ordering. Plan 07-04 performs comprehensive verification: HTTPS certificate, Google Workspace MX preservation, complete user flow from signup to team features. Plan 07-05 documents the entire deployment process in a Korean tutorial for beginners, covering tunnel concepts, DNS configuration, service automation, and troubleshooting.
 
 ## Documentation Requirement
 
@@ -190,8 +191,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Team Features | 6/6 | ✅ Complete | 2026-02-10 |
 | 5. Photo Upload | 7/7 | ✅ Complete | 2026-02-10 |
 | 6. Production Ready | 8/8 | ✅ Complete | 2026-02-10 |
-| 7. Cloud Deployment | 0/4 | ⏳ Not Started | - |
+| 7. Local Deployment | 0/5 | ⏳ Not Started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-11 (Phase 7 planned with 4 plans)*
+*Last updated: 2026-02-12 (Phase 7 replaced with Local Deployment milestone)*
