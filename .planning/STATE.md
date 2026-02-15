@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 ## Current Position
 
 Phase: 9 of 14 (UI Layout & Navigation)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-02-16 — Completed 09-02-PLAN.md (View Scope Tab Switcher)
+Plan: 3 of 3 complete
+Status: Phase complete
+Last activity: 2026-02-16 — Completed 09-03-PLAN.md (Content Area Switching)
 
-Progress: [████████████░░░░░░░░] 57% (v1.0 + v1.1 complete, v2.0 Phase 8 complete, Phase 9 plan 2/3)
+Progress: [████████████░░░░░░░░] 58% (v1.0 + v1.1 complete, v2.0 Phase 8-9 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 53 (Phases 1-8, Phase 9 plans 1-2)
-- Average duration: ~42 min (weighted average including Phase 9)
+- Total plans completed: 54 (Phases 1-8, Phase 9 complete)
+- Average duration: ~41 min (weighted average including Phase 9)
 
 **By Phase:**
 
@@ -34,14 +34,14 @@ Progress: [████████████░░░░░░░░] 57% (v1
 | 6. Admin & Offline | 8 | ~6.0h | ~45min |
 | 7. Mac Mini Deployment | 6 | ~4.5h | ~45min |
 | 8. Schema Migration | 3 | ~1.0h | ~20min |
-| 9. UI Layout & Navigation | 2/3 | ~7min | ~3.5min |
+| 9. UI Layout & Navigation | 3/3 | ~13min | ~4.3min |
 
 **Recent Trend:**
 - v1.0 + v1.1 shipped in 6 days (2026-02-10 → 2026-02-15)
 - Phase 8 completed 2026-02-16 (schema migration + F# types + offline sync)
-- Phase 9 started 2026-02-16 (date navigation)
+- Phase 9 completed 2026-02-16 (UI layout with date nav + view switching, 13min total)
 
-*Updated: 2026-02-16 after Phase 9 Plan 02 completion*
+*Updated: 2026-02-16 after Phase 9 Plan 03 completion*
 
 ## Accumulated Context
 
@@ -66,6 +66,8 @@ Recent decisions affecting current work:
 - **Mobile-first layout**: Single-row flexbox with short button text to prevent wrapping on 375px screens (v2.0 Phase 9)
 - **ViewScope discriminated union**: Personal | TeamView for type-safe view selection (avoids collision with TabMode's Team) (v2.0 Phase 9)
 - **Default to Personal view**: 나 tab selected by default — matches user expectation for personal-first (v2.0 Phase 9)
+- **Props lifting for date state**: Dashboard owns currentYear/currentMonth, passes as read-only props to ProgressView/TeamView (v2.0 Phase 9)
+- **No setter props pattern**: Child components receive state as props but NOT setters — parent controls all mutations (v2.0 Phase 9)
 
 ### Pending Todos
 
@@ -82,10 +84,11 @@ None.
 - ✅ Offline sync updated (simple insert, soft delete)
 - ✅ Build succeeds, online flow verified
 
-**Phase 9 (UI Layout & Navigation) — IN PROGRESS:**
+**Phase 9 (UI Layout & Navigation) — COMPLETE:**
 - ✅ Plan 01: Date navigation with year rollover (4 min)
 - ✅ Plan 02: View scope tab switcher 나/우리 (3 min)
-- ⏳ Plan 03: Calendar grid integration (pending)
+- ✅ Plan 03: Content area switching with lifted date state (6 min)
+- **Total:** 13 minutes, 3 plans
 
 **Research flags:**
 - Phase 14 (Admin Audit): 트리거 성능 이슈 발생 시 추가 연구 필요
@@ -94,9 +97,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Completed 09-02-PLAN.md (View Scope Tab Switcher)
+Stopped at: Completed 09-03-PLAN.md (Content Area Switching) — Phase 9 complete
 Resume file: None
 
 ---
 
-**Next step:** `/gsd:execute-plan 09-03` to add calendar grid integration
+**Next step:** Phase 10 planning (v2.0 feature development continues)
