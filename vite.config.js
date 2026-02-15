@@ -83,9 +83,10 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
+    allowedHosts: ['localhost', '.hariplan.com'],
   },
   preview: {
-    allowedHosts: ['localhost', '.trycloudflare.com'],
+    allowedHosts: ['localhost', '.hariplan.com'],
   },
   build: {
     rollupOptions: {
