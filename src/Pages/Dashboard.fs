@@ -230,6 +230,35 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                         ]
                     ]
 
+                    // Row 2: View scope tabs (나/우리)
+                    Html.div [
+                        prop.className "flex gap-2 mb-6"
+                        prop.children [
+                            Html.button [
+                                prop.onClick (fun _ -> setViewScope Personal)
+                                prop.className (
+                                    "flex-1 px-6 py-3 rounded-lg font-medium transition-colors " +
+                                    if viewScope = Personal then
+                                        "bg-indigo-600 text-white"
+                                    else
+                                        "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                )
+                                prop.text "나"
+                            ]
+                            Html.button [
+                                prop.onClick (fun _ -> setViewScope TeamView)
+                                prop.className (
+                                    "flex-1 px-6 py-3 rounded-lg font-medium transition-colors " +
+                                    if viewScope = TeamView then
+                                        "bg-indigo-600 text-white"
+                                    else
+                                        "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                )
+                                prop.text "우리"
+                            ]
+                        ]
+                    ]
+
                     // Tab navigation
                     Html.div [
                         prop.className "flex gap-2 mb-6"
