@@ -14,6 +14,7 @@ open Offline.NetworkStatus
 open Offline.Queue
 open Offline.Types
 open Offline.Sync
+open Utils.DateHelpers
 
 /// Tab mode for dashboard navigation
 type TabMode = Home | Progress | Team | Admin
@@ -140,6 +141,25 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
     let loading, setLoading = React.useState(false)
     let (activeTab, setActiveTab) = React.useState(Home)
     let (refreshKey, setRefreshKey) = React.useState(0)
+
+    // Date navigation state
+    let (currentYear, setCurrentYear) = React.useState(System.DateTime.Now.Year)
+    let (currentMonth, setCurrentMonth) = React.useState(System.DateTime.Now.Month)
+
+    // Month navigation functions with year rollover
+    let goToNextMonth () =
+        if currentMonth = 12 then
+            setCurrentYear (currentYear + 1)
+            setCurrentMonth 1
+        else
+            setCurrentMonth (currentMonth + 1)
+
+    let goToPrevMonth () =
+        if currentMonth = 1 then
+            setCurrentYear (currentYear - 1)
+            setCurrentMonth 12
+        else
+            setCurrentMonth (currentMonth - 1)
 
     let handleLogout () =
         setLoading true

@@ -14,6 +14,7 @@ import { equals, createObj } from "../fable_modules/fable-library-js.4.28.0/Util
 import { singleton, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
 import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { singleton as singleton_1, ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
+import { month, now, year } from "../fable_modules/fable-library-js.4.28.0/Date.js";
 import { signOut } from "../Supabase/Auth.js";
 import { ProgressViewPage } from "./ProgressView.js";
 import { TeamViewPage } from "./TeamView.js";
@@ -149,6 +150,12 @@ export function DashboardPage(dashboardPageInputProps) {
     const activeTab = patternInput_1[0];
     const patternInput_2 = reactApi.useState(0);
     const refreshKey = patternInput_2[0] | 0;
+    let patternInput_3;
+    const initial_3 = year(now()) | 0;
+    patternInput_3 = reactApi.useState(initial_3);
+    let patternInput_4;
+    const initial_4 = month(now()) | 0;
+    patternInput_4 = reactApi.useState(initial_4);
     return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100"], (elems_10 = [createElement("header", createObj(ofArray([["className", "bg-white shadow-sm"], (elems_1 = [createElement("div", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-4 flex items-center justify-between"], (elems = [createElement("h1", {
         className: "text-xl font-bold text-indigo-600",
         children: "Rollbook",
