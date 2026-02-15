@@ -256,58 +256,48 @@ npm run preview
 
 ## 5. 자동 시작 설정 (launchd)
 
-Mac Mini 부팅 시 cloudflared 터널을 자동으로 시작합니다.
+Mac Mini 부팅 시 세 서비스를 자동으로 시작합니다. 헬스 체크 루프로 의존성 순서를 보장합니다.
 
-### 5.1 cloudflared 서비스 등록
+### 5.1 plist 파일 구조
+
+프로젝트 내 `launchd/` 디렉토리에 세 개의 plist 파일이 있습니다:
+
+| 파일 | 서비스 | 헬스 체크 |
+|------|--------|-----------|
+| `com.rollbook.supabase.plist` | Docker 대기 → `npx supabase start` | `while ! docker info` |
+| `com.rollbook.frontend.plist` | Supabase API 대기 → `npx vite preview --host 0.0.0.0` | `while ! curl localhost:54321` |
+| `com.rollbook.tunnel.plist` | `cloudflared tunnel run jeju_rollbook` | 없음 (자체 재연결) |
+
+**핵심 설계:**
+- **절대 경로 필수**: launchd는 `~`를 확장하지 않음
+- **PATH 환경 변수**: `/opt/homebrew/bin` 포함 필수 (Homebrew 바이너리)
+- **KeepAlive**: Supabase는 `SuccessfulExit: false`, Frontend/Tunnel은 `true`
+
+### 5.2 서비스 관리 스크립트
+
+`scripts/rollbook-services.sh`로 모든 서비스를 관리합니다:
 
 ```bash
-# macOS 서비스로 설치
-sudo cloudflared service install
+./scripts/rollbook-services.sh install   # plist를 ~/Library/LaunchAgents/로 복사
+./scripts/rollbook-services.sh start     # 모든 서비스 시작
+./scripts/rollbook-services.sh status    # 상태 + 포트 헬스 체크
+./scripts/rollbook-services.sh logs      # 최근 로그
+./scripts/rollbook-services.sh stop      # 모든 서비스 중지
+./scripts/rollbook-services.sh restart   # 재시작
+./scripts/rollbook-services.sh uninstall # 서비스 제거
 ```
 
-이 명령은 `/Library/LaunchDaemons/com.cloudflare.cloudflared.plist`를 생성합니다.
-
-또는 수동으로 LaunchAgent를 만들 수 있습니다:
-
-```bash
-cat > ~/Library/LaunchAgents/com.rollbook.tunnel.plist << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.rollbook.tunnel</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/opt/homebrew/bin/cloudflared</string>
-        <string>tunnel</string>
-        <string>run</string>
-        <string>rollbook</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-    <key>StandardOutPath</key>
-    <string>/tmp/rollbook-tunnel.log</string>
-    <key>StandardErrorPath</key>
-    <string>/tmp/rollbook-tunnel.error.log</string>
-</dict>
-</plist>
-EOF
-
-launchctl load ~/Library/LaunchAgents/com.rollbook.tunnel.plist
-```
-
-### 5.2 전체 서비스 시작 순서
-
-Mac Mini 부팅 시 자동 시작되는 서비스:
+### 5.3 전체 서비스 시작 순서
 
 ```
+Mac Mini 부팅
+  ↓
 1. Docker Desktop       (시스템 설정 > 로그인 항목)
+  ↓  (헬스 체크: while ! docker info)
 2. Supabase              (com.rollbook.supabase.plist)
+  ↓  (헬스 체크: while ! curl localhost:54321)
 3. Frontend              (com.rollbook.frontend.plist)
+  ↓
 4. Cloudflare Tunnel     (com.rollbook.tunnel.plist)
 ```
 
@@ -316,23 +306,31 @@ Mac Mini 부팅 시 자동 시작되는 서비스:
 ### 상태 확인
 
 ```bash
+# 전체 서비스 상태 (권장)
+./scripts/rollbook-services.sh status
+
 # 터널 상태
-cloudflared tunnel info rollbook
+cloudflared tunnel info jeju_rollbook
 
 # 활성 연결 확인
 cloudflared tunnel list
 
 # 로그 확인
+./scripts/rollbook-services.sh logs
+# 또는 개별 로그
 tail -f /tmp/rollbook-tunnel.log
 ```
 
-### 터널 중지/재시작
+### 서비스 중지/재시작
 
 ```bash
-# 수동 중지
-launchctl unload ~/Library/LaunchAgents/com.rollbook.tunnel.plist
+# 전체 서비스 (권장)
+./scripts/rollbook-services.sh stop
+./scripts/rollbook-services.sh start
+./scripts/rollbook-services.sh restart
 
-# 수동 시작
+# 개별 서비스 (수동)
+launchctl unload ~/Library/LaunchAgents/com.rollbook.tunnel.plist
 launchctl load ~/Library/LaunchAgents/com.rollbook.tunnel.plist
 ```
 
@@ -398,4 +396,8 @@ extra_search_path = ["public", "extensions"]
 - [Cloudflare Tunnel 공식 문서](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
 - [Cloudflare Access + Google 연동](https://developers.cloudflare.com/cloudflare-one/identity/idp-integration/google/)
 - [서비스 가이드](./service-guide.md) - Mac Mini 서비스 관리
+- [cloudflared 파일 구조](./manage-cloudflared-files.md) - cert.pem, credentials JSON, config.yml
+- [credentials 형식 변환](./fix-cloudflared-credentials-format.md) - base64 토큰 → JSON
+- [Supabase 터널 인증](./setup-supabase-tunnel-auth.md) - external_url, site_url 설정
+- [SendGrid SMTP](./setup-sendgrid-smtp-supabase.md) - 이메일 발송 설정
 - [컴파일 가이드](./compile-guide.md) - 빌드 방법

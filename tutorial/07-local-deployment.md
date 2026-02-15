@@ -17,8 +17,14 @@ Phase 6에서 프로덕션 준비를 완료했다면, Phase 7에서는 실제로
 - `~/.cloudflared/config.yml` - Cloudflare Tunnel 라우팅 설정
 - `supabase/config.toml` - Supabase API 외부 URL, SMTP, 인증 설정
 - `supabase/.env` - SendGrid API 키
-- `vite.config.js` - `allowedHosts` 추가
+- `vite.config.js` - `allowedHosts`, `preview.host`, workbox 패턴 확장
 - `.env.local` - Supabase URL을 커스텀 도메인으로 변경
+- `.env.production` - 프로덕션 환경 변수 (터널 도메인)
+- `.gitignore` - `.env.production` 제외 추가
+- `launchd/com.rollbook.supabase.plist` - Supabase launchd 서비스
+- `launchd/com.rollbook.frontend.plist` - Frontend launchd 서비스
+- `launchd/com.rollbook.tunnel.plist` - Tunnel launchd 서비스
+- `scripts/rollbook-services.sh` - 서비스 관리 스크립트
 
 ## 아키텍처 (Architecture)
 
@@ -768,12 +774,30 @@ export default defineConfig({
     allowedHosts: ['localhost', '.hariplan.com'],  // Phase 7에서 추가
   },
   preview: {
+    host: '0.0.0.0',  // 모든 인터페이스에서 수신 (터널 접근용)
+    port: 4173,
     allowedHosts: ['localhost', '.hariplan.com'],  // Phase 7에서 추가
   },
 
   // ... 기존 build 설정 ...
 });
 ```
+
+**`preview.host: '0.0.0.0'`이 필요한 이유:**
+
+기본값은 `localhost`(127.0.0.1)만 수신합니다. cloudflared는 같은 머신에서 실행되지만, 터널을 통해 들어오는 요청은 외부 인터페이스로 도착할 수 있습니다. `0.0.0.0`으로 설정하면 모든 네트워크 인터페이스에서 요청을 받아들입니다.
+
+**Phase 7에서 추가된 workbox 변경:**
+
+```javascript
+// Phase 6 (supabase.co 전용)
+urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
+
+// Phase 7 (터널 도메인도 매칭)
+urlPattern: /^https:\/\/.*\/(rest|graphql|functions)\/.*/i,
+```
+
+기존 workbox 패턴은 `*.supabase.co`만 매칭했습니다. 터널 도메인(`supabase.hariplan.com`)은 매칭되지 않아 PWA 캐싱이 동작하지 않았습니다. 경로 기반 패턴(`/rest/`, `/auth/`, `/storage/`)으로 변경하면 어떤 도메인이든 Supabase API 경로를 올바르게 캐싱합니다.
 
 **Phase 6에서 이미 있던 설정과의 차이:**
 
@@ -792,14 +816,23 @@ server: {
 }
 ```
 
-### 4. 프론트엔드 환경 변수 (`.env.local`)
+### 4. 프론트엔드 환경 변수
 
-**Phase 7 설정:**
+**개발용 (`.env.local`):**
 
 ```env
 VITE_SUPABASE_URL=https://supabase.hariplan.com
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+VITE_SUPABASE_ANON_KEY=sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
 ```
+
+**프로덕션용 (`.env.production`):**
+
+```env
+VITE_SUPABASE_URL=https://supabase.hariplan.com
+VITE_SUPABASE_ANON_KEY=sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+```
+
+Vite는 `npm run build` 시 자동으로 `.env.production`을 사용하고, `npm run dev` 시 `.env.local`을 사용합니다. 두 파일 모두 `.gitignore`에 포함되어야 합니다.
 
 **URL 변경 전후 비교:**
 
@@ -1403,67 +1436,69 @@ Studio는 Mac Mini에 직접 접속해서만 사용합니다 (`http://localhost:
 
 ## 다음 단계 (Next Steps)
 
-### 1. 자동 시작 설정 (launchd)
+### 1. 자동 시작 설정 (launchd) — 구현 완료
 
-현재는 Mac Mini를 재시작할 때마다 서비스를 수동으로 시작해야 합니다. `launchd`를 사용하면 부팅 시 자동 시작할 수 있습니다.
+Mac Mini 부팅 시 세 서비스가 자동으로 시작됩니다. 헬스 체크 루프로 의존성 순서를 보장합니다.
 
-**cloudflared 자동 시작:**
-
-```bash
-# macOS 서비스로 등록
-sudo cloudflared service install
-```
-
-또는 수동으로 LaunchAgent를 만들 수 있습니다.
-
-```xml
-<!-- ~/Library/LaunchAgents/com.rollbook.tunnel.plist -->
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.rollbook.tunnel</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/opt/homebrew/bin/cloudflared</string>
-        <string>tunnel</string>
-        <string>run</string>
-        <string>rollbook</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-    <key>StandardOutPath</key>
-    <string>/tmp/rollbook-tunnel.log</string>
-    <key>StandardErrorPath</key>
-    <string>/tmp/rollbook-tunnel.error.log</string>
-</dict>
-</plist>
-```
-
-```bash
-# 서비스 등록
-launchctl load ~/Library/LaunchAgents/com.rollbook.tunnel.plist
-
-# 서비스 해제
-launchctl unload ~/Library/LaunchAgents/com.rollbook.tunnel.plist
-```
-
-**전체 서비스 자동 시작 순서:**
+**서비스 시작 순서:**
 
 ```
 Mac Mini 부팅
   ↓
 1. Docker Desktop (시스템 설정 > 로그인 항목)
+  ↓  (com.rollbook.supabase.plist가 Docker 대기)
+2. Supabase — while ! docker info; do sleep 5; done → npx supabase start
+  ↓  (com.rollbook.frontend.plist가 Supabase API 대기)
+3. Frontend — while ! curl localhost:54321; do sleep 5; done → npx vite preview --host 0.0.0.0
   ↓
-2. Supabase (com.rollbook.supabase.plist)
-  ↓
-3. Vite 서버 (com.rollbook.frontend.plist)
-  ↓
-4. Cloudflare Tunnel (com.rollbook.tunnel.plist)
+4. Tunnel — /opt/homebrew/bin/cloudflared tunnel run jeju_rollbook
+```
+
+**plist 파일 위치:** `launchd/` 디렉토리 (프로젝트 내)
+
+**핵심 설계 원칙:**
+- **절대 경로 필수**: launchd는 `~`를 확장하지 않음 → `/Users/ohama/vibe-coding/rollbook`
+- **PATH 환경 변수 필수**: Homebrew 바이너리를 찾으려면 `/opt/homebrew/bin` 포함
+- **헬스 체크 루프**: launchd에는 systemd 같은 `After=` 의존성이 없음 → 직접 구현
+- **KeepAlive 전략**: Supabase는 `SuccessfulExit: false` (크래시만 재시작), Frontend/Tunnel은 `true` (항상 재시작)
+
+**서비스 관리 스크립트 (`scripts/rollbook-services.sh`):**
+
+```bash
+# 설치 (plist를 ~/Library/LaunchAgents/로 복사)
+./scripts/rollbook-services.sh install
+
+# 시작
+./scripts/rollbook-services.sh start
+
+# 상태 확인
+./scripts/rollbook-services.sh status
+
+# 로그 보기
+./scripts/rollbook-services.sh logs
+
+# 중지
+./scripts/rollbook-services.sh stop
+
+# 재시작
+./scripts/rollbook-services.sh restart
+
+# 제거
+./scripts/rollbook-services.sh uninstall
+```
+
+**status 출력 예시:**
+
+```
+=== Rollbook Services ===
+  com.rollbook.supabase: RUNNING (PID 1234)
+  com.rollbook.frontend: RUNNING (PID 1235)
+  com.rollbook.tunnel: RUNNING (PID 1236)
+
+=== Port Check ===
+  Supabase API (54321): UP
+  Frontend (4173):      UP
+  Tunnel:               CONNECTED
 ```
 
 ### 2. Cloudflare Access (접근 제어)

@@ -101,12 +101,12 @@ npm run preview
 
 ## 3. 서비스 URL 정리
 
-| 서비스 | URL | 용도 |
-|--------|-----|------|
-| Rollbook App | http://localhost:4173 | 메인 앱 |
-| Supabase Studio | http://localhost:54323 | DB 관리 UI |
-| Supabase API | http://localhost:54321 | REST API |
-| Inbucket | http://localhost:54324 | 이메일 테스트 |
+| 서비스 | 로컬 URL | 외부 URL (터널) | 용도 |
+|--------|----------|----------------|------|
+| Rollbook App | http://localhost:3000 (dev) / :4173 (preview) | https://rollbook.hariplan.com | 메인 앱 |
+| Supabase API | http://localhost:54321 | https://supabase.hariplan.com | REST API |
+| Supabase Studio | http://localhost:54323 | — (터널 비노출) | DB 관리 UI |
+| Inbucket/Mailpit | http://localhost:54324 | — (터널 비노출) | 이메일 테스트 |
 
 ## 4. 외부 접근 설정
 
@@ -429,108 +429,98 @@ http://100.100.100.10:4173
 
 ## 5. 자동 시작 설정 (launchd)
 
-Mac Mini 부팅 시 자동으로 서비스 시작:
+Mac Mini 부팅 시 자동으로 서비스 시작. 프로젝트 `launchd/` 디렉토리에 세 개의 plist 파일이 있습니다.
 
-### Supabase 자동 시작
-
-```bash
-cat > ~/Library/LaunchAgents/com.rollbook.supabase.plist << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.rollbook.supabase</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/bin/bash</string>
-        <string>-c</string>
-        <string>cd ~/rollbook && npx supabase start</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <false/>
-    <key>StandardOutPath</key>
-    <string>/tmp/rollbook-supabase.log</string>
-    <key>StandardErrorPath</key>
-    <string>/tmp/rollbook-supabase.error.log</string>
-</dict>
-</plist>
-EOF
-
-launchctl load ~/Library/LaunchAgents/com.rollbook.supabase.plist
-```
-
-### 프론트엔드 자동 시작
+### 서비스 관리 스크립트 (권장)
 
 ```bash
-cat > ~/Library/LaunchAgents/com.rollbook.frontend.plist << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.rollbook.frontend</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/bin/bash</string>
-        <string>-c</string>
-        <string>cd ~/rollbook && npm run preview -- --host 0.0.0.0</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-    <key>StandardOutPath</key>
-    <string>/tmp/rollbook-frontend.log</string>
-    <key>StandardErrorPath</key>
-    <string>/tmp/rollbook-frontend.error.log</string>
-</dict>
-</plist>
-EOF
+# 설치 (plist를 ~/Library/LaunchAgents/로 복사)
+./scripts/rollbook-services.sh install
 
-launchctl load ~/Library/LaunchAgents/com.rollbook.frontend.plist
+# 시작/중지/재시작/상태/로그
+./scripts/rollbook-services.sh start
+./scripts/rollbook-services.sh stop
+./scripts/rollbook-services.sh restart
+./scripts/rollbook-services.sh status
+./scripts/rollbook-services.sh logs
+
+# 제거
+./scripts/rollbook-services.sh uninstall
 ```
+
+### plist 파일 설계
+
+**핵심 원칙:**
+- 절대 경로 필수 (launchd는 `~` 미확장)
+- PATH 환경 변수에 `/opt/homebrew/bin` 포함 (Homebrew 바이너리)
+- 헬스 체크 루프로 의존성 순서 보장 (launchd에는 `After=` 없음)
+
+**Supabase** (`launchd/com.rollbook.supabase.plist`):
+- Docker 대기: `while ! docker info; do sleep 5; done`
+- 실행: `npx supabase start`
+- KeepAlive: `SuccessfulExit: false` (크래시만 재시작)
+
+**Frontend** (`launchd/com.rollbook.frontend.plist`):
+- Supabase API 대기: `while ! curl -sf http://localhost:54321/rest/v1/; do sleep 5; done`
+- 실행: `npx vite preview --host 0.0.0.0` (포트 4173)
+- KeepAlive: `true` (항상 재시작)
+- NODE_ENV: `production`
+
+**Tunnel** (`launchd/com.rollbook.tunnel.plist`):
+- 실행: `/opt/homebrew/bin/cloudflared tunnel run jeju_rollbook`
+- KeepAlive: `true` (항상 재시작)
+- 헬스 체크 불필요 (cloudflared가 자체 재연결)
 
 ## 6. 서비스 관리 명령어
 
-### 상태 확인
+### launchd 서비스 관리 (프로덕션)
 
 ```bash
-# Supabase
-npx supabase status
+# 전체 상태 확인 (launchd + 포트 헬스 체크)
+./scripts/rollbook-services.sh status
 
-# 프론트엔드 (프로세스 확인)
-lsof -i :4173
+# 전체 시작/중지/재시작
+./scripts/rollbook-services.sh start
+./scripts/rollbook-services.sh stop
+./scripts/rollbook-services.sh restart
+
+# 로그 보기
+./scripts/rollbook-services.sh logs
 ```
 
-### 중지
+### 수동 관리
+
+```bash
+# Supabase 상태
+npx supabase status
+
+# 프론트엔드 프로세스 확인
+lsof -i :4173
+
+# 터널 상태
+cloudflared tunnel info jeju_rollbook
+```
+
+### 중지 (수동)
 
 ```bash
 # Supabase
 npx supabase stop
 
 # 프론트엔드
-# Ctrl+C 또는
 kill $(lsof -t -i:4173)
-```
 
-### 재시작
-
-```bash
-# Supabase
-npx supabase stop && npx supabase start
-
-# 프론트엔드
-npm run build && npm run preview
+# 터널
+kill $(lsof -t -i:cloudflared 2>/dev/null)
 ```
 
 ### 로그 확인
 
 ```bash
-# Supabase 로그
-npx supabase logs
+# launchd 서비스 로그
+tail -f /tmp/rollbook-supabase.log
+tail -f /tmp/rollbook-frontend.log
+tail -f /tmp/rollbook-tunnel.log
 
 # Docker 컨테이너 로그
 docker logs supabase_db_rollbook
