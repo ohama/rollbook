@@ -5,7 +5,7 @@ import React from "react";
 import { reactApi } from "../fable_modules/Feliz.2.9.0/Interop.fs.js";
 import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "../fable_modules/Fable.Promise.3.2.0/Promise.fs.js";
 import { promise } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
-import { upsertWorkout, deleteWorkout, getWorkout, getTodayDateString } from "../Supabase/Workouts.js";
+import { getWorkoutsForDate, upsertWorkout, deleteWorkout, getWorkout, getTodayDateString } from "../Supabase/Workouts.js";
 import { isOnline } from "../offline/NetworkStatus.js";
 import { OperationType } from "../offline/Types.js";
 import { enqueue } from "../offline/Queue.js";
@@ -15,6 +15,7 @@ import { singleton, append, delay, toList } from "../fable_modules/fable-library
 import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { singleton as singleton_1, ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 import { month, now, year } from "../fable_modules/fable-library-js.4.28.0/Date.js";
+import { RecordEditState } from "../Supabase/Types.js";
 import { signOut } from "../Supabase/Auth.js";
 import { formatMonthYear } from "../Utils/DateHelpers.js";
 import { TeamViewPage } from "./TeamView.js";
@@ -66,20 +67,17 @@ export function WorkoutToggle(workoutToggleInputProps) {
     const loading = patternInput_1[0];
     const patternInput_2 = reactApi.useState(undefined);
     const setError = patternInput_2[1];
-    const error = patternInput_2[0];
     const dependencies = [refreshKey];
     reactApi.useEffect(() => {
         const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
             setLoading(true);
             const today = getTodayDateString();
             return getWorkout(userId, today).then((_arg) => {
-                const workout = _arg;
-                setHasWorkedOut(workout != null);
+                setHasWorkedOut(_arg != null);
                 setLoading(false);
                 return Promise.resolve();
             });
         }).catch((_arg_1) => {
-            const ex = _arg_1;
             setError("운동 기록을 불러올 수 없습니다");
             setLoading(false);
             return Promise.resolve();
@@ -102,7 +100,6 @@ export function WorkoutToggle(workoutToggleInputProps) {
                     setLoading(false);
                     return Promise.resolve();
                 })))).catch((_arg_4) => {
-                    const ex_1 = _arg_4;
                     setError("저장 실패. 다시 시도해주세요.");
                     setLoading(false);
                     return Promise.resolve();
@@ -115,8 +112,7 @@ export function WorkoutToggle(workoutToggleInputProps) {
                     return enqueue(operationType, userId, today_1).then((_arg_5) => {
                         const result = _arg_5;
                         if (result.tag === 1) {
-                            const msg = result.fields[0];
-                            setError(msg);
+                            setError(result.fields[0]);
                             setLoading(false);
                             return Promise.resolve();
                         }
@@ -129,7 +125,6 @@ export function WorkoutToggle(workoutToggleInputProps) {
                         }
                     });
                 }).catch((_arg_7) => {
-                    const ex_2 = _arg_7;
                     setError("저장 실패. 다시 시도해주세요.");
                     setLoading(false);
                     return Promise.resolve();
@@ -153,17 +148,11 @@ export function WorkoutToggle(workoutToggleInputProps) {
         className: "px-8 py-4 rounded-xl text-xl font-semibold transition-all " + (loading ? "bg-gray-300 text-gray-500 cursor-wait" : (hasWorkedOut ? "bg-green-600 text-white hover:bg-green-700 active:scale-95" : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95")),
         children: loading ? "..." : (hasWorkedOut ? "운동 완료!" : "오늘 운동했다"),
     })), delay(() => {
-        const matchValue = error;
-        if (matchValue == null) {
-            return singleton(defaultOf());
-        }
-        else {
-            const msg_1 = matchValue;
-            return singleton(createElement("p", {
-                className: "text-sm text-red-600",
-                children: msg_1,
-            }));
-        }
+        const matchValue = patternInput_2[0];
+        return (matchValue == null) ? singleton(defaultOf()) : singleton(createElement("p", {
+            className: "text-sm text-red-600",
+            children: matchValue,
+        }));
     })))))), ["children", reactApi.Children.toArray(Array.from(elems))])])));
 }
 
@@ -172,13 +161,11 @@ export function DashboardPage(dashboardPageInputProps) {
     const onLogout = dashboardPageInputProps.onLogout;
     const user = dashboardPageInputProps.user;
     const patternInput = reactApi.useState(false);
-    const setLoading = patternInput[1];
     const loading = patternInput[0];
     const patternInput_1 = reactApi.useState(new TabMode(0, []));
     const setActiveTab = patternInput_1[1];
     const activeTab = patternInput_1[0];
     const patternInput_2 = reactApi.useState(0);
-    const setRefreshKey = patternInput_2[1];
     const refreshKey = patternInput_2[0] | 0;
     let patternInput_3;
     const initial_3 = year(now()) | 0;
@@ -193,38 +180,36 @@ export function DashboardPage(dashboardPageInputProps) {
     const patternInput_5 = reactApi.useState(new ViewScope(0, []));
     const viewScope = patternInput_5[0];
     const setViewScope = patternInput_5[1];
-    const goToNextMonth = () => {
-        if (currentMonth === 12) {
-            setCurrentYear(currentYear + 1);
-            setCurrentMonth(1);
-        }
-        else {
-            setCurrentMonth(currentMonth + 1);
-        }
-    };
-    const goToPrevMonth = () => {
-        if (currentMonth === 1) {
-            setCurrentYear(currentYear - 1);
-            setCurrentMonth(12);
-        }
-        else {
-            setCurrentMonth(currentMonth - 1);
-        }
-    };
-    const handleLogout = () => {
-        setLoading(true);
-        const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signOut().then((_arg) => {
-            onLogout();
+    const patternInput_6 = reactApi.useState([]);
+    const setRecordsLoading = reactApi.useState(true)[1];
+    const patternInput_8 = reactApi.useState(new RecordEditState(0, []));
+    const dependencies = [refreshKey];
+    reactApi.useEffect(() => {
+        const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
+            setRecordsLoading(true);
+            const today = getTodayDateString();
+            return getWorkoutsForDate(user.id, today).then((_arg) => {
+                patternInput_6[1](_arg);
+                setRecordsLoading(false);
+                return Promise.resolve();
+            });
+        }).catch((_arg_1) => {
+            setRecordsLoading(false);
             return Promise.resolve();
         }))));
         void pr;
-    };
+    }, dependencies);
     return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100"], (elems_12 = [createElement("header", createObj(ofArray([["className", "bg-white shadow-sm"], (elems_1 = [createElement("div", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-4 flex items-center justify-between"], (elems = [createElement("h1", {
         className: "text-xl font-bold text-indigo-600",
         children: "Rollbook",
     }), createElement("button", {
-        onClick: (_arg_1) => {
-            handleLogout();
+        onClick: (_arg_11) => {
+            patternInput[1](true);
+            const pr_4 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signOut().then((_arg_10) => {
+                onLogout();
+                return Promise.resolve();
+            }))));
+            void pr_4;
         },
         disabled: loading,
         className: "px-4 py-2 rounded-lg text-sm font-medium transition-colors " + (loading ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"),
@@ -232,8 +217,14 @@ export function DashboardPage(dashboardPageInputProps) {
     })], ["children", reactApi.Children.toArray(Array.from(elems))])])))], ["children", reactApi.Children.toArray(Array.from(elems_1))])]))), createElement("main", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-8"], (elems_11 = toList(delay(() => {
         let elems_2;
         return append(singleton(createElement("div", createObj(ofArray([["className", "flex items-center justify-between bg-white rounded-lg shadow-sm p-4 mb-4"], (elems_2 = [createElement("button", {
-            onClick: (_arg_2) => {
-                goToPrevMonth();
+            onClick: (_arg_12) => {
+                if (currentMonth === 1) {
+                    setCurrentYear(currentYear - 1);
+                    setCurrentMonth(12);
+                }
+                else {
+                    setCurrentMonth(currentMonth - 1);
+                }
             },
             className: "px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors",
             children: "< 이전",
@@ -241,21 +232,27 @@ export function DashboardPage(dashboardPageInputProps) {
             className: "text-lg font-semibold text-gray-800",
             children: formatMonthYear(currentYear, currentMonth),
         }), createElement("button", {
-            onClick: (_arg_3) => {
-                goToNextMonth();
+            onClick: (_arg_13) => {
+                if (currentMonth === 12) {
+                    setCurrentYear(currentYear + 1);
+                    setCurrentMonth(1);
+                }
+                else {
+                    setCurrentMonth(currentMonth + 1);
+                }
             },
             className: "px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors",
             children: "다음 >",
         })], ["children", reactApi.Children.toArray(Array.from(elems_2))])])))), delay(() => {
             let elems_3;
             return append(singleton(createElement("div", createObj(ofArray([["className", "flex gap-2 mb-6"], (elems_3 = [createElement("button", {
-                onClick: (_arg_4) => {
+                onClick: (_arg_14) => {
                     setViewScope(new ViewScope(0, []));
                 },
                 className: "flex-1 px-6 py-3 rounded-lg font-medium transition-colors " + (equals(viewScope, new ViewScope(0, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
                 children: "나",
             }), createElement("button", {
-                onClick: (_arg_5) => {
+                onClick: (_arg_15) => {
                     setViewScope(new ViewScope(1, []));
                 },
                 className: "flex-1 px-6 py-3 rounded-lg font-medium transition-colors " + (equals(viewScope, new ViewScope(1, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
@@ -263,25 +260,25 @@ export function DashboardPage(dashboardPageInputProps) {
             })], ["children", reactApi.Children.toArray(Array.from(elems_3))])])))), delay(() => {
                 let elems_4;
                 return append(singleton(createElement("div", createObj(ofArray([["className", "flex gap-2 mb-6"], (elems_4 = [createElement("button", {
-                    onClick: (_arg_6) => {
+                    onClick: (_arg_16) => {
                         setActiveTab(new TabMode(0, []));
                     },
                     className: "px-6 py-3 rounded-lg font-medium transition-colors " + (equals(activeTab, new TabMode(0, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
                     children: "홈",
                 }), createElement("button", {
-                    onClick: (_arg_7) => {
+                    onClick: (_arg_17) => {
                         setActiveTab(new TabMode(1, []));
                     },
                     className: "px-6 py-3 rounded-lg font-medium transition-colors " + (equals(activeTab, new TabMode(1, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
                     children: "내 기록",
                 }), createElement("button", {
-                    onClick: (_arg_8) => {
+                    onClick: (_arg_18) => {
                         setActiveTab(new TabMode(2, []));
                     },
                     className: "px-6 py-3 rounded-lg font-medium transition-colors " + (equals(activeTab, new TabMode(2, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
                     children: "팀",
                 }), createElement("button", {
-                    onClick: (_arg_9) => {
+                    onClick: (_arg_19) => {
                         setActiveTab(new TabMode(3, []));
                     },
                     className: "px-6 py-3 rounded-lg font-medium transition-colors " + (equals(activeTab, new TabMode(3, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
@@ -317,7 +314,7 @@ export function DashboardPage(dashboardPageInputProps) {
                     }), createElement(PhotoUploadButton, {
                         userId: user.id,
                         onUploadComplete: () => {
-                            setRefreshKey(refreshKey + 1);
+                            patternInput_2[1](refreshKey + 1);
                         },
                     })], ["children", reactApi.Children.toArray(Array.from(elems_8))])]))), createElement("div", createObj(ofArray([["className", "bg-white rounded-2xl shadow-sm p-6"], (elems_9 = [createElement(PhotoGallery, {
                         userId: user.id,

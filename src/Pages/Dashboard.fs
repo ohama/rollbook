@@ -10,6 +10,8 @@ open Pages.TeamView
 open Pages.AdminPage
 open Components.PhotoUpload
 open Components.PhotoGallery
+open Components.RecordItem
+open Components.RecordEditModal
 open Offline.NetworkStatus
 open Offline.Queue
 open Offline.Types
@@ -152,6 +154,25 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
     // View scope state
     let (viewScope, setViewScope) = React.useState(Personal)  // Default to "나"
 
+    // Multi-record state
+    let (todayRecords, setTodayRecords) = React.useState<WorkoutRecord array>([||])
+    let (recordsLoading, setRecordsLoading) = React.useState(true)
+    let (editState, setEditState) = React.useState<RecordEditState>(RecordEditState.Idle)
+
+    // Load today's records
+    React.useEffect((fun () ->
+        promise {
+            try
+                setRecordsLoading true
+                let today = getTodayDateString()
+                let! records = getWorkoutsForDate user.id today
+                setTodayRecords records
+                setRecordsLoading false
+            with ex ->
+                setRecordsLoading false
+        } |> Promise.start
+    ), [| box refreshKey |])
+
     // Month navigation functions with year rollover
     let goToNextMonth () =
         if currentMonth = 12 then
@@ -166,6 +187,60 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
             setCurrentMonth 12
         else
             setCurrentMonth (currentMonth - 1)
+
+    // Create workout record (simple, no modal)
+    let handleCreateWorkout () =
+        promise {
+            try
+                let today = getTodayDateString()
+                let! _ = createWorkout user.id today
+                setRefreshKey (refreshKey + 1)
+            with ex -> ()
+        } |> Promise.start
+
+    // Save text record (create or update)
+    let handleSaveText (text: string) =
+        setEditState RecordEditState.Saving
+        promise {
+            try
+                let today = getTodayDateString()
+                match editState with
+                | EditingText (recordId, _) ->
+                    let! _ = updateWorkoutById recordId text
+                    ()
+                | _ ->
+                    let! _ = createTextRecord user.id today text
+                    ()
+                setEditState RecordEditState.Idle
+                setRefreshKey (refreshKey + 1)
+            with ex ->
+                setEditState (RecordEditState.Error "저장 실패. 다시 시도해주세요.")
+        } |> Promise.start
+
+    // Delete record
+    let handleDelete (recordId: int) =
+        promise {
+            try
+                // Optimistic: remove from local state
+                let filtered = todayRecords |> Array.filter (fun r -> r.id <> recordId)
+                setTodayRecords filtered
+                let! _ = deleteWorkoutById recordId
+                setRefreshKey (refreshKey + 1)
+            with ex ->
+                // Rollback: re-fetch
+                let today = getTodayDateString()
+                let! records = getWorkoutsForDate user.id today
+                setTodayRecords records
+        } |> Promise.start
+
+    // Start editing a text record
+    let handleStartEdit (recordId: int) =
+        let record = todayRecords |> Array.tryFind (fun r -> r.id = recordId)
+        match record with
+        | Some r ->
+            let currentText = r.text_content |> Option.defaultValue ""
+            setEditState (EditingText (recordId, currentText))
+        | None -> ()
 
     let handleLogout () =
         setLoading true
