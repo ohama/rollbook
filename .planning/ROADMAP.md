@@ -137,10 +137,12 @@ Plans:
   2. 화면 상단에 날짜 네비게이션(< 년월일 >)이 1줄로 표시된다
   3. 나/우리 탭을 클릭하면 선택된 탭이 강조색으로 변한다
   4. 탭 선택에 따라 콘텐츠 영역이 나의 기록 / 우리 기록으로 전환된다
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 09-01: [To be planned]
+- [ ] 09-01-PLAN.md — Date navigation UI with month browsing and year rollover
+- [ ] 09-02-PLAN.md — View scope tab switcher (나/우리) with active state highlighting
+- [ ] 09-03-PLAN.md — Content area switching with lifted date state
 
 ### Phase 10: Multi-Record CRUD
 **Goal**: Users can create, edit, and delete multiple workout records per day
@@ -229,7 +231,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 6. Admin & Offline | v1.0 | 8/8 | Complete | 2026-02-10 |
 | 7. Mac Mini Deployment | v1.1 | 6/6 | Complete | 2026-02-15 |
 | 8. Schema Migration | v2.0 | 3/3 | Complete | 2026-02-16 |
-| 9. UI Layout & Navigation | v2.0 | 0/TBD | Not started | - |
+| 9. UI Layout & Navigation | v2.0 | 0/3 | Not started | - |
 | 10. Multi-Record CRUD | v2.0 | 0/TBD | Not started | - |
 | 11. Calendar Integration | v2.0 | 0/TBD | Not started | - |
 | 12. Detail Views | v2.0 | 0/TBD | Not started | - |
