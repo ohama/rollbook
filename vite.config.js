@@ -40,7 +40,8 @@ export default defineConfig({
         runtimeCaching: [
           {
             // Supabase API - NetworkFirst with fallback
-            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
+            // Matches both *.supabase.co AND tunnel domain APIs
+            urlPattern: /^https:\/\/.*\/(rest|graphql|functions)\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'supabase-api',
@@ -52,13 +53,13 @@ export default defineConfig({
             }
           },
           {
-            // Supabase Auth - NetworkOnly (never cache auth)
-            urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
+            // Auth endpoints - NetworkOnly (never cache)
+            urlPattern: /^https:\/\/.*\/auth\/.*/i,
             handler: 'NetworkOnly'
           },
           {
             // Storage images - StaleWhileRevalidate
-            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
+            urlPattern: /^https:\/\/.*\/storage\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'storage-images',
@@ -86,6 +87,8 @@ export default defineConfig({
     allowedHosts: ['localhost', '.hariplan.com'],
   },
   preview: {
+    host: '0.0.0.0', // Listen on all interfaces for tunnel
+    port: 4173,
     allowedHosts: ['localhost', '.hariplan.com'],
   },
   build: {
