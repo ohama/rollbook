@@ -154,10 +154,12 @@ Plans:
   3. 운동 기록에 사진을 첨부할 수 있다
   4. 본인의 기록에만 수정/삭제 아이콘이 표시된다
   5. 수정/삭제 아이콘 클릭 시 해당 기록을 수정하거나 삭제할 수 있다
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 10-01: [To be planned]
+- [ ] 10-01-PLAN.md — Backend API functions and RecordEditState type
+- [ ] 10-02-PLAN.md — RecordItem and RecordEditModal components
+- [ ] 10-03-PLAN.md — Dashboard integration with multi-record CRUD flow
 
 ### Phase 11: Calendar Integration
 **Goal**: Calendar displays record counts and navigates to daily detail view
@@ -232,11 +234,11 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 7. Mac Mini Deployment | v1.1 | 6/6 | Complete | 2026-02-15 |
 | 8. Schema Migration | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 9. UI Layout & Navigation | v2.0 | 3/3 | Complete | 2026-02-16 |
-| 10. Multi-Record CRUD | v2.0 | 0/TBD | Not started | - |
+| 10. Multi-Record CRUD | v2.0 | 0/3 | Not started | - |
 | 11. Calendar Integration | v2.0 | 0/TBD | Not started | - |
 | 12. Detail Views | v2.0 | 0/TBD | Not started | - |
 | 13. Photo Gallery | v2.0 | 0/TBD | Not started | - |
 | 14. Admin & Audit | v2.0 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-16 — Phase 9 complete (date navigation, view scope tabs, content switching)*
+*Last updated: 2026-02-16 — Phase 10 planned (3 plans in 3 waves)*
