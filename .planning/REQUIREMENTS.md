@@ -59,8 +59,8 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ### Schema Migration
 
-- [ ] **MIG-01**: 기존 데이터 손실 없이 DB 스키마를 마이그레이션한다
-- [ ] **MIG-02**: 오프라인 큐가 새 스키마와 호환되도록 업데이트된다
+- [x] **MIG-01**: 기존 데이터 손실 없이 DB 스키마를 마이그레이션한다
+- [x] **MIG-02**: 오프라인 큐가 새 스키마와 호환되도록 업데이트된다
 
 ## Future Requirements
 
@@ -86,8 +86,8 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MIG-01 | Phase 8 | Pending |
-| MIG-02 | Phase 8 | Pending |
+| MIG-01 | Phase 8 | Complete |
+| MIG-02 | Phase 8 | Complete |
 | UI-01 | Phase 9 | Pending |
 | UI-02 | Phase 9 | Pending |
 | UI-03 | Phase 9 | Pending |
@@ -128,4 +128,4 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-02-15*
-*Last updated: 2026-02-15 — All requirements mapped to phases 8-14*
+*Last updated: 2026-02-16 — MIG-01, MIG-02 complete (Phase 8)*

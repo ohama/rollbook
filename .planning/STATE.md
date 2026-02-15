@@ -5,23 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-02-15)
 
 **Core value:** 원탭 운동 기록 — 앱을 열고 "오늘 운동했다" 버튼 하나로 기록 완료
-**Current focus:** Phase 8 - Schema Migration
+**Current focus:** Phase 9 - UI Layout & Navigation
 
 ## Current Position
 
-Phase: 8 of 14 (Schema Migration)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-15 — Completed 08-02-PLAN.md (Frontend types and API)
+Phase: 9 of 14 (UI Layout & Navigation)
+Plan: Not started
+Status: Ready for planning
+Last activity: 2026-02-16 — Completed Phase 8 (Schema Migration)
 
-Progress: [███████████░░░░░░░░░] 52% (v1.0 + v1.1 complete, v2.0 Phase 8 in progress)
+Progress: [████████████░░░░░░░░] 55% (v1.0 + v1.1 complete, v2.0 Phase 8 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 48 (Phases 1-7)
+- Total plans completed: 51 (Phases 1-8)
 - Average duration: ~45 min (estimated from 6-day delivery)
-- Total execution time: ~36 hours
 
 **By Phase:**
 
@@ -34,12 +33,13 @@ Progress: [███████████░░░░░░░░░] 52% (v1
 | 5. Photo Storage | 8 | ~6.0h | ~45min |
 | 6. Admin & Offline | 8 | ~6.0h | ~45min |
 | 7. Mac Mini Deployment | 6 | ~4.5h | ~45min |
+| 8. Schema Migration | 3 | ~1.0h | ~20min |
 
 **Recent Trend:**
 - v1.0 + v1.1 shipped in 6 days (2026-02-10 → 2026-02-15)
-- Trend: Stable velocity throughout v1.x
+- Phase 8 completed 2026-02-16 (schema migration + F# types + offline sync)
 
-*Updated: 2026-02-15 after v2.0 milestone start*
+*Updated: 2026-02-16 after Phase 8 completion*
 
 ## Accumulated Context
 
@@ -56,22 +56,25 @@ Recent decisions affecting current work:
 - **BIGSERIAL id PRIMARY KEY**: Replaces composite (user_id, workout_date) for multiple records per day (v2.0 Phase 8)
 - **record_type CHECK constraint**: Enforces workout/text/photo values at database level (v2.0 Phase 8)
 - **Soft delete with deleted_at**: Enables undo functionality in v2.0 UI (v2.0 Phase 8)
-- **Remove onConflict pattern**: Simple insert replaces upsert for multi-record support (v2.0 Phase 8-02)
-- **IndexedDB queue v2**: Clear v1 queue on upgrade (safe for ~20 beta users) (v2.0 Phase 8-02)
+- **Remove onConflict pattern**: Simple insert replaces upsert for multi-record support (v2.0 Phase 8)
+- **IndexedDB queue v2**: Clear v1 queue on upgrade (safe for ~20 beta users) (v2.0 Phase 8)
+- **Fable F#→JS**: Always edit .fs source files, never .js compiled output (v2.0 Phase 8)
+- **Cloudflare Tunnel config mode**: Use local config.yml instead of --token for ingress rules (v2.0 Phase 8)
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-**Phase 8 (Schema Migration) - Plans 01-02 complete, next concerns:**
-- ✅ Blue-green migration created (zero data loss guaranteed)
-- ✅ RLS 정책 업데이트 완료 (새 스키마 반영)
-- ✅ Frontend API updated (onConflict removed, soft-delete support added)
-- ✅ IndexedDB queue v2 with new field support
-- ⚠️ Production migration deferred to user action (apply via Supabase Dashboard)
-- ⚠️ Offline sync logic update needed (Plan 08-03): Use new schema in sync operations
+**Phase 8 (Schema Migration) — COMPLETE:**
+- ✅ Blue-green migration applied to production (1 row migrated)
+- ✅ RLS 정책 업데이트 완료 (3 policies)
+- ✅ F# types updated (WorkoutRecord 9 fields, QueuedOperation 10 fields)
+- ✅ Frontend API updated (onConflict removed, soft-delete support)
+- ✅ IndexedDB queue v2 with upgrade handler
+- ✅ Offline sync updated (simple insert, soft delete)
+- ✅ Build succeeds, online flow verified
 
 **Research flags:**
 - Phase 14 (Admin Audit): 트리거 성능 이슈 발생 시 추가 연구 필요
@@ -79,10 +82,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-15
-Stopped at: Completed 08-02-PLAN.md (Frontend types and API updated)
+Last session: 2026-02-16
+Stopped at: Phase 8 complete, ready for Phase 9 planning
 Resume file: None
 
 ---
 
-**Next step:** `/gsd:execute-plan 08-03` to update offline sync logic for new schema
+**Next step:** `/gsd:plan-phase 9` to plan UI Layout & Navigation
