@@ -44,17 +44,17 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
 
                 match uploadResult with
                 | Result.Ok uploadedPath ->
-                    // Create workout record for today (the key feature: WORK-04)
-                    let! _ = upsertWorkout userId today |> Async.AwaitPromise
-
-                    // Get signed URL for display
+                    // Get signed URL for display and record
                     let! urlResult = createSignedUrl bucketName uploadedPath 3600 |> Async.AwaitPromise
 
-                    // Handle URL result and set final state
                     let finalUrl =
                         match urlResult with
                         | Result.Ok url -> url
-                        | Result.Error _ -> ""  // Upload succeeded but URL failed - still success
+                        | Result.Error _ -> ""
+
+                    // Create photo record with the uploaded URL (v2.0: photo type instead of workout)
+                    let today = getTodayDateString()
+                    let! _ = createPhotoRecord userId today finalUrl None |> Async.AwaitPromise
 
                     setUploadState (PhotoUploadState.Success finalUrl)
                     onUploadComplete()

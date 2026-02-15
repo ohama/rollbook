@@ -8,7 +8,7 @@ import { singleton, append, delay, toList } from "../fable_modules/fable-library
 import { awaitPromise, startImmediate } from "../fable_modules/fable-library-js.4.28.0/Async.js";
 import { singleton as singleton_1 } from "../fable_modules/fable-library-js.4.28.0/AsyncBuilder.js";
 import { createSignedUrl, upload, compressImage } from "../Supabase/Storage.js";
-import { upsertWorkout, getTodayDateString } from "../Supabase/Workouts.js";
+import { createPhotoRecord, getTodayDateString } from "../Supabase/Workouts.js";
 import { ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 
 const bucketName = "workout-photos";
@@ -38,8 +38,7 @@ export function PhotoUploadButton(photoUploadButtonInputProps) {
                     setUploadState(new PhotoUploadState(1, []));
                     return singleton_1.Bind(awaitPromise(compressImage(file)), (_arg) => {
                         setUploadState(new PhotoUploadState(2, [0]));
-                        const today = getTodayDateString();
-                        const path = buildPath(userId, today);
+                        const path = buildPath(userId, getTodayDateString());
                         return singleton_1.Bind(awaitPromise(upload(bucketName, path, _arg, (progress) => {
                             setUploadState(new PhotoUploadState(2, [progress]));
                         })), (_arg_1) => {
@@ -49,12 +48,16 @@ export function PhotoUploadButton(photoUploadButtonInputProps) {
                                 return singleton_1.Zero();
                             }
                             else {
-                                return singleton_1.Bind(awaitPromise(upsertWorkout(userId, today)), (_arg_2) => singleton_1.Bind(awaitPromise(createSignedUrl(bucketName, uploadResult.fields[0], 3600)), (_arg_3) => {
-                                    const urlResult = _arg_3;
-                                    setUploadState(new PhotoUploadState(3, [(urlResult.tag === 1) ? "" : urlResult.fields[0]]));
-                                    onUploadComplete();
-                                    return singleton_1.Zero();
-                                }));
+                                return singleton_1.Bind(awaitPromise(createSignedUrl(bucketName, uploadResult.fields[0], 3600)), (_arg_2) => {
+                                    const urlResult = _arg_2;
+                                    const finalUrl = (urlResult.tag === 1) ? "" : urlResult.fields[0];
+                                    const today_1 = getTodayDateString();
+                                    return singleton_1.Bind(awaitPromise(createPhotoRecord(userId, today_1, finalUrl, undefined)), (_arg_3) => {
+                                        setUploadState(new PhotoUploadState(3, [finalUrl]));
+                                        onUploadComplete();
+                                        return singleton_1.Zero();
+                                    });
+                                });
                             }
                         });
                     });
