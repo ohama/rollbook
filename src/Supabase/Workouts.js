@@ -12,49 +12,66 @@ export function getTodayDateString() {
 }
 
 /**
- * Get a single workout record for a user and date
+ * Get a single workout record for a user and date (returns first non-deleted record)
  */
 export function getWorkout(userId, date) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
-        const query = ((((supabase.from("workouts")).select("*")).eq("user_id", userId)).eq("workout_date", date)).maybeSingle();
+        const query = (((((supabase.from("workouts")).select("*")).eq("user_id", userId)).eq("workout_date", date)).is("deleted_at", null)).maybeSingle();
         return query.then((_arg) => {
-            const result = _arg;
-            const data = result.data;
+            const data = _arg.data;
             return (data == null) ? (Promise.resolve(undefined)) : (Promise.resolve(data));
         });
     }));
 }
 
 /**
- * Upsert a workout record (idempotent - handles double-clicks)
+ * Create a workout record (simple insert for new schema)
  */
-export function upsertWorkout(userId, date) {
+export function createWorkout(userId, date, recordType = "workout", textContent = null, photoUrl = null) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const record = {
             user_id: userId,
             workout_date: date,
+            record_type: recordType,
+            text_content: textContent,
+            photo_url: photoUrl,
         };
-        const options = {
-            onConflict: "user_id,workout_date",
-        };
-        const query = ((supabase.from("workouts")).upsert(record, options)).select();
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        const query = ((supabase.from("workouts")).insert(record)).select();
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
 /**
- * Delete a workout record
+ * @deprecated Use createWorkout instead - kept for backward compatibility
+ * Upsert a workout record (idempotent - handles double-clicks)
+ */
+export function upsertWorkout(userId, date) {
+    return createWorkout(userId, date, "workout", null, null);
+}
+
+/**
+ * Soft delete a workout record (sets deleted_at timestamp)
  */
 export function deleteWorkout(userId, date) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
-        const query = (((supabase.from("workouts")).delete()).eq("user_id", userId)).eq("workout_date", date);
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        const updates = {
+            deleted_at: new Date().toISOString(),
+        };
+        const query = ((((supabase.from("workouts")).update(updates)).eq("user_id", userId)).eq("workout_date", date)).select();
+        return query.then((_arg) => (Promise.resolve(_arg)));
+    }));
+}
+
+/**
+ * Soft delete a specific workout record by ID
+ */
+export function deleteWorkoutById(workoutId) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const updates = {
+            deleted_at: new Date().toISOString(),
+        };
+        const query = (((supabase.from("workouts")).update(updates)).eq("id", workoutId)).select();
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
@@ -64,20 +81,17 @@ export function deleteWorkout(userId, date) {
 export function updateWorkout(userId, date, updates) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = ((((supabase.from("workouts")).update(updates)).eq("user_id", userId)).eq("workout_date", date)).select();
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
 /**
- * Get workout records for a user with optional date range filtering
+ * Get workout records for a user with optional date range filtering (excludes soft-deleted)
  */
 export function getWorkouts(userId, startDate, endDate) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         let date;
-        let query = ((supabase.from("workouts")).select("*")).eq("user_id", userId);
+        let query = (((supabase.from("workouts")).select("*")).eq("user_id", userId)).is("deleted_at", null);
         return ((startDate == null) ? (Promise.resolve()) : ((date = startDate, (query = (query.gte("workout_date", date)), Promise.resolve())))).then(() => PromiseBuilder__Delay_62FBFDE1(promise, () => {
             let date_1;
             return ((endDate == null) ? (Promise.resolve()) : ((date_1 = endDate, (query = (query.lte("workout_date", date_1)), Promise.resolve())))).then(() => PromiseBuilder__Delay_62FBFDE1(promise, () => {
@@ -85,12 +99,26 @@ export function getWorkouts(userId, startDate, endDate) {
                     ascending: false,
                 }));
                 return query.then((_arg) => {
-                    const result = _arg;
-                    const data = result.data;
+                    const data = _arg.data;
                     return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
                 });
             }));
         }));
+    }));
+}
+
+/**
+ * Get all workout records for a specific date (supports multiple records per day)
+ */
+export function getWorkoutsForDate(userId, date) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const query = ((((((supabase.from("workouts")).select("*")).eq("user_id", userId)).eq("workout_date", date)).is("deleted_at", null)).order("created_at", {
+            ascending: false,
+        }));
+        return query.then((_arg) => {
+            const data = _arg.data;
+            return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
+        });
     }));
 }
 

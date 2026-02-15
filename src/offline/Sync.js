@@ -16,10 +16,7 @@ const syncTag = "sync-workouts";
  * Check if Background Sync is supported
  */
 export function isBackgroundSyncSupported() {
-    return PromiseBuilder__Run_212F1D4B(promise_4, PromiseBuilder__Delay_62FBFDE1(promise_4, () => (PromiseBuilder__Delay_62FBFDE1(promise_4, () => ((navigator).serviceWorker.ready.then((_arg) => {
-        const registration = _arg;
-        return Promise.resolve("sync" in registration);
-    }))).catch((_arg_1) => (Promise.resolve(false))))));
+    return PromiseBuilder__Run_212F1D4B(promise_4, PromiseBuilder__Delay_62FBFDE1(promise_4, () => (PromiseBuilder__Delay_62FBFDE1(promise_4, () => ((navigator).serviceWorker.ready.then((_arg) => (Promise.resolve("sync" in _arg))))).catch((_arg_1) => (Promise.resolve(false))))));
 }
 
 /**
@@ -33,8 +30,7 @@ export function registerBackgroundSync() {
             return Promise.resolve(true);
         })) : (Promise.resolve(false));
     }))).catch((_arg_2) => {
-        const exn = _arg_2;
-        const arg_1 = exn.message;
+        const arg_1 = _arg_2.message;
         toConsole(printf("Background Sync registration failed: %s"))(arg_1);
         return Promise.resolve(false);
     }))));
@@ -45,24 +41,50 @@ function replayOperation(operation) {
         const supabase = Client;
         const client = supabase.supabase;
         const matchValue = operation.operationType;
-        return (matchValue === "CreateWorkout") ? (((client.from("workouts")).upsert({
-            user_id: operation.userId,
-            workout_date: operation.workoutDate,
-        }, {
-            onConflict: "user_id,workout_date",
-        })).then((_arg) => {
-            const response = _arg;
-            const error = response.error;
-            return equals(error, defaultOf()) ? (dequeue(defaultArg(operation.id, 0)).then((_arg_1) => (Promise.resolve(new SyncResult(0, [defaultArg(operation.id, 0)]))))) : (incrementRetry(defaultArg(operation.id, 0)).then((_arg_2) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), error.message])))));
-        })) : ((matchValue === "DeleteWorkout") ? (((((client.from("workouts")).delete()).eq("user_id", operation.userId)).eq("workout_date", operation.workoutDate)).then((_arg_3) => {
-            const response_1 = _arg_3;
-            const error_1 = response_1.error;
-            return equals(error_1, defaultOf()) ? (dequeue(defaultArg(operation.id, 0)).then((_arg_4) => (Promise.resolve(new SyncResult(0, [defaultArg(operation.id, 0)]))))) : (incrementRetry(defaultArg(operation.id, 0)).then((_arg_5) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), error_1.message])))));
-        })) : (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), "Unknown operation type"]))));
-    }).catch((_arg_6) => {
-        const exn = _arg_6;
-        return incrementRetry(defaultArg(operation.id, 0)).then((_arg_7) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), exn.message]))));
-    }))));
+        return (matchValue === "CreateWorkout") ? (() => {
+            // Build insert payload with new schema fields
+            const payload = {
+                user_id: operation.userId,
+                workout_date: operation.workoutDate,
+                record_type: operation.recordType || 'workout',
+            };
+            // Add optional fields if present
+            if (operation.textContent) {
+                payload.text_content = operation.textContent;
+            }
+            if (operation.photoUrl) {
+                payload.photo_url = operation.photoUrl;
+            }
+
+            toConsole(printf("Syncing CreateWorkout: user=%s, date=%s, type=%s"))(operation.userId)(operation.workoutDate)(payload.record_type);
+
+            // Use simple insert (no onConflict - new schema allows multiple records per day)
+            return ((client.from("workouts")).insert(payload)).then((_arg) => {
+                const error = _arg.error;
+                if (equals(error, defaultOf())) {
+                    toConsole(printf("✓ CreateWorkout synced successfully (op id=%d)"))(defaultArg(operation.id, 0));
+                    return dequeue(defaultArg(operation.id, 0)).then((_arg_1) => (Promise.resolve(new SyncResult(0, [defaultArg(operation.id, 0)]))));
+                } else {
+                    toConsole(printf("✗ CreateWorkout failed: %s (op id=%d)"))(error.message)(defaultArg(operation.id, 0));
+                    return incrementRetry(defaultArg(operation.id, 0)).then((_arg_2) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), error.message]))));
+                }
+            });
+        })() : ((matchValue === "DeleteWorkout") ? (() => {
+            // Use soft delete (UPDATE deleted_at = now()) instead of hard DELETE
+            toConsole(printf("Syncing DeleteWorkout: user=%s, date=%s"))(operation.userId)(operation.workoutDate);
+
+            return ((((client.from("workouts")).update({ deleted_at: new Date().toISOString() })).eq("user_id", operation.userId)).eq("workout_date", operation.workoutDate)).then((_arg_3) => {
+                const error_1 = _arg_3.error;
+                if (equals(error_1, defaultOf())) {
+                    toConsole(printf("✓ DeleteWorkout synced successfully (op id=%d)"))(defaultArg(operation.id, 0));
+                    return dequeue(defaultArg(operation.id, 0)).then((_arg_4) => (Promise.resolve(new SyncResult(0, [defaultArg(operation.id, 0)]))));
+                } else {
+                    toConsole(printf("✗ DeleteWorkout failed: %s (op id=%d)"))(error_1.message)(defaultArg(operation.id, 0));
+                    return incrementRetry(defaultArg(operation.id, 0)).then((_arg_5) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), error_1.message]))));
+                }
+            });
+        })() : (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), "Unknown operation type"]))));
+    }).catch((_arg_6) => (incrementRetry(defaultArg(operation.id, 0)).then((_arg_7) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), _arg_6.message])))))))));
 }
 
 /**
@@ -77,25 +99,22 @@ export function replayQueue() {
         else {
             let synced = 0;
             let failed = 0;
-            return PromiseBuilder__For_1565554B(promise_4, pending, (_arg_1) => {
-                const operation = _arg_1;
-                return replayOperation(operation).then((_arg_2) => {
-                    const result = _arg_2;
-                    switch (result.tag) {
-                        case 1: {
-                            failed = ((failed + 1) | 0);
-                            return Promise.resolve();
-                        }
-                        case 2: {
-                            return Promise.resolve();
-                        }
-                        default: {
-                            synced = ((synced + 1) | 0);
-                            return Promise.resolve();
-                        }
+            return PromiseBuilder__For_1565554B(promise_4, pending, (_arg_1) => (replayOperation(_arg_1).then((_arg_2) => {
+                const result = _arg_2;
+                switch (result.tag) {
+                    case 1: {
+                        failed = ((failed + 1) | 0);
+                        return Promise.resolve();
                     }
-                });
-            }).then(() => PromiseBuilder__Delay_62FBFDE1(promise_4, () => (Promise.resolve(new SyncStatus(2, [synced, failed])))));
+                    case 2: {
+                        return Promise.resolve();
+                    }
+                    default: {
+                        synced = ((synced + 1) | 0);
+                        return Promise.resolve();
+                    }
+                }
+            }))).then(() => PromiseBuilder__Delay_62FBFDE1(promise_4, () => (Promise.resolve(new SyncStatus(2, [synced, failed])))));
         }
     })))));
 }
