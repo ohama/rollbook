@@ -73,7 +73,10 @@ BEGIN
   RAISE NOTICE 'Migration verification passed: % rows migrated successfully', v2_count;
 END $$;
 
--- Step 5: Create indexes for performance
+-- Step 5: Drop old indexes inherited by backup table (name conflicts)
+DROP INDEX IF EXISTS idx_workouts_date;
+
+-- Create indexes for performance
 -- Primary access pattern: user_id + workout_date
 CREATE INDEX idx_workouts_user_date ON public.workouts(user_id, workout_date);
 
@@ -112,10 +115,7 @@ CREATE POLICY "Users can update own workouts"
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
 -- Step 8: Add table comment documenting schema version
-COMMENT ON TABLE public.workouts IS
-  'v2.0 schema: Multiple workout records per day with record types (workout/text/photo). ' ||
-  'Supports soft delete via deleted_at. Migrated from v1.0 composite PK to BIGSERIAL id. ' ||
-  'RLS enabled. Backup retained in workouts_v1_backup for 7 days.';
+COMMENT ON TABLE public.workouts IS 'v2.0 schema: Multiple workout records per day with record types (workout/text/photo). Supports soft delete via deleted_at. Migrated from v1.0 composite PK to BIGSERIAL id. RLS enabled. Backup retained in workouts_v1_backup for 7 days.';
 
 -- Step 9: Add column comments for clarity
 COMMENT ON COLUMN public.workouts.id IS 'Primary key (v2.0): BIGSERIAL for multiple records per day';
