@@ -88,6 +88,21 @@ export function PhotoUploadState_$reflection() {
     return union_type("Supabase.Types.PhotoUploadState", [], PhotoUploadState, () => [[], [], [["progress", float64_type]], [["url", string_type]], [["message", string_type]]]);
 }
 
+export class RecordEditState extends Union {
+    constructor(tag, fields) {
+        super();
+        this.tag = tag;
+        this.fields = fields;
+    }
+    cases() {
+        return ["Idle", "CreatingText", "CreatingPhoto", "EditingText", "Saving", "Deleting", "Error"];
+    }
+}
+
+export function RecordEditState_$reflection() {
+    return union_type("Supabase.Types.RecordEditState", [], RecordEditState, () => [[], [], [], [["recordId", int32_type], ["currentText", string_type]], [], [["recordId", int32_type]], [["message", string_type]]]);
+}
+
 export class StorageUploadResult extends Record {
     constructor(path, error) {
         super();

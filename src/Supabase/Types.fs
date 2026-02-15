@@ -110,6 +110,16 @@ type PhotoUploadState =
     | Success of url: string
     | Error of message: string
 
+/// Edit state for record CRUD operations
+type RecordEditState =
+    | Idle
+    | CreatingText                     // Modal open for new text record
+    | CreatingPhoto                    // Photo upload for new photo record
+    | EditingText of recordId: int * currentText: string  // Editing existing text record
+    | Saving
+    | Deleting of recordId: int
+    | Error of message: string
+
 /// Storage upload result
 type StorageUploadResult = {
     path: string option
