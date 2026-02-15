@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rollbook.frontend</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>while ! curl -sf http://localhost:54321/rest/v1/ -H "apikey: dummy" &gt; /dev/null 2&gt;&amp;1; do echo "Waiting for Supabase API..." &amp;&amp; sleep 5; done &amp;&amp; cd /Users/ohama/vibe-coding/rollbook &amp;&amp; npx vite preview --host 0.0.0.0</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/ohama/vibe-coding/rollbook</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/rollbook-frontend.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/rollbook-frontend.error.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>NODE_ENV</key>
+        <string>production</string>
+    </dict>
+</dict>
+</plist>
