@@ -8,7 +8,11 @@ import { FSharpResult$2 } from "../fable_modules/fable-library-js.4.28.0/Result.
  * Check if current user has admin role
  */
 export function isAdmin() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (((((supabase.from("user_roles")).select("role")).eq("role", "admin")).single()).then((_arg) => (equals(_arg.error, defaultOf()) ? (Promise.resolve(true)) : (Promise.resolve(false)))))).catch((_arg_1) => (Promise.resolve(false))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (((((supabase.from("user_roles")).select("role")).eq("role", "admin")).single()).then((_arg) => {
+        const response = _arg;
+        const error = response.error;
+        return equals(error, defaultOf()) ? (Promise.resolve(true)) : (Promise.resolve(false));
+    }))).catch((_arg_1) => (Promise.resolve(false))))));
 }
 
 /**
@@ -22,13 +26,17 @@ export function getAllProfiles() {
         const error = response.error;
         const data = response.data;
         if (equals(error, defaultOf())) {
-            return Promise.resolve(new FSharpResult$2(0, [data]));
+            const profiles = data;
+            return Promise.resolve(new FSharpResult$2(0, [profiles]));
         }
         else {
             const errorMsg = error.message;
             return Promise.resolve(new FSharpResult$2(1, [errorMsg]));
         }
-    }))).catch((_arg_1) => (Promise.resolve(new FSharpResult$2(1, [_arg_1.message])))))));
+    }))).catch((_arg_1) => {
+        const exn = _arg_1;
+        return Promise.resolve(new FSharpResult$2(1, [exn.message]));
+    }))));
 }
 
 /**
@@ -37,7 +45,8 @@ export function getAllProfiles() {
  */
 export function deleteProfile(userId) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => ((((supabase.from("profiles")).delete()).eq("id", userId)).then((_arg) => {
-        const error = _arg.error;
+        const response = _arg;
+        const error = response.error;
         if (equals(error, defaultOf())) {
             return Promise.resolve(new FSharpResult$2(0, [undefined]));
         }
@@ -45,7 +54,10 @@ export function deleteProfile(userId) {
             const errorMsg = error.message;
             return Promise.resolve(new FSharpResult$2(1, [errorMsg]));
         }
-    }))).catch((_arg_1) => (Promise.resolve(new FSharpResult$2(1, [_arg_1.message])))))));
+    }))).catch((_arg_1) => {
+        const exn = _arg_1;
+        return Promise.resolve(new FSharpResult$2(1, [exn.message]));
+    }))));
 }
 
 /**
@@ -56,7 +68,8 @@ export function getAdminCount() {
         count: "exact",
         head: true,
     })).eq("role", "admin")).then((_arg) => {
-        const count = _arg.count;
+        const response = _arg;
+        const count = response.count;
         return Promise.resolve(count);
     }))).catch((_arg_1) => (Promise.resolve(0))))));
 }

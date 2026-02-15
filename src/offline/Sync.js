@@ -16,7 +16,10 @@ const syncTag = "sync-workouts";
  * Check if Background Sync is supported
  */
 export function isBackgroundSyncSupported() {
-    return PromiseBuilder__Run_212F1D4B(promise_4, PromiseBuilder__Delay_62FBFDE1(promise_4, () => (PromiseBuilder__Delay_62FBFDE1(promise_4, () => ((navigator).serviceWorker.ready.then((_arg) => (Promise.resolve("sync" in _arg))))).catch((_arg_1) => (Promise.resolve(false))))));
+    return PromiseBuilder__Run_212F1D4B(promise_4, PromiseBuilder__Delay_62FBFDE1(promise_4, () => (PromiseBuilder__Delay_62FBFDE1(promise_4, () => ((navigator).serviceWorker.ready.then((_arg) => {
+        const registration = _arg;
+        return Promise.resolve("sync" in registration);
+    }))).catch((_arg_1) => (Promise.resolve(false))))));
 }
 
 /**
@@ -30,7 +33,8 @@ export function registerBackgroundSync() {
             return Promise.resolve(true);
         })) : (Promise.resolve(false));
     }))).catch((_arg_2) => {
-        const arg_1 = _arg_2.message;
+        const exn = _arg_2;
+        const arg_1 = exn.message;
         toConsole(printf("Background Sync registration failed: %s"))(arg_1);
         return Promise.resolve(false);
     }))));
@@ -47,13 +51,18 @@ function replayOperation(operation) {
         }, {
             onConflict: "user_id,workout_date",
         })).then((_arg) => {
-            const error = _arg.error;
+            const response = _arg;
+            const error = response.error;
             return equals(error, defaultOf()) ? (dequeue(defaultArg(operation.id, 0)).then((_arg_1) => (Promise.resolve(new SyncResult(0, [defaultArg(operation.id, 0)]))))) : (incrementRetry(defaultArg(operation.id, 0)).then((_arg_2) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), error.message])))));
         })) : ((matchValue === "DeleteWorkout") ? (((((client.from("workouts")).delete()).eq("user_id", operation.userId)).eq("workout_date", operation.workoutDate)).then((_arg_3) => {
-            const error_1 = _arg_3.error;
+            const response_1 = _arg_3;
+            const error_1 = response_1.error;
             return equals(error_1, defaultOf()) ? (dequeue(defaultArg(operation.id, 0)).then((_arg_4) => (Promise.resolve(new SyncResult(0, [defaultArg(operation.id, 0)]))))) : (incrementRetry(defaultArg(operation.id, 0)).then((_arg_5) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), error_1.message])))));
         })) : (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), "Unknown operation type"]))));
-    }).catch((_arg_6) => (incrementRetry(defaultArg(operation.id, 0)).then((_arg_7) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), _arg_6.message])))))))));
+    }).catch((_arg_6) => {
+        const exn = _arg_6;
+        return incrementRetry(defaultArg(operation.id, 0)).then((_arg_7) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), exn.message]))));
+    }))));
 }
 
 /**
@@ -68,22 +77,25 @@ export function replayQueue() {
         else {
             let synced = 0;
             let failed = 0;
-            return PromiseBuilder__For_1565554B(promise_4, pending, (_arg_1) => (replayOperation(_arg_1).then((_arg_2) => {
-                const result = _arg_2;
-                switch (result.tag) {
-                    case 1: {
-                        failed = ((failed + 1) | 0);
-                        return Promise.resolve();
+            return PromiseBuilder__For_1565554B(promise_4, pending, (_arg_1) => {
+                const operation = _arg_1;
+                return replayOperation(operation).then((_arg_2) => {
+                    const result = _arg_2;
+                    switch (result.tag) {
+                        case 1: {
+                            failed = ((failed + 1) | 0);
+                            return Promise.resolve();
+                        }
+                        case 2: {
+                            return Promise.resolve();
+                        }
+                        default: {
+                            synced = ((synced + 1) | 0);
+                            return Promise.resolve();
+                        }
                     }
-                    case 2: {
-                        return Promise.resolve();
-                    }
-                    default: {
-                        synced = ((synced + 1) | 0);
-                        return Promise.resolve();
-                    }
-                }
-            }))).then(() => PromiseBuilder__Delay_62FBFDE1(promise_4, () => (Promise.resolve(new SyncStatus(2, [synced, failed])))));
+                });
+            }).then(() => PromiseBuilder__Delay_62FBFDE1(promise_4, () => (Promise.resolve(new SyncStatus(2, [synced, failed])))));
         }
     })))));
 }

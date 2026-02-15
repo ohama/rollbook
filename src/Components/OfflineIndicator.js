@@ -17,12 +17,13 @@ export function OfflineIndicator() {
     let patternInput;
     const initial = isOnline();
     patternInput = reactApi.useState(initial);
+    const setIsOnline = patternInput[1];
     const isOnlineState = patternInput[0];
     const patternInput_1 = reactApi.useState(0);
     const setPendingCount = patternInput_1[1];
     const pendingCount = patternInput_1[0] | 0;
     useEffectWithDeps(() => {
-        const cleanup = onStatusChange(patternInput[1]);
+        const cleanup = onStatusChange(setIsOnline);
         return {
             Dispose() {
                 cleanup();
@@ -33,7 +34,8 @@ export function OfflineIndicator() {
         if (!isOnlineState) {
             const intervalId = window.setInterval(() => {
                 const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (getPendingCount().then((_arg) => {
-                    setPendingCount(_arg);
+                    const count = _arg | 0;
+                    setPendingCount(count);
                     return Promise.resolve();
                 }))));
                 void pr;

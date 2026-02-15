@@ -76,7 +76,8 @@ export function createSignedUrl(bucket, path, expiresIn) {
  */
 export function remove(bucket, paths) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (((supabase.storage.from(bucket)).remove(paths)).then((_arg) => {
-        const error = _arg.error;
+        const result = _arg;
+        const error = result.error;
         if (error == null) {
             return Promise.resolve(new FSharpResult$2(0, [undefined]));
         }
@@ -95,7 +96,8 @@ export function listFiles(bucket, folder) {
         const result = _arg;
         const error = result.error;
         if (error == null) {
-            const names = map((item) => item.name, result.data);
+            const data = result.data;
+            const names = map((item) => item.name, data);
             return Promise.resolve(new FSharpResult$2(0, [names]));
         }
         else {

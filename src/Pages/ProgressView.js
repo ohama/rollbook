@@ -49,24 +49,47 @@ export function ProgressViewPage(progressViewPageInputProps) {
     const currentMonth = patternInput_2[0] | 0;
     const patternInput_3 = reactApi.useState([]);
     const workouts = patternInput_3[0];
+    const setWorkouts = patternInput_3[1];
     const patternInput_4 = reactApi.useState(true);
     const setLoading = patternInput_4[1];
+    const loading = patternInput_4[0];
     const patternInput_5 = reactApi.useState(undefined);
     const setError = patternInput_5[1];
     const error = patternInput_5[0];
+    const goToNextMonth = () => {
+        if (currentMonth === 12) {
+            setCurrentYear(currentYear + 1);
+            setCurrentMonth(1);
+        }
+        else {
+            setCurrentMonth(currentMonth + 1);
+        }
+    };
+    const goToPrevMonth = () => {
+        if (currentMonth === 1) {
+            setCurrentYear(currentYear - 1);
+            setCurrentMonth(12);
+        }
+        else {
+            setCurrentMonth(currentMonth - 1);
+        }
+    };
     const dependencies = [currentYear, currentMonth];
     reactApi.useEffect(() => {
         const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
             setLoading(true);
             setError(undefined);
             const startDate = formatDateString(currentYear, currentMonth, 1);
-            const endDate = formatDateString(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
+            const daysInMonth = getDaysInMonth(currentYear, currentMonth) | 0;
+            const endDate = formatDateString(currentYear, currentMonth, daysInMonth);
             return getWorkouts(userId, startDate, endDate).then((_arg) => {
-                patternInput_3[1](_arg);
+                const monthWorkouts = _arg;
+                setWorkouts(monthWorkouts);
                 setLoading(false);
                 return Promise.resolve();
             });
         }).catch((_arg_1) => {
+            const ex = _arg_1;
             setError("운동 기록을 불러올 수 없습니다");
             setLoading(false);
             return Promise.resolve();
@@ -93,7 +116,7 @@ export function ProgressViewPage(progressViewPageInputProps) {
                 workouts: workouts,
                 year: currentYear,
                 month: currentMonth,
-            })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))), delay(() => (patternInput_4[0] ? singleton(createElement("div", {
+            })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))), delay(() => (loading ? singleton(createElement("div", {
                 className: "text-center text-gray-600 py-8",
                 children: "로딩 중...",
             })) : ((error != null) ? singleton(createElement("div", {
@@ -106,24 +129,8 @@ export function ProgressViewPage(progressViewPageInputProps) {
                 year: currentYear,
                 month: currentMonth,
                 workouts: workouts,
-                onPrevMonth: () => {
-                    if (currentMonth === 1) {
-                        setCurrentYear(currentYear - 1);
-                        setCurrentMonth(12);
-                    }
-                    else {
-                        setCurrentMonth(currentMonth - 1);
-                    }
-                },
-                onNextMonth: () => {
-                    if (currentMonth === 12) {
-                        setCurrentYear(currentYear + 1);
-                        setCurrentMonth(1);
-                    }
-                    else {
-                        setCurrentMonth(currentMonth + 1);
-                    }
-                },
+                onPrevMonth: goToPrevMonth,
+                onNextMonth: goToNextMonth,
             })))))));
         }));
     })), ["children", reactApi.Children.toArray(Array.from(elems_2))])])));

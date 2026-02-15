@@ -18,7 +18,8 @@ export function getWorkout(userId, date) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = ((((supabase.from("workouts")).select("*")).eq("user_id", userId)).eq("workout_date", date)).maybeSingle();
         return query.then((_arg) => {
-            const data = _arg.data;
+            const result = _arg;
+            const data = result.data;
             return (data == null) ? (Promise.resolve(undefined)) : (Promise.resolve(data));
         });
     }));
@@ -37,7 +38,10 @@ export function upsertWorkout(userId, date) {
             onConflict: "user_id,workout_date",
         };
         const query = ((supabase.from("workouts")).upsert(record, options)).select();
-        return query.then((_arg) => (Promise.resolve(_arg)));
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
     }));
 }
 
@@ -47,7 +51,10 @@ export function upsertWorkout(userId, date) {
 export function deleteWorkout(userId, date) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = (((supabase.from("workouts")).delete()).eq("user_id", userId)).eq("workout_date", date);
-        return query.then((_arg) => (Promise.resolve(_arg)));
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
     }));
 }
 
@@ -57,7 +64,10 @@ export function deleteWorkout(userId, date) {
 export function updateWorkout(userId, date, updates) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = ((((supabase.from("workouts")).update(updates)).eq("user_id", userId)).eq("workout_date", date)).select();
-        return query.then((_arg) => (Promise.resolve(_arg)));
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
     }));
 }
 
@@ -75,7 +85,8 @@ export function getWorkouts(userId, startDate, endDate) {
                     ascending: false,
                 }));
                 return query.then((_arg) => {
-                    const data = _arg.data;
+                    const result = _arg;
+                    const data = result.data;
                     return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
                 });
             }));

@@ -49,17 +49,20 @@ export function WorkoutToggle(workoutToggleInputProps) {
     const loading = patternInput_1[0];
     const patternInput_2 = reactApi.useState(undefined);
     const setError = patternInput_2[1];
+    const error = patternInput_2[0];
     const dependencies = [refreshKey];
     reactApi.useEffect(() => {
         const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
             setLoading(true);
             const today = getTodayDateString();
             return getWorkout(userId, today).then((_arg) => {
-                setHasWorkedOut(_arg != null);
+                const workout = _arg;
+                setHasWorkedOut(workout != null);
                 setLoading(false);
                 return Promise.resolve();
             });
         }).catch((_arg_1) => {
+            const ex = _arg_1;
             setError("운동 기록을 불러올 수 없습니다");
             setLoading(false);
             return Promise.resolve();
@@ -82,6 +85,7 @@ export function WorkoutToggle(workoutToggleInputProps) {
                     setLoading(false);
                     return Promise.resolve();
                 })))).catch((_arg_4) => {
+                    const ex_1 = _arg_4;
                     setError("저장 실패. 다시 시도해주세요.");
                     setLoading(false);
                     return Promise.resolve();
@@ -94,7 +98,8 @@ export function WorkoutToggle(workoutToggleInputProps) {
                     return enqueue(operationType, userId, today_1).then((_arg_5) => {
                         const result = _arg_5;
                         if (result.tag === 1) {
-                            setError(result.fields[0]);
+                            const msg = result.fields[0];
+                            setError(msg);
                             setLoading(false);
                             return Promise.resolve();
                         }
@@ -107,6 +112,7 @@ export function WorkoutToggle(workoutToggleInputProps) {
                         }
                     });
                 }).catch((_arg_7) => {
+                    const ex_2 = _arg_7;
                     setError("저장 실패. 다시 시도해주세요.");
                     setLoading(false);
                     return Promise.resolve();
@@ -130,11 +136,17 @@ export function WorkoutToggle(workoutToggleInputProps) {
         className: "px-8 py-4 rounded-xl text-xl font-semibold transition-all " + (loading ? "bg-gray-300 text-gray-500 cursor-wait" : (hasWorkedOut ? "bg-green-600 text-white hover:bg-green-700 active:scale-95" : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95")),
         children: loading ? "..." : (hasWorkedOut ? "운동 완료!" : "오늘 운동했다"),
     })), delay(() => {
-        const matchValue = patternInput_2[0];
-        return (matchValue == null) ? singleton(defaultOf()) : singleton(createElement("p", {
-            className: "text-sm text-red-600",
-            children: matchValue,
-        }));
+        const matchValue = error;
+        if (matchValue == null) {
+            return singleton(defaultOf());
+        }
+        else {
+            const msg_1 = matchValue;
+            return singleton(createElement("p", {
+                className: "text-sm text-red-600",
+                children: msg_1,
+            }));
+        }
     })))))), ["children", reactApi.Children.toArray(Array.from(elems))])])));
 }
 
@@ -143,23 +155,28 @@ export function DashboardPage(dashboardPageInputProps) {
     const onLogout = dashboardPageInputProps.onLogout;
     const user = dashboardPageInputProps.user;
     const patternInput = reactApi.useState(false);
+    const setLoading = patternInput[1];
     const loading = patternInput[0];
     const patternInput_1 = reactApi.useState(new TabMode(0, []));
     const setActiveTab = patternInput_1[1];
     const activeTab = patternInput_1[0];
     const patternInput_2 = reactApi.useState(0);
+    const setRefreshKey = patternInput_2[1];
     const refreshKey = patternInput_2[0] | 0;
+    const handleLogout = () => {
+        setLoading(true);
+        const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signOut().then((_arg) => {
+            onLogout();
+            return Promise.resolve();
+        }))));
+        void pr;
+    };
     return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100"], (elems_10 = [createElement("header", createObj(ofArray([["className", "bg-white shadow-sm"], (elems_1 = [createElement("div", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-4 flex items-center justify-between"], (elems = [createElement("h1", {
         className: "text-xl font-bold text-indigo-600",
         children: "Rollbook",
     }), createElement("button", {
         onClick: (_arg_1) => {
-            patternInput[1](true);
-            const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signOut().then((_arg) => {
-                onLogout();
-                return Promise.resolve();
-            }))));
-            void pr;
+            handleLogout();
         },
         disabled: loading,
         className: "px-4 py-2 rounded-lg text-sm font-medium transition-colors " + (loading ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"),
@@ -213,7 +230,7 @@ export function DashboardPage(dashboardPageInputProps) {
             }), createElement(PhotoUploadButton, {
                 userId: user.id,
                 onUploadComplete: () => {
-                    patternInput_2[1](refreshKey + 1);
+                    setRefreshKey(refreshKey + 1);
                 },
             })], ["children", reactApi.Children.toArray(Array.from(elems_6))])]))), createElement("div", createObj(ofArray([["className", "bg-white rounded-2xl shadow-sm p-6"], (elems_7 = [createElement(PhotoGallery, {
                 userId: user.id,

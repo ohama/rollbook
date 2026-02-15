@@ -29,23 +29,39 @@ function getDb() {
  */
 export function enqueue(operationType, userId, workoutDate) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
+        const db = _arg;
         const operation = new QueuedOperation(undefined, (operationType.tag === 1) ? "DeleteWorkout" : "CreateWorkout", userId, workoutDate, Date.now(), 0);
-        return (_arg.add(storeName, operation)).then((_arg_1) => (Promise.resolve(new QueueResult(0, [_arg_1]))));
-    }))).catch((_arg_2) => (Promise.resolve(new QueueResult(1, [_arg_2.message])))))));
+        return (db.add(storeName, operation)).then((_arg_1) => {
+            const id = _arg_1;
+            return Promise.resolve(new QueueResult(0, [id]));
+        });
+    }))).catch((_arg_2) => {
+        const exn = _arg_2;
+        return Promise.resolve(new QueueResult(1, [exn.message]));
+    }))));
 }
 
 /**
  * Get all pending operations
  */
 export function getAllPending() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => ((_arg.getAll(storeName)).then((_arg_1) => (Promise.resolve(_arg_1))))))).catch((_arg_2) => (Promise.resolve([]))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
+        const db = _arg;
+        return (db.getAll(storeName)).then((_arg_1) => {
+            const items = _arg_1;
+            return Promise.resolve(items);
+        });
+    }))).catch((_arg_2) => (Promise.resolve([]))))));
 }
 
 /**
  * Remove an operation from the queue (after successful sync)
  */
 export function dequeue(operationId) {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => ((_arg.delete(storeName, operationId)).then(() => (Promise.resolve(true))))))).catch((_arg_2) => (Promise.resolve(false))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
+        const db = _arg;
+        return (db.delete(storeName, operationId)).then(() => (Promise.resolve(true)));
+    }))).catch((_arg_2) => (Promise.resolve(false))))));
 }
 
 /**
@@ -78,13 +94,22 @@ export function incrementRetry(operationId) {
  * Get count of pending operations
  */
 export function getPendingCount() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => ((_arg.count(storeName)).then((_arg_1) => (Promise.resolve(_arg_1))))))).catch((_arg_2) => (Promise.resolve(0))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
+        const db = _arg;
+        return (db.count(storeName)).then((_arg_1) => {
+            const count = _arg_1;
+            return Promise.resolve(count);
+        });
+    }))).catch((_arg_2) => (Promise.resolve(0))))));
 }
 
 /**
  * Clear all queued operations (use with caution)
  */
 export function clear() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => ((_arg.clear(storeName)).then(() => (Promise.resolve(true))))))).catch((_arg_2) => (Promise.resolve(false))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
+        const db = _arg;
+        return (db.clear(storeName)).then(() => (Promise.resolve(true)));
+    }))).catch((_arg_2) => (Promise.resolve(false))))));
 }
 

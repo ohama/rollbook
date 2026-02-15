@@ -37,7 +37,8 @@ export function LoginPage(loginPageInputProps) {
     const handleLogin = () => {
         setState(new LoginState(state.email, state.password, true, undefined));
         const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signInWithPassword(state.email, state.password).then((_arg) => {
-            const matchValue = _arg.error;
+            const result = _arg;
+            const matchValue = result.error;
             if (matchValue == null) {
                 setState(new LoginState(state.email, state.password, false, state.error));
                 onLoginSuccess();

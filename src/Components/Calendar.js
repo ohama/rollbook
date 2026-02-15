@@ -71,10 +71,10 @@ export function CalendarGrid(calendarGridInputProps) {
     }), createElement("div", {
         children: "토",
     })], ["children", reactApi.Children.toArray(Array.from(elems_1))])]))), createElement("div", createObj(ofArray([["className", "grid grid-cols-7 gap-1"], (elems_2 = toList(delay(() => map((dayRecord) => createElement("div", createObj(toList(delay(() => {
-        let matchValue;
-        return append((matchValue = dayRecord.GridColumnStart, (matchValue == null) ? (empty()) : singleton(["style", {
-            gridColumnStart: matchValue,
-        }])), delay(() => append(singleton(["className", ("aspect-square flex items-center justify-center rounded-lg " + (dayRecord.IsToday ? "border-2 border-indigo-600 font-bold " : "")) + (dayRecord.HasWorkout ? "bg-green-100 text-green-800" : "text-gray-700")]), delay(() => singleton(["children", int32ToString(dayRecord.Day)])))));
+        let matchValue, col;
+        return append((matchValue = dayRecord.GridColumnStart, (matchValue == null) ? (empty()) : ((col = (matchValue | 0), singleton(["style", {
+            gridColumnStart: col,
+        }])))), delay(() => append(singleton(["className", ("aspect-square flex items-center justify-center rounded-lg " + (dayRecord.IsToday ? "border-2 border-indigo-600 font-bold " : "")) + (dayRecord.HasWorkout ? "bg-green-100 text-green-800" : "text-gray-700")]), delay(() => singleton(["children", int32ToString(dayRecord.Day)])))));
     })))), calendarDays))), ["children", reactApi.Children.toArray(Array.from(elems_2))])])))], ["children", reactApi.Children.toArray(Array.from(elems_3))])])));
 }
 

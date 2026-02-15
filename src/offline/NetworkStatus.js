@@ -30,7 +30,8 @@ export function onStatusChange(callback) {
  */
 export function onVisibilityChange(callback) {
     const handleVisibility = (_arg) => {
-        callback(document.visibilityState === "visible");
+        const isVisible = document.visibilityState === "visible";
+        callback(isVisible);
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {

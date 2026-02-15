@@ -108,7 +108,13 @@ export function App() {
         };
     });
     const navigateTo = (page) => {
-        setState(new AppState(state.authState, (page === "signup") ? (new Page(1, [])) : ((page === "forgot-password") ? (new Page(2, [])) : ((page === "reset-password") ? (new Page(3, [])) : (new Page(0, []))))));
+        const newPage = (page === "signup") ? (new Page(1, [])) : ((page === "forgot-password") ? (new Page(2, [])) : ((page === "reset-password") ? (new Page(3, [])) : (new Page(0, []))));
+        setState(new AppState(state.authState, newPage));
+    };
+    const onLoginSuccess = () => {
+    };
+    const onLogout = () => {
+        setState(new AppState(new AuthState(1, []), new Page(0, [])));
     };
     const xs_4 = toList(delay(() => append(singleton(createElement(OfflineIndicator, null)), delay(() => {
         let elems_1, elems;
@@ -124,17 +130,16 @@ export function App() {
                     onNavigate: navigateTo,
                 })) : singleton(createElement(LoginPage, {
                     onNavigate: navigateTo,
-                    onLoginSuccess: () => {
-                    },
+                    onLoginSuccess: onLoginSuccess,
                 }))));
             }
-            case 2:
+            case 2: {
+                const user = matchValue.fields[0];
                 return singleton(createElement(DashboardPage, {
-                    user: matchValue.fields[0],
-                    onLogout: () => {
-                        setState(new AppState(new AuthState(1, []), new Page(0, [])));
-                    },
+                    user: user,
+                    onLogout: onLogout,
                 }));
+            }
             default:
                 return singleton(createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100 flex items-center justify-center"], (elems_1 = [createElement("div", createObj(ofArray([["className", "text-center"], (elems = [createElement("div", {
                     className: "animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4",

@@ -48,10 +48,16 @@ export function FormInput(formInputInputProps) {
         className: "w-full px-4 py-3 rounded-lg border focus:ring-2 focus:outline-none transition-colors " + ((error == null) ? "border-gray-300 focus:ring-indigo-200 focus:border-indigo-500" : "border-red-500 focus:ring-red-200"),
     })), delay(() => {
         const matchValue = error;
-        return (matchValue == null) ? singleton(defaultOf()) : singleton(createElement("p", {
-            className: "mt-1 text-sm text-red-600",
-            children: matchValue,
-        }));
+        if (matchValue == null) {
+            return singleton(defaultOf());
+        }
+        else {
+            const msg = matchValue;
+            return singleton(createElement("p", {
+                className: "mt-1 text-sm text-red-600",
+                children: msg,
+            }));
+        }
     })))))), ["children", reactApi.Children.toArray(Array.from(elems))])])));
 }
 
@@ -97,8 +103,11 @@ export function Alert(alertInputProps) {
     const alertType = alertInputProps.alertType;
     const message = alertInputProps.message;
     const patternInput = (alertType === "success") ? ["bg-green-50", "text-green-800", "border-green-200"] : ((alertType === "error") ? ["bg-red-50", "text-red-800", "border-red-200"] : ((alertType === "info") ? ["bg-blue-50", "text-blue-800", "border-blue-200"] : ["bg-gray-50", "text-gray-800", "border-gray-200"]));
+    const textColor = patternInput[1];
+    const borderColor = patternInput[2];
+    const bgColor = patternInput[0];
     return createElement("div", {
-        className: `p-4 rounded-lg border ${patternInput[0]} ${patternInput[1]} ${patternInput[2]} mb-4`,
+        className: `p-4 rounded-lg border ${bgColor} ${textColor} ${borderColor} mb-4`,
         children: message,
     });
 }

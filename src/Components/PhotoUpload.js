@@ -3,12 +3,12 @@ import { createElement } from "react";
 import React from "react";
 import { reactApi } from "../fable_modules/Feliz.2.9.0/Interop.fs.js";
 import { PhotoUploadState } from "../Supabase/Types.js";
-import { createObj } from "../fable_modules/fable-library-js.4.28.0/Util.js";
-import { singleton, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
 import { awaitPromise, startImmediate } from "../fable_modules/fable-library-js.4.28.0/Async.js";
-import { singleton as singleton_1 } from "../fable_modules/fable-library-js.4.28.0/AsyncBuilder.js";
+import { singleton } from "../fable_modules/fable-library-js.4.28.0/AsyncBuilder.js";
 import { createSignedUrl, upload, compressImage } from "../Supabase/Storage.js";
 import { upsertWorkout, getTodayDateString } from "../Supabase/Workouts.js";
+import { createObj } from "../fable_modules/fable-library-js.4.28.0/Util.js";
+import { singleton as singleton_1, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
 import { ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 
 const bucketName = "workout-photos";
@@ -24,7 +24,49 @@ export function PhotoUploadButton(photoUploadButtonInputProps) {
     const patternInput = reactApi.useState(new PhotoUploadState(0, []));
     const uploadState = patternInput[0];
     const setUploadState = patternInput[1];
-    return createElement("div", createObj(ofArray([["className", "relative"], (elems_8 = toList(delay(() => append(singleton(createElement("input", {
+    const handleFileSelected = (file) => {
+        startImmediate(singleton.Delay(() => singleton.TryWith(singleton.Delay(() => {
+            setUploadState(new PhotoUploadState(1, []));
+            return singleton.Bind(awaitPromise(compressImage(file)), (_arg) => {
+                const compressed = _arg;
+                setUploadState(new PhotoUploadState(2, [0]));
+                const today = getTodayDateString();
+                const path = buildPath(userId, today);
+                return singleton.Bind(awaitPromise(upload(bucketName, path, compressed, (progress) => {
+                    setUploadState(new PhotoUploadState(2, [progress]));
+                })), (_arg_1) => {
+                    const uploadResult = _arg_1;
+                    if (uploadResult.tag === 1) {
+                        const msg = uploadResult.fields[0];
+                        setUploadState(new PhotoUploadState(4, [msg]));
+                        return singleton.Zero();
+                    }
+                    else {
+                        const uploadedPath = uploadResult.fields[0];
+                        return singleton.Bind(awaitPromise(upsertWorkout(userId, today)), (_arg_2) => singleton.Bind(awaitPromise(createSignedUrl(bucketName, uploadedPath, 3600)), (_arg_3) => {
+                            const urlResult = _arg_3;
+                            let finalUrl;
+                            if (urlResult.tag === 1) {
+                                finalUrl = "";
+                            }
+                            else {
+                                const url = urlResult.fields[0];
+                                finalUrl = url;
+                            }
+                            setUploadState(new PhotoUploadState(3, [finalUrl]));
+                            onUploadComplete();
+                            return singleton.Zero();
+                        }));
+                    }
+                });
+            });
+        }), (_arg_4) => {
+            const ex = _arg_4;
+            setUploadState(new PhotoUploadState(4, ["사진 업로드 실패. 다시 시도해주세요."]));
+            return singleton.Zero();
+        })));
+    };
+    return createElement("div", createObj(ofArray([["className", "relative"], (elems_8 = toList(delay(() => append(singleton_1(createElement("input", {
         id: "photo-upload-input",
         type: "file",
         accept: "image/*",
@@ -33,35 +75,7 @@ export function PhotoUploadButton(photoUploadButtonInputProps) {
         onChange: (e) => {
             const input = e.target;
             if (!(input.files == null) && (input.files.length > 0)) {
-                const file = input.files[0];
-                startImmediate(singleton_1.Delay(() => singleton_1.TryWith(singleton_1.Delay(() => {
-                    setUploadState(new PhotoUploadState(1, []));
-                    return singleton_1.Bind(awaitPromise(compressImage(file)), (_arg) => {
-                        setUploadState(new PhotoUploadState(2, [0]));
-                        const today = getTodayDateString();
-                        const path = buildPath(userId, today);
-                        return singleton_1.Bind(awaitPromise(upload(bucketName, path, _arg, (progress) => {
-                            setUploadState(new PhotoUploadState(2, [progress]));
-                        })), (_arg_1) => {
-                            const uploadResult = _arg_1;
-                            if (uploadResult.tag === 1) {
-                                setUploadState(new PhotoUploadState(4, [uploadResult.fields[0]]));
-                                return singleton_1.Zero();
-                            }
-                            else {
-                                return singleton_1.Bind(awaitPromise(upsertWorkout(userId, today)), (_arg_2) => singleton_1.Bind(awaitPromise(createSignedUrl(bucketName, uploadResult.fields[0], 3600)), (_arg_3) => {
-                                    const urlResult = _arg_3;
-                                    setUploadState(new PhotoUploadState(3, [(urlResult.tag === 1) ? "" : urlResult.fields[0]]));
-                                    onUploadComplete();
-                                    return singleton_1.Zero();
-                                }));
-                            }
-                        });
-                    });
-                }), (_arg_4) => {
-                    setUploadState(new PhotoUploadState(4, ["사진 업로드 실패. 다시 시도해주세요."]));
-                    return singleton_1.Zero();
-                })));
+                handleFileSelected(input.files[0]);
             }
         },
         disabled: (uploadState.tag === 1) ? true : (uploadState.tag === 2),
@@ -70,7 +84,7 @@ export function PhotoUploadButton(photoUploadButtonInputProps) {
         const matchValue = uploadState;
         switch (matchValue.tag) {
             case 1:
-                return singleton(createElement("div", createObj(ofArray([["className", "flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 rounded-lg cursor-wait"], (elems_1 = [createElement("span", {
+                return singleton_1(createElement("div", createObj(ofArray([["className", "flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 rounded-lg cursor-wait"], (elems_1 = [createElement("span", {
                     className: "animate-spin",
                     children: "⏳",
                 }), createElement("span", {
@@ -78,7 +92,7 @@ export function PhotoUploadButton(photoUploadButtonInputProps) {
                 })], ["children", reactApi.Children.toArray(Array.from(elems_1))])]))));
             case 2: {
                 const progress_1 = matchValue.fields[0];
-                return singleton(createElement("div", createObj(ofArray([["className", "px-4 py-3 bg-gray-100 rounded-lg"], (elems_4 = [createElement("div", createObj(ofArray([["className", "flex items-center justify-between mb-2"], (elems_2 = [createElement("span", {
+                return singleton_1(createElement("div", createObj(ofArray([["className", "px-4 py-3 bg-gray-100 rounded-lg"], (elems_4 = [createElement("div", createObj(ofArray([["className", "flex items-center justify-between mb-2"], (elems_2 = [createElement("span", {
                     className: "text-sm text-gray-600",
                     children: "업로드 중...",
                 }), createElement("span", {
@@ -91,20 +105,23 @@ export function PhotoUploadButton(photoUploadButtonInputProps) {
                     },
                 })], ["children", reactApi.Children.toArray(Array.from(elems_3))])])))], ["children", reactApi.Children.toArray(Array.from(elems_4))])]))));
             }
-            case 3:
-                return singleton(createElement("div", createObj(ofArray([["className", "flex items-center gap-2 px-4 py-3 bg-green-100 text-green-700 rounded-lg"], (elems_5 = [createElement("span", {
+            case 3: {
+                const url_1 = matchValue.fields[0];
+                return singleton_1(createElement("div", createObj(ofArray([["className", "flex items-center gap-2 px-4 py-3 bg-green-100 text-green-700 rounded-lg"], (elems_5 = [createElement("span", {
                     className: "text-xl",
                     children: "✅",
                 }), createElement("span", {
                     className: "font-medium",
                     children: "업로드 완료! 운동 기록됨",
                 })], ["children", reactApi.Children.toArray(Array.from(elems_5))])]))));
-            case 4:
-                return singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_7 = [createElement("div", createObj(ofArray([["className", "flex items-center gap-2 px-4 py-3 bg-red-100 text-red-700 rounded-lg"], (elems_6 = [createElement("span", {
+            }
+            case 4: {
+                const msg_1 = matchValue.fields[0];
+                return singleton_1(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_7 = [createElement("div", createObj(ofArray([["className", "flex items-center gap-2 px-4 py-3 bg-red-100 text-red-700 rounded-lg"], (elems_6 = [createElement("span", {
                     className: "text-xl",
                     children: "❌",
                 }), createElement("span", {
-                    children: matchValue.fields[0],
+                    children: msg_1,
                 })], ["children", reactApi.Children.toArray(Array.from(elems_6))])]))), createElement("button", {
                     onClick: (_arg_5) => {
                         setUploadState(new PhotoUploadState(0, []));
@@ -112,8 +129,9 @@ export function PhotoUploadButton(photoUploadButtonInputProps) {
                     className: "text-sm text-indigo-600 hover:text-indigo-800 underline",
                     children: "다시 시도",
                 })], ["children", reactApi.Children.toArray(Array.from(elems_7))])]))));
+            }
             default:
-                return singleton(createElement("div", createObj(ofArray([(value_15 = "flex items-center gap-2 px-4 py-3 bg-indigo-100 text-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-200 transition-colors", ["className", value_15]), (elems = [createElement("span", {
+                return singleton_1(createElement("div", createObj(ofArray([(value_15 = "flex items-center gap-2 px-4 py-3 bg-indigo-100 text-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-200 transition-colors", ["className", value_15]), (elems = [createElement("span", {
                     className: "text-xl",
                     children: "📷",
                 }), createElement("span", {
