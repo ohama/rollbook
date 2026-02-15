@@ -121,10 +121,12 @@ Plans:
   2. 하루에 여러 번 운동을 기록할 수 있다 (UNIQUE 제약 제거됨)
   3. 오프라인 큐가 새 스키마와 호환된다 (백그라운드 동기화 정상 작동)
   4. RLS 정책이 새 스키마에서 정상 작동한다 (본인 기록만 수정/삭제 가능)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: [To be planned]
+- [ ] 08-01-PLAN.md — Database schema migration with blue-green pattern
+- [ ] 08-02-PLAN.md — Frontend types and API updates (remove onConflict)
+- [ ] 08-03-PLAN.md — Offline sync logic migration and verification
 
 ### Phase 9: UI Layout & Navigation
 **Goal**: Users can navigate dates and switch between "나/우리" tabs
@@ -226,7 +228,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 5. Photo Storage | v1.0 | 8/8 | Complete | 2026-02-10 |
 | 6. Admin & Offline | v1.0 | 8/8 | Complete | 2026-02-10 |
 | 7. Mac Mini Deployment | v1.1 | 6/6 | Complete | 2026-02-15 |
-| 8. Schema Migration | v2.0 | 0/TBD | Not started | - |
+| 8. Schema Migration | v2.0 | 0/3 | Ready to execute | - |
 | 9. UI Layout & Navigation | v2.0 | 0/TBD | Not started | - |
 | 10. Multi-Record CRUD | v2.0 | 0/TBD | Not started | - |
 | 11. Calendar Integration | v2.0 | 0/TBD | Not started | - |
