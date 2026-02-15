@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 ## Current Position
 
 Phase: 8 of 14 (Schema Migration)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-15 — Completed 08-01-PLAN.md (Schema migration SQL)
+Last activity: 2026-02-15 — Completed 08-02-PLAN.md (Frontend types and API)
 
-Progress: [███████████░░░░░░░░░] 51% (v1.0 + v1.1 complete, v2.0 Phase 8 started)
+Progress: [███████████░░░░░░░░░] 52% (v1.0 + v1.1 complete, v2.0 Phase 8 in progress)
 
 ## Performance Metrics
 
@@ -56,6 +56,8 @@ Recent decisions affecting current work:
 - **BIGSERIAL id PRIMARY KEY**: Replaces composite (user_id, workout_date) for multiple records per day (v2.0 Phase 8)
 - **record_type CHECK constraint**: Enforces workout/text/photo values at database level (v2.0 Phase 8)
 - **Soft delete with deleted_at**: Enables undo functionality in v2.0 UI (v2.0 Phase 8)
+- **Remove onConflict pattern**: Simple insert replaces upsert for multi-record support (v2.0 Phase 8-02)
+- **IndexedDB queue v2**: Clear v1 queue on upgrade (safe for ~20 beta users) (v2.0 Phase 8-02)
 
 ### Pending Todos
 
@@ -63,12 +65,13 @@ None yet.
 
 ### Blockers/Concerns
 
-**Phase 8 (Schema Migration) - Plan 01 complete, next concerns:**
+**Phase 8 (Schema Migration) - Plans 01-02 complete, next concerns:**
 - ✅ Blue-green migration created (zero data loss guaranteed)
 - ✅ RLS 정책 업데이트 완료 (새 스키마 반영)
+- ✅ Frontend API updated (onConflict removed, soft-delete support added)
+- ✅ IndexedDB queue v2 with new field support
 - ⚠️ Production migration deferred to user action (apply via Supabase Dashboard)
-- ⚠️ 오프라인 큐 호환성 필요 (Plan 08-02, 08-03): id 대신 composite key 사용 중
-- ⚠️ Frontend types update needed: Remove onConflict: 'user_id,workout_date' (Plan 08-02)
+- ⚠️ Offline sync logic update needed (Plan 08-03): Use new schema in sync operations
 
 **Research flags:**
 - Phase 14 (Admin Audit): 트리거 성능 이슈 발생 시 추가 연구 필요
@@ -77,9 +80,9 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 08-01-PLAN.md (Schema migration SQL created)
+Stopped at: Completed 08-02-PLAN.md (Frontend types and API updated)
 Resume file: None
 
 ---
 
-**Next step:** `/gsd:execute-plan 08-02` to update frontend types and API (remove onConflict)
+**Next step:** `/gsd:execute-plan 08-03` to update offline sync logic for new schema
