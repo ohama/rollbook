@@ -16,13 +16,13 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ### Records
 
-- [ ] **REC-01**: 하루에 여러 번 운동을 기록할 수 있다 (복수 기록)
-- [ ] **REC-02**: 운동 기록에 텍스트 메모를 추가할 수 있다
-- [ ] **REC-03**: 운동 기록에 사진을 첨부할 수 있다
-- [ ] **REC-04**: 본인의 기록을 수정할 수 있다
-- [ ] **REC-05**: 본인의 기록을 삭제할 수 있다
-- [ ] **REC-06**: 본인 기록에만 수정/삭제 아이콘이 표시된다
-- [ ] **REC-07**: 운동 아이콘 클릭 시 이번 달 운동 횟수가 증가/감소한다
+- [x] **REC-01**: 하루에 여러 번 운동을 기록할 수 있다 (복수 기록)
+- [x] **REC-02**: 운동 기록에 텍스트 메모를 추가할 수 있다
+- [x] **REC-03**: 운동 기록에 사진을 첨부할 수 있다
+- [x] **REC-04**: 본인의 기록을 수정할 수 있다
+- [x] **REC-05**: 본인의 기록을 삭제할 수 있다
+- [x] **REC-06**: 본인 기록에만 수정/삭제 아이콘이 표시된다
+- [x] **REC-07**: 운동 아이콘 클릭 시 이번 달 운동 횟수가 증가/감소한다
 
 ### Calendar
 
@@ -92,13 +92,13 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 | UI-02 | Phase 9 | Complete |
 | UI-03 | Phase 9 | Complete |
 | UI-04 | Phase 9 | Complete |
-| REC-01 | Phase 10 | Pending |
-| REC-02 | Phase 10 | Pending |
-| REC-03 | Phase 10 | Pending |
-| REC-04 | Phase 10 | Pending |
-| REC-05 | Phase 10 | Pending |
-| REC-06 | Phase 10 | Pending |
-| REC-07 | Phase 10 | Pending |
+| REC-01 | Phase 10 | Complete |
+| REC-02 | Phase 10 | Complete |
+| REC-03 | Phase 10 | Complete |
+| REC-04 | Phase 10 | Complete |
+| REC-05 | Phase 10 | Complete |
+| REC-06 | Phase 10 | Complete |
+| REC-07 | Phase 10 | Complete |
 | CAL-01 | Phase 11 | Pending |
 | CAL-02 | Phase 11 | Pending |
 | CAL-03 | Phase 11 | Pending |
@@ -128,4 +128,4 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-02-15*
-*Last updated: 2026-02-16 — UI-01~04 complete (Phase 9)*
+*Last updated: 2026-02-16 — REC-01~07 complete (Phase 10)*
