@@ -22,8 +22,7 @@ export function getWorkout(userId, date) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = (((((supabase.from("workouts")).select("*")).eq("user_id", userId)).eq("workout_date", date)).is("deleted_at", defaultOf())).limit(1);
         return query.then((_arg) => {
-            const result = _arg;
-            const data = result.data;
+            const data = _arg.data;
             if (data == null) {
                 return Promise.resolve(undefined);
             }
@@ -44,8 +43,7 @@ export function getWorkoutsForDate(userId, date) {
             ascending: true,
         });
         return query.then((_arg) => {
-            const result = _arg;
-            const data = result.data;
+            const data = _arg.data;
             return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
         });
     }));
@@ -63,10 +61,7 @@ export function upsertWorkout(userId, date) {
             record_type: "workout",
         };
         const query = ((supabase.from("workouts")).insert(record)).select();
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
@@ -79,15 +74,11 @@ export const createWorkout = (userId) => ((date) => upsertWorkout(userId, date))
  */
 export function deleteWorkout(userId, date) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
-        const nowIso = new Date().toISOString();
         const updates = {
-            deleted_at: nowIso,
+            deleted_at: new Date().toISOString(),
         };
         const query = ((((supabase.from("workouts")).update(updates)).eq("user_id", userId)).eq("workout_date", date)).is("deleted_at", defaultOf());
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
@@ -96,15 +87,11 @@ export function deleteWorkout(userId, date) {
  */
 export function deleteWorkoutById(recordId) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
-        const nowIso = new Date().toISOString();
         const updates = {
-            deleted_at: nowIso,
+            deleted_at: new Date().toISOString(),
         };
         const query = ((supabase.from("workouts")).update(updates)).eq("id", recordId);
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
@@ -120,10 +107,7 @@ export function createTextRecord(userId, date, textContent) {
             text_content: textContent,
         };
         const query = ((supabase.from("workouts")).insert(record)).select();
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
@@ -132,15 +116,9 @@ export function createTextRecord(userId, date, textContent) {
  */
 export function createPhotoRecord(userId, date, photoUrl, textContent) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
-        const record = createObj(toList(delay(() => append(singleton(["user_id", userId]), delay(() => append(singleton(["workout_date", date]), delay(() => append(singleton(["record_type", "photo"]), delay(() => append(singleton(["photo_url", photoUrl]), delay(() => {
-            let text;
-            return (textContent == null) ? empty() : ((text = textContent, singleton_1(["text_content", text])));
-        })))))))))));
+        const record = createObj(toList(delay(() => append(singleton(["user_id", userId]), delay(() => append(singleton(["workout_date", date]), delay(() => append(singleton(["record_type", "photo"]), delay(() => append(singleton(["photo_url", photoUrl]), delay(() => ((textContent == null) ? empty() : singleton_1(["text_content", textContent])))))))))))));
         const query = ((supabase.from("workouts")).insert(record)).select();
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
@@ -149,16 +127,12 @@ export function createPhotoRecord(userId, date, photoUrl, textContent) {
  */
 export function updateWorkoutById(recordId, textContent) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
-        const nowIso = new Date().toISOString();
         const updates = {
             text_content: textContent,
-            updated_at: nowIso,
+            updated_at: new Date().toISOString(),
         };
         const query = ((((supabase.from("workouts")).update(updates)).eq("id", recordId)).is("deleted_at", defaultOf())).select();
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
@@ -168,10 +142,7 @@ export function updateWorkoutById(recordId, textContent) {
 export function updateWorkout(userId, date, updates) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = (((((supabase.from("workouts")).update(updates)).eq("user_id", userId)).eq("workout_date", date)).is("deleted_at", defaultOf())).select();
-        return query.then((_arg) => {
-            const result = _arg;
-            return Promise.resolve(result);
-        });
+        return query.then((_arg) => (Promise.resolve(_arg)));
     }));
 }
 
@@ -189,8 +160,7 @@ export function getWorkouts(userId, startDate, endDate) {
                     ascending: false,
                 }));
                 return query.then((_arg) => {
-                    const result = _arg;
-                    const data = result.data;
+                    const data = _arg.data;
                     return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
                 });
             }));
