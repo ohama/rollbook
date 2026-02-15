@@ -1,953 +1,695 @@
-# Domain Pitfalls: Fable + Supabase Workout Tracking App
+# Domain Pitfalls: v2.0 UI Refactoring (Live System Migration)
 
-**Domain:** Workout tracking app with photo upload and automated exercise logging
-**Stack:** Fable (F#/Elmish/Feliz) + Supabase (Auth, DB, Storage, Edge Functions)
-**Researched:** 2026-02-10
+**Domain:** Workout tracking app migration - Multi-record support, audit logging, UI refactoring
+**System:** Live production with ~20 users, Fable/Elmish + Supabase
+**Researched:** 2026-02-15
+**Critical Context:** This is a LIVE SYSTEM with real users and data
+
+---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, security breaches, or major production issues.
+These mistakes cause data loss, extended downtime, or require complete rewrites.
 
-### Pitfall 1: Row-Level Security (RLS) Disabled or Misconfigured
+### Pitfall 1: Dropping Composite Primary Key Without Migration Strategy
 
-**What goes wrong:** Database tables and Storage buckets are publicly accessible, exposing all user data. In January 2025, 170+ apps built with Lovable had exposed databases (CVE-2025-48757). In January 2026, Moltbook leaked 1.5 million API keys and 35,000+ email addresses due to disabled RLS. 83% of exposed Supabase databases involve RLS misconfigurations.
-
-**Why it happens:**
-- RLS is disabled by default when creating tables
-- Developers skip RLS during prototyping and forget to enable before launch
-- Enabling RLS without creating policies results in "deny all" (no one can access data)
-- Creating policies without enabling RLS does nothing
-
-**Consequences:**
-- Complete data breach - anyone with your anon key can read/write all data
-- User privacy violations
-- Potential legal liability
-- Reputational damage
-
-**Prevention:**
-```sql
--- Enable RLS from day one on EVERY table
-ALTER TABLE workouts ENABLE ROW LEVEL SECURITY;
-
--- Create policies immediately
-CREATE POLICY "Users can view their own workouts"
-  ON workouts FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own workouts"
-  ON workouts FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-```
-
-For Storage:
-```sql
--- Storage bucket policies
-CREATE POLICY "Authenticated users can upload photos"
-  ON storage.objects FOR INSERT
-  TO authenticated
-  WITH CHECK (
-    bucket_id = 'workout-photos'
-    AND (storage.foldername(name))[1] = auth.uid()::text
-  );
-
--- Turn OFF "Public" access on bucket
-```
-
-**Detection:**
-- Run Supabase Security Advisor in dashboard before every deployment
-- Test with different user accounts - can User A see User B's data?
-- Check `SELECT * FROM pg_policies WHERE tablename = 'workouts'` returns policies
-- Verify Storage buckets show "Private" not "Public"
-
-**Phase to address:** Phase 1 (Database setup) - RLS must be enabled before ANY data is inserted.
-
-### Pitfall 2: Service Role Key Exposed in Client Code
-
-**What goes wrong:** The service_role key bypasses RLS and grants full database access. Exposing it in client-side Fable code gives attackers complete control over your database.
+**What goes wrong:** Removing `PRIMARY KEY (user_id, workout_date)` to allow multiple records per day can cause data loss or extended downtime if not properly planned.
 
 **Why it happens:**
-- Confusion between anon key (safe for client) and service_role key (server-only)
-- Copying example code that uses service_role for convenience
-- Committing .env files with keys to version control
+- The current schema uses composite primary key enforcing UNIQUE constraint
+- PostgreSQL requires ACCESS EXCLUSIVE lock to drop constraints
+- Lock blocks ALL reads and writes during migration
+- Long-running transactions queue behind lock request, creating cascading delays
 
 **Consequences:**
-- Attacker can read/write/delete all data regardless of RLS
-- Complete database compromise
-- Impossible to recover without database migration
+- Production downtime during migration
+- User data loss if migration fails mid-operation
+- Offline queue operations fail because schema has changed
+- IndexedDB queue holds operations for old schema (user_id, workout_date), but new schema expects different structure
 
 **Prevention:**
-```fsharp
-// ✅ CORRECT: Use anon key in Fable client
-let supabaseClient =
-    Supabase.createClient
-        "https://project.supabase.co"
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // anon key
-
-// ❌ WRONG: Never use service_role in client
-// let supabaseClient =
-//     Supabase.createClient url serviceRoleKey
-```
-
-- Store service_role key in Edge Functions environment variables only
-- Add .env to .gitignore immediately
-- Use separate keys for dev/staging/prod environments
+1. **Test migration on production snapshot** - Clone production database, run migration, verify data integrity
+2. **Blue-green migration approach**:
+   - Create new table `workouts_v2` with new schema (id SERIAL, user_id, workout_date, no UNIQUE constraint)
+   - Migrate existing data: `INSERT INTO workouts_v2 (user_id, workout_date, created_at) SELECT user_id, workout_date, created_at FROM workouts`
+   - Deploy frontend with dual-write support (writes to both tables during transition)
+   - Switch reads to new table
+   - Drop old table only after verification period
+3. **Schedule migration during low-usage window** - Check analytics for lowest traffic time
+4. **Terminate long-running transactions before migration** - Query `pg_stat_activity`, kill blockers
+5. **Version the IndexedDB schema** - Bump `dbVersion` to 2, migrate queue operations to include new id field
 
 **Detection:**
-- Search codebase for `service_role` string in client files
-- Check git history: `git log -p | grep service_role`
-- Use GitHub secret scanning
-- Review all environment variable references
+- Monitor migration duration: should complete in milliseconds for ~20 users
+- If migration takes >1 second, investigate locks: `SELECT * FROM pg_stat_activity WHERE state = 'active'`
+- Check for queued operations in IndexedDB after migration completes
+- Test offline sync immediately after deployment
 
-**Phase to address:** Phase 1 (Initial setup) - Must be correct from first commit.
+**Phase to address:** Phase 1 (Schema Migration) - Critical blocker, must succeed before any other v2.0 work
 
-### Pitfall 3: Manual Schema Changes via Supabase Studio
+**Reference:**
+- [PostgreSQL: ALTER TABLE Documentation](https://www.postgresql.org/docs/current/ddl-constraints.html)
+- [CommandPrompt: How to DROP UNIQUE CONSTRAINT](https://www.commandprompt.com/education/how-to-drop-unique-constraint-in-postgresql/)
 
-**What goes wrong:** Schema changes made in UI cannot be replicated across environments, making it impossible to maintain dev/staging/prod consistency. Team members work with different schemas.
+---
+
+### Pitfall 2: Offline Sync Breaking After Schema Migration
+
+**What goes wrong:** Offline queue holds operations for old schema (upsert with `onConflict: "user_id,workout_date"`), but new schema no longer has this constraint. Queue replay fails silently or creates duplicate records.
 
 **Why it happens:**
-- Supabase Studio UI is convenient for quick changes
-- Teams don't set up migrations early
-- "Just this one quick change" mindset
+- Current code: `upsert(record, { onConflict: "user_id,workout_date" })`
+- After migration: No composite unique constraint exists
+- Supabase upsert with non-existent conflict target silently becomes INSERT
+- User who logged workout offline before migration, syncs after migration → duplicate record or error
 
 **Consequences:**
-- Cannot reproduce production schema in local environment
-- Deployments break because schema doesn't match code expectations
-- Impossible to roll back bad schema changes
-- Team members have divergent local schemas
+- Users lose offline changes when queue replay fails
+- Duplicate workout records (same user, same date, different auto-generated IDs)
+- User confusion: "I already logged this workout, why is it showing twice?"
+- Silent data corruption (duplicates without error messages)
 
 **Prevention:**
-```bash
-# Use Supabase CLI for ALL schema changes
-supabase init  # Set up migrations from day one
-
-# Create migration instead of using Studio
-supabase db diff -f add_workouts_table
-supabase db push  # Apply to remote
-
-# Version control ALL migrations
-git add supabase/migrations/
-git commit -m "Add workouts table"
-```
-
-**Never:**
-- Create tables in Supabase Studio UI (production)
-- Run raw SQL in SQL Editor (production)
-- Click "Save" on schema changes in UI
+1. **Clear offline queue before migration** - Deploy notification 24h before: "Please go online to sync pending changes"
+2. **Version the queue operations**:
+   ```javascript
+   {
+     version: 2,  // Add version field
+     operationType: "CreateWorkout",
+     userId: "...",
+     workoutDate: "...",
+     recordId: null  // New field for v2 schema
+   }
+   ```
+3. **Handle version mismatch in sync**:
+   ```javascript
+   if (operation.version === 1) {
+     // Old schema: upsert with conflict
+     client.from("workouts").upsert(...)
+   } else {
+     // New schema: insert (multiple records allowed)
+     client.from("workouts_v2").insert(...)
+   }
+   ```
+4. **Test offline-to-online flow** - Manually queue operation, deploy, verify sync works
+5. **Monitor sync failures** - Track sync error rate, alert if >5% failure
 
 **Detection:**
-- Compare local and remote schemas: `supabase db diff`
-- Check if supabase/migrations/ directory has recent files matching production schema
-- Review team workflow - are people using Studio for schema changes?
+- Check IndexedDB pending count before and after migration
+- Watch for duplicate workout records in database
+- Monitor browser console for Supabase errors during sync
+- User reports: "My workout appears twice"
 
-**Phase to address:** Phase 0 (Project setup) - Initialize migrations before creating first table.
+**Phase to address:** Phase 1 (Schema Migration) - Must coordinate with offline sync code
 
-### Pitfall 4: Edge Functions Written in F# (Not Possible)
+**Reference:**
+- [Dexie: Migrating existing DB](https://dexie.org/docs/Tutorial/Migrating-existing-DB-to-Dexie)
+- [Offline-first frontend apps in 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
 
-**What goes wrong:** Developers attempt to write Edge Functions in F#, but Edge Functions run on Deno which only executes TypeScript/JavaScript.
+---
+
+### Pitfall 3: Admin Audit Log Circular Reference (Admin Deletes Audit Table)
+
+**What goes wrong:** Admin deletes another admin's records → audit log records deletion → deleted admin was the one who created audit log table → circular reference or orphaned records.
 
 **Why it happens:**
-- Assumption that F# can be used everywhere since frontend is Fable
-- Unclear documentation about Edge Function requirements
-- Desire for type safety across entire stack
+- Audit log tracks "who deleted what"
+- If admin A deletes admin B's account, audit log references admin B
+- If admin B's user account gets CASCADE deleted, foreign key to audit log breaks
+- Audit log loses context: "deleted by [NULL]"
 
 **Consequences:**
-- Wasted development time trying to get F# working
-- Forced context switch between F# (frontend) and TS (backend)
-- Need to maintain separate type definitions
+- Audit trail becomes useless (can't identify who performed action)
+- Compliance/legal issues (cannot prove who deleted data)
+- Cannot restore deleted records (no context for "who" or "why")
+- Cascading deletes corrupt audit history
 
 **Prevention:**
-```typescript
-// Edge Functions MUST be TypeScript/JavaScript
-// supabase/functions/analyze-workout-photo/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-
-serve(async (req) => {
-  const { imageUrl } = await req.json()
-  // Call ML model, process image, etc.
-  return new Response(JSON.stringify({ exercises }))
-})
-```
-
-Alternative: Use Fable to transpile F# to JS/TS for Edge Functions
-```bash
-# This would require custom build pipeline
-dotnet fable src/EdgeFunctions --outDir supabase/functions
-```
+1. **Denormalize audit log** - Store user email/name as TEXT, not foreign key to auth.users:
+   ```sql
+   CREATE TABLE admin_audit_log (
+     id SERIAL PRIMARY KEY,
+     performed_by_id UUID,  -- Reference, but nullable
+     performed_by_email TEXT NOT NULL,  -- Denormalized for history
+     action TEXT NOT NULL,  -- 'delete_user', 'delete_workout', etc.
+     target_user_id UUID,  -- Who was affected (nullable)
+     target_user_email TEXT,  -- Denormalized
+     old_values JSONB,  -- Snapshot of deleted data
+     timestamp TIMESTAMPTZ DEFAULT NOW()
+   );
+   ```
+2. **Never CASCADE delete audit log** - Audit log is append-only, immune to deletes
+3. **Snapshot full context** - Store old_values JSONB with complete record before deletion
+4. **Test admin-deletes-admin scenario** - Verify audit log remains intact
+5. **Separate audit log from user tables** - No foreign key constraints to auth.users
 
 **Detection:**
-- Review Edge Functions directory - are there .fs or .fsproj files?
-- Attempt to deploy - will fail with "unable to bundle" errors
-- Check Supabase Edge Functions docs - only shows TS/JS examples
+- Query audit log for NULL performed_by references
+- Check for missing email context in audit entries
+- Test: Create admin, have them delete something, delete that admin, verify audit log still shows email
 
-**Phase to address:** Phase 2 (Edge Function architecture planning) - Decide on TypeScript from the start.
+**Phase to address:** Phase 3 (Audit Log Setup) - Design schema correctly from start
 
-### Pitfall 5: Photo Upload Without Storage RLS Policies
+**Reference:**
+- [Supabase Audit Log Best Practices](https://bootstrapped.app/guide/how-to-implement-audit-logs-in-supabase)
+- [Postgres Auditing in 150 lines](https://supabase.com/blog/postgres-audit)
 
-**What goes wrong:** Users can view/delete other users' workout photos, or upload unlimited files causing storage cost explosion.
+---
+
+### Pitfall 4: RLS Policy Does Not Prevent Admin from Deleting Audit Log
+
+**What goes wrong:** Admin with delete privileges can delete their own audit trail, covering up malicious actions.
 
 **Why it happens:**
-- Storage RLS is separate from database RLS - easy to forget
-- Default bucket configuration doesn't enforce user isolation
-- File size/type validation not implemented
+- Current pattern: `CREATE POLICY "Admins can delete profiles" ... USING (public.is_admin())`
+- If same pattern applied to audit log, admin can delete evidence of their actions
+- RLS allows admin to DELETE from audit_log WHERE performed_by_id = auth.uid()
 
 **Consequences:**
-- Privacy breach - users see each other's photos
-- Malicious users can delete others' photos
-- Storage costs spiral from spam uploads
-- GDPR/privacy violations
+- Malicious admin covers tracks
+- Cannot investigate security incidents
+- Audit log becomes untrustworthy
+- Compliance violations (audit logs must be immutable)
 
 **Prevention:**
-```sql
--- Storage policies for workout photos bucket
-CREATE POLICY "Users can only upload their own photos"
-  ON storage.objects FOR INSERT
-  TO authenticated
-  WITH CHECK (
-    bucket_id = 'workout-photos'
-    AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+1. **No DELETE policy on audit log** - Audit log is append-only:
+   ```sql
+   ALTER TABLE admin_audit_log ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can only view their own photos"
-  ON storage.objects FOR SELECT
-  TO authenticated
-  USING (
-    bucket_id = 'workout-photos'
-    AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+   -- SELECT: Admins can view audit log
+   CREATE POLICY "Admins can view audit log"
+     ON admin_audit_log FOR SELECT
+     TO authenticated
+     USING (public.is_admin());
 
-CREATE POLICY "Users can only delete their own photos"
-  ON storage.objects FOR DELETE
-  TO authenticated
-  USING (
-    bucket_id = 'workout-photos'
-    AND (storage.foldername(name))[1] = auth.uid()::text
-  );
-```
-
-Client-side validation:
-```fsharp
-// Validate file before upload
-let validateWorkoutPhoto (file: Browser.Types.File) =
-    let maxSize = 10_000_000 // 10MB
-    let allowedTypes = ["image/jpeg"; "image/png"; "image/webp"]
-
-    if file.size > maxSize then
-        Error "Photo must be under 10MB"
-    elif not (List.contains file.``type`` allowedTypes) then
-        Error "Photo must be JPEG, PNG, or WebP"
-    else
-        Ok file
-```
+   -- INSERT: Database triggers only (no direct user insert)
+   -- NO UPDATE POLICY
+   -- NO DELETE POLICY
+   ```
+2. **Archive, don't delete** - If storage grows too large, archive to external storage (S3), never delete from Postgres
+3. **Partition by month** - For performance on large tables:
+   ```sql
+   CREATE TABLE admin_audit_log_2026_02 PARTITION OF admin_audit_log
+     FOR VALUES FROM ('2026-02-01') TO ('2026-03-01');
+   ```
+4. **Separate backup** - Daily backup of audit log to separate storage
 
 **Detection:**
-- Try uploading photo as User A, then accessing as User B
-- Check Storage policies: `SELECT * FROM storage.policies WHERE bucket_id = 'workout-photos'`
-- Test with oversized/invalid file types
-- Review bucket configuration in Supabase Studio
+- Try to DELETE from audit_log as admin user → should fail with RLS error
+- Monitor row count: should only increase, never decrease
+- Alert if row count decreases
 
-**Phase to address:** Phase 3 (Photo upload feature) - Implement Storage RLS before enabling uploads.
+**Phase to address:** Phase 3 (Audit Log Setup) - RLS policies must be correct from day one
+
+**Reference:**
+- [Supabase RLS Security](https://designrevision.com/blog/supabase-row-level-security)
+- [Production-Ready Audit Logs in PostgreSQL](https://medium.com/@sehban.alam/lets-build-production-ready-audit-logs-in-postgresql-7125481713d8)
+
+---
 
 ## Moderate Pitfalls
 
-Mistakes that cause delays, technical debt, or degraded performance.
+These mistakes cause delays, performance issues, or technical debt.
 
-### Pitfall 6: Excessive Re-rendering in Elmish State Management
+### Pitfall 5: Audit Log Trigger Performance Degrades Write Operations
 
-**What goes wrong:** Every state change triggers full app re-render, causing performance issues as app grows. One input field change re-renders entire component tree.
-
-**Why it happens:**
-- Global Elmish state at top level forces all components to re-render
-- Passing entire model down component hierarchy
-- Not using React.memo or selective subscriptions
-
-**Consequences:**
-- Sluggish UI as workout list grows
-- Poor user experience on mobile
-- Battery drain from unnecessary renders
-
-**Prevention:**
-```fsharp
-// ❌ BAD: Global state causes full re-renders
-let view model dispatch =
-    div [] [
-        workoutList model dispatch  // Re-renders on ANY model change
-        profileSettings model dispatch  // Re-renders even when workouts change
-    ]
-
-// ✅ GOOD: Use Feliz.UseElmish for component-level state
-let workoutList () =
-    let state, dispatch = React.useElmish(WorkoutList.init, WorkoutList.update, [||])
-    // Only this component re-renders on workout changes
-
-// ✅ GOOD: Use Elmish.Store for selective subscriptions
-let workoutList = React.functionComponent(fun () ->
-    let workouts = Store.useSelector(fun model -> model.workouts)
-    // Only re-renders when workouts change
-)
-```
-
-**Detection:**
-- Use React DevTools Profiler
-- Add console.log in render functions - how often called?
-- Monitor frame rate during state updates
-- User reports of "laggy" or "slow" UI
-
-**Phase to address:** Phase 4 (State management refactor) - Address when component tree grows complex.
-
-### Pitfall 7: Gmail SMTP Configuration Fails Silently
-
-**What goes wrong:** Authentication emails (signup, magic link, password reset) timeout or never arrive. Users cannot sign up or log in.
+**What goes wrong:** Database trigger on every INSERT/UPDATE/DELETE to workouts table writes to audit log. On high volume days (team challenge, everyone logging), writes slow down due to trigger overhead.
 
 **Why it happens:**
-- Gmail requires App Password (not regular password) with 2-Step Verification enabled
-- HELO localhost message rejected by Gmail relay service
-- Wrong SMTP port (465 required for Gmail relay)
-- Sender email doesn't match SMTP username
+- Each workout operation fires AFTER INSERT/UPDATE/DELETE trigger
+- Trigger writes to audit_log table
+- With ~20 users, not an issue now, but scales poorly
+- Generic triggers (one trigger handles all tables) slower than table-specific triggers
 
 **Consequences:**
-- Users cannot complete signup flow
-- Password reset broken
-- Support tickets flood in
-- Poor first impression
+- Workout creation feels slow (200ms → 500ms for insert)
+- Offline sync takes longer (queued operations replay slowly)
+- User frustration: "App is slow today"
 
 **Prevention:**
-```bash
-# Supabase Dashboard → Authentication → Email Settings
-
-SMTP Host: smtp-relay.gmail.com
-SMTP Port: 465  # NOT 587 for Gmail relay
-SMTP Username: your-workspace-admin@yourdomain.com
-SMTP Password: xxxx-xxxx-xxxx-xxxx  # App Password, not regular password
-Sender Email: your-workspace-admin@yourdomain.com  # Must match username
-```
-
-Setup steps:
-1. Enable 2-Step Verification on Google Account
-2. Generate App Password at https://myaccount.google.com/apppasswords
-3. Use App Password (16 characters with hyphens) in Supabase
-4. Sender email MUST equal SMTP username
-5. Configure SPF, DKIM, DMARC records for domain
+1. **Use table-specific triggers** - Faster than generic triggers per PostgreSQL research:
+   ```sql
+   CREATE TRIGGER workouts_audit_trigger
+     AFTER INSERT OR UPDATE OR DELETE ON workouts
+     FOR EACH ROW EXECUTE FUNCTION audit_workouts_change();
+   ```
+2. **Only audit admin actions** - Don't audit every user workout insert (too verbose), only admin deletions:
+   ```sql
+   CREATE FUNCTION audit_admin_delete() RETURNS TRIGGER AS $$
+   BEGIN
+     IF public.is_admin() THEN
+       INSERT INTO admin_audit_log (action, target_user_id, old_values, ...)
+       VALUES ('delete_workout', OLD.user_id, row_to_json(OLD), ...);
+     END IF;
+     RETURN OLD;
+   END;
+   $$ LANGUAGE plpgsql;
+   ```
+3. **Async audit logging** - Use NOTIFY to enqueue audit log write, process asynchronously
+4. **Monitor trigger execution time**:
+   ```sql
+   SET track_functions = all;
+   SELECT * FROM pg_stat_user_functions WHERE funcname LIKE '%audit%';
+   ```
+5. **Benchmark before/after** - Test 100 rapid inserts before adding trigger, compare timing
 
 **Detection:**
-- Test signup flow immediately after SMTP config
-- Check Supabase logs for email sending errors
-- Monitor email deliverability rates
-- Check spam folder for test emails
+- Monitor average INSERT duration in Supabase dashboard
+- Enable autoexplain for slow queries: `autoexplain.log_triggers = on`
+- User feedback: "Logging workouts feels slow"
 
-**Phase to address:** Phase 1 (Auth setup) - Configure and test before user testing.
+**Phase to address:** Phase 3 (Audit Log Implementation) - Benchmark before deploying trigger
 
-### Pitfall 8: Fable Promise/Async Interop Confusion
+**Reference:**
+- [PostgreSQL Triggers in 2026: Performance](https://thelinuxcode.com/postgresql-triggers-in-2026-design-performance-and-production-reality/)
+- [Performance: Generic vs Table-Specific Triggers](https://www.cybertec-postgresql.com/en/performance-differences-between-normal-and-generic-audit-triggers/)
 
-**What goes wrong:** JavaScript Promise-based APIs (Supabase client) don't work cleanly with F# async workflows. Type mismatches, error handling breaks, or code won't compile.
+---
+
+### Pitfall 6: Photo Thumbnail Generation Overloads Client CPU
+
+**What goes wrong:** Generating thumbnails client-side (browser-image-compression for every photo in gallery view) causes mobile browsers to freeze or crash when viewing date with 5+ photos.
 
 **Why it happens:**
-- F# async != JavaScript Promise
-- Fable.Promise library needed for interop
-- Error handling differs (Exception vs Promise rejection)
-- Async.RunSynchronously not available in Fable
+- Current: Client compresses before upload (max 1MB)
+- New feature: Gallery view shows thumbnails
+- If thumbnails generated on-the-fly in browser, CPU spikes
+- Mobile devices (especially older phones) can't handle 10 concurrent canvas operations
 
 **Consequences:**
-- Runtime errors from improper promise handling
-- Unhandled promise rejections crash app
-- Difficult to debug async issues
-- Inconsistent error handling across codebase
+- App freezes when scrolling through photo gallery
+- Mobile browser crashes ("Out of memory")
+- Battery drain from constant image processing
+- Poor UX: "Why is this app so slow?"
 
 **Prevention:**
-```fsharp
-// ✅ Use Fable.Promise for Supabase calls
-open Fable.Core
-open Fable.Promise
-
-// Supabase client returns JS Promise
-let fetchWorkouts userId =
-    promise {
-        let! response =
-            supabase
-                .From("workouts")
-                .Select("*")
-                .Eq("user_id", userId)
-                .AsTask()  // Convert to Promise
-
-        return! response.Data
-    }
-    |> Promise.catch (fun error ->
-        console.error("Failed to fetch workouts", error)
-        Promise.lift []
-    )
-
-// ❌ WRONG: Using F# async with Promise-based API
-// let fetchWorkouts userId = async {
-//     let! response = supabase.From(...) // Type error!
-//     return response
-// }
-```
-
-Error handling pattern:
-```fsharp
-// Define Result-based wrapper
-let supabaseCall<'T> (promise: JS.Promise<'T>) : JS.Promise<Result<'T, string>> =
-    promise
-    |> Promise.map Ok
-    |> Promise.catch (fun error ->
-        Error (sprintf "Supabase error: %A" error)
-    )
-
-// Use consistently
-let! workoutsResult =
-    supabase.From("workouts").Select("*").AsTask()
-    |> supabaseCall
-
-match workoutsResult with
-| Ok workouts -> // Handle success
-| Error msg -> // Handle error
-```
+1. **Use Supabase Image Transformations** (server-side, Pro plan feature):
+   ```javascript
+   const { data } = supabase.storage
+     .from('photos')
+     .getPublicUrl(path, {
+       transform: {
+         width: 200,
+         height: 200,
+         resize: 'cover'
+       }
+     })
+   ```
+2. **Pre-generate thumbnails on upload** - Edge Function creates thumbnail, stores alongside original:
+   ```
+   /photos/{userId}/{date}/original.jpg  (1MB)
+   /photos/{userId}/{date}/thumb.jpg     (50KB, 200x200)
+   ```
+3. **Lazy load thumbnails** - Only render thumbnails for visible photos (IntersectionObserver)
+4. **Cache transformed URLs** - Store thumbnail URL in IndexedDB, avoid re-requesting
+5. **Fallback for free tier** - If no Image Transformations, generate thumbnails once on upload, not on view
 
 **Detection:**
-- Compiler errors about Promise vs Async
-- Runtime errors: "Promise is not a function"
-- Unhandled promise rejections in browser console
-- Type mismatches in Supabase API calls
+- Monitor browser CPU usage when viewing gallery (Chrome DevTools → Performance)
+- Test on low-end Android device (3-year-old phone)
+- Check for console errors: "Maximum call stack exceeded" or memory warnings
 
-**Phase to address:** Phase 1 (Setup) - Establish pattern before writing async code.
+**Phase to address:** Phase 4 (Photo Gallery UI) - Design for server-side or pre-generated thumbnails
 
-### Pitfall 9: No Database Migration Testing in CI/CD
+**Reference:**
+- [Supabase Storage Image Transformations](https://supabase.com/docs/guides/storage/serving/image-transformations)
+- [Image Manipulation with Edge Functions](https://supabase.com/docs/guides/functions/examples/image-manipulation)
 
-**What goes wrong:** Migrations work locally but fail in staging/production due to data differences, causing deployment failures and potential downtime.
+---
+
+### Pitfall 7: Optimistic UI Update Races with Offline Sync
+
+**What goes wrong:** User deletes workout → optimistic UI removes it → offline sync replays queued CREATE for same workout → workout reappears.
 
 **Why it happens:**
-- Migrations only tested against empty local database
-- Production data has edge cases local data doesn't
-- No staging environment to test migrations
-- CI/CD pipeline doesn't run migration tests
+1. User offline, creates workout A → queued in IndexedDB
+2. User comes online, deletes workout A → optimistic UI removes from screen
+3. Sync engine replays queue → CREATE workout A fires
+4. Workout A reappears (zombie record)
 
 **Consequences:**
-- Failed deployments to production
-- Downtime while fixing migrations
-- Data corruption from partial migrations
-- Need to manually fix production database
+- User confusion: "I deleted this, why is it back?"
+- Duplicate records (create, delete, create again)
+- Trust issues with offline mode
 
 **Prevention:**
-```yaml
-# .github/workflows/test-migrations.yml
-name: Test Database Migrations
-
-on: [pull_request]
-
-jobs:
-  test-migrations:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-
-      - name: Start local Supabase
-        run: supabase start
-
-      - name: Run migrations
-        run: supabase db push
-
-      - name: Test migration rollback
-        run: supabase db reset
-
-      - name: Re-apply migrations
-        run: supabase db push
-
-      - name: Run database tests
-        run: npm run test:db
-```
-
-Best practices:
-- Test migrations on copy of production data (anonymized)
-- Write idempotent migrations (can run multiple times safely)
-- Test rollback/down migrations
-- Use staging environment that mirrors production
-- Add database seeds for common scenarios
+1. **Sync before allowing edits** - Disable edit/delete buttons if pending queue count > 0:
+   ```javascript
+   const canEdit = pendingCount === 0 && isOnline
+   ```
+2. **Tombstone pattern** - Instead of deleting from queue, mark as deleted:
+   ```javascript
+   {
+     operationType: "CreateWorkout",
+     workoutDate: "2026-02-15",
+     status: "cancelled"  // Don't replay this
+   }
+   ```
+3. **Clear queue on successful delete** - If deleting workout that's still in queue, remove queue entry instead of syncing both operations
+4. **Show sync status** - Display "Syncing X pending changes..." before allowing destructive actions
+5. **Conflict resolution UI** - If conflict detected, show modal: "This workout was created offline. Delete anyway?"
 
 **Detection:**
-- Monitor deployment failure rates
-- Check for production hotfixes to migrations
-- Review migration complexity - are they tested?
-- Look for manual SQL run in production
+- Test scenario: Go offline, create workout, go online, delete workout, wait for sync
+- Monitor for duplicate records with same (user_id, workout_date, created_at)
+- User reports: "Deleted workouts keep coming back"
 
-**Phase to address:** Phase 0 (CI/CD setup) - Configure before first migration to production.
+**Phase to address:** Phase 5 (Edit/Delete Implementation) - Critical for data integrity
 
-### Pitfall 10: OCR/ML Model Output Not Validated
+**Reference:**
+- [Optimistic UI and Conflict Resolution](https://borstch.com/snippet/optimistic-ui-updates-and-conflict-resolution)
+- [Offline vs Real-Time Sync: Managing Conflicts](https://www.adalo.com/posts/offline-vs-real-time-sync-managing-data-conflicts)
 
-**What goes wrong:** Edge Function blindly trusts OCR output, inserting nonsense exercise data. User uploads photo of cat, app logs "3 sets of 猫 meow meow".
+---
+
+### Pitfall 8: State Management Complexity Explosion (Tabs × Date Navigation × Filters)
+
+**What goes wrong:** UI has 3 state dimensions: selected tab (나/우리), selected date, selected filter (all/text/photos). Managing this in Elmish Model causes update function to balloon with edge cases.
 
 **Why it happens:**
-- Overconfidence in ML model accuracy
-- No validation of OCR output structure
-- Missing business logic constraints
-- Poor error handling for malformed data
+- Tab change should preserve date
+- Date change should preserve tab
+- Filter applies per-tab (나 tab has different filter than 우리 tab)
+- URL should reflect state (for bookmarks/sharing)
+- Back button should work intuitively
 
 **Consequences:**
-- Garbage data in workout logs
-- User confusion and frustration
-- Need to manually clean database
-- Loss of user trust
+- Update function becomes 200+ lines of nested pattern matching
+- Bugs: Changing tab resets date to today
+- URL state gets out of sync with Model
+- Browser back button behaves unexpectedly
+- Difficulty testing (too many state combinations)
 
 **Prevention:**
-```typescript
-// Edge Function: analyze-workout-photo/index.ts
-interface OcrOutput {
-  text: string;
-  confidence: number;
-}
-
-interface WorkoutExercise {
-  name: string;
-  sets: number;
-  reps: number;
-  weight?: number;
-}
-
-async function validateAndParseOcr(ocrOutput: OcrOutput): Promise<WorkoutExercise[]> {
-  // Confidence threshold
-  if (ocrOutput.confidence < 0.7) {
-    throw new Error("OCR confidence too low - please retake photo");
-  }
-
-  // Parse exercises from text
-  const exercises = parseExercises(ocrOutput.text);
-
-  // Validate each exercise
-  const validExercises = exercises.filter(ex => {
-    return (
-      ex.name.length > 2 &&           // Reasonable name length
-      ex.name.length < 50 &&
-      ex.sets > 0 && ex.sets < 20 &&  // Reasonable sets (1-20)
-      ex.reps > 0 && ex.reps < 500 && // Reasonable reps (1-500)
-      (!ex.weight || ex.weight < 1000) // Reasonable weight
-    );
-  });
-
-  if (validExercises.length === 0) {
-    throw new Error("No valid exercises found in photo");
-  }
-
-  return validExercises;
-}
-
-// Always store raw OCR output for debugging
-await supabase.from('workout_photos').insert({
-  user_id: userId,
-  photo_url: photoUrl,
-  ocr_raw: ocrOutput.text,           // Store for reprocessing
-  ocr_confidence: ocrOutput.confidence,
-  parsed_exercises: validExercises,
-  created_at: new Date().toISOString()
-});
-```
-
-Fable client-side validation:
-```fsharp
-type ExerciseValidationError =
-    | EmptyName
-    | InvalidSets of int
-    | InvalidReps of int
-    | InvalidWeight of float
-
-let validateExercise exercise =
-    [
-        if String.IsNullOrWhiteSpace exercise.Name then
-            Some EmptyName
-        if exercise.Sets < 1 || exercise.Sets > 20 then
-            Some (InvalidSets exercise.Sets)
-        if exercise.Reps < 1 || exercise.Reps > 500 then
-            Some (InvalidReps exercise.Reps)
-        match exercise.Weight with
-        | Some w when w <= 0.0 || w >= 1000.0 ->
-            Some (InvalidWeight w)
-        | _ -> None
-    ]
-    |> List.choose id
-```
+1. **Normalize state shape** - Keep state flat, not nested:
+   ```fsharp
+   type Model = {
+     CurrentTab: Tab  // Me | Team
+     SelectedDate: DateTime
+     MeFilter: Filter  // All | Text | Photos
+     TeamFilter: Filter
+     // NOT: TabState of MeState | TeamState (nested)
+   }
+   ```
+2. **Derive filter from tab** - Computed property, not separate state:
+   ```fsharp
+   let currentFilter model =
+     match model.CurrentTab with
+     | Me -> model.MeFilter
+     | Team -> model.TeamFilter
+   ```
+3. **URL as source of truth** - Parse URL on init, update URL on state change:
+   ```fsharp
+   /me/2026-02-15?filter=photos
+   /team/2026-02-14?filter=all
+   ```
+4. **Test state transitions** - Matrix of all combinations (tab change × date change × filter change)
+5. **Separate concerns** - Date navigation logic separate from tab logic separate from filter logic
 
 **Detection:**
-- Review logged workouts for nonsense data
-- Monitor OCR confidence scores
-- Check user feedback/support tickets about bad data
-- Test with variety of photos (good and bad quality)
+- Count lines in Update function → if >150 lines, refactor
+- Test: Change tab, press back button → should go to previous page, not toggle tab
+- Test: Bookmark URL, reload → state should match URL
 
-**Phase to address:** Phase 5 (Photo OCR feature) - Implement validation before deploying OCR.
+**Phase to address:** Phase 2 (UI Architecture Planning) - Design state shape early
 
-### Pitfall 11: Fable Bundle Size Not Optimized
+**Reference:**
+- [React State Management 2026: What You Need](https://www.developerway.com/posts/react-state-management-2025)
+- [State Management Best Practices](https://www.c-sharpcorner.com/article/state-management-in-react-2026-best-practices-tools-real-world-patterns/)
 
-**What goes wrong:** Initial JavaScript bundle is 5MB+, causing slow load times, especially on mobile networks. Users abandon app before it loads.
-
-**Why it happens:**
-- Including entire F# standard library
-- Not using [<Erase>] attribute on types
-- Importing large libraries (Feliz, Elmish) without tree-shaking
-- No bundle size monitoring
-
-**Consequences:**
-- Poor Time to Interactive (TTI)
-- High bounce rate on slow connections
-- Bad mobile experience
-- Poor Core Web Vitals scores
-
-**Prevention:**
-```fsharp
-// Use [<Erase>] for type-only constructs
-[<Erase>]
-type WorkoutId = WorkoutId of string
-
-[<Erase>]
-type UserId = UserId of string
-
-// These compile to plain JavaScript strings (zero runtime cost)
-
-// Prefer ofArray over ofList (arrays are native JS)
-let workouts = [| workout1; workout2; workout3 |]  // ✅
-// Not: let workouts = [ workout1; workout2; workout3 ]  // ❌
-
-// Use Feliz components (optimized for bundle size)
-let button = Feliz.Html.button [  // Erased attributes, minimal JS
-    prop.text "Submit"
-    prop.onClick handleClick
-]
-
-// Code splitting for large features
-// webpack.config.js
-module.exports = {
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-    }
-  }
-}
-```
-
-Bundle analysis:
-```bash
-# Add webpack-bundle-analyzer
-npm install --save-dev webpack-bundle-analyzer
-
-# Build and analyze
-npm run build
-npx webpack-bundle-analyzer dist/stats.json
-```
-
-**Detection:**
-- Run Lighthouse audit - check bundle size warnings
-- Monitor bundle size in CI: `bundlesize` package
-- Check Network tab in DevTools
-- Measure Time to Interactive (TTI)
-
-**Phase to address:** Phase 6 (Performance optimization) - Optimize before launch.
+---
 
 ## Minor Pitfalls
 
-Mistakes that cause annoyance but are fixable without major rework.
+These mistakes cause annoyance but are easily fixable.
 
-### Pitfall 12: Hardcoded Supabase URL in Multiple Files
+### Pitfall 9: Audit Log Storage Growth Not Monitored
 
-**What goes wrong:** Need to update Supabase URL in 5+ files when moving to production or creating staging environment.
-
-**Why it happens:**
-- Copy-pasting initialization code
-- No centralized configuration
-- Environment variables not set up
-
-**Prevention:**
-```fsharp
-// src/Config.fs - Single source of truth
-module Config
-
-open Fable.Core
-
-[<Emit("process.env.VITE_SUPABASE_URL")>]
-let supabaseUrl: string = jsNative
-
-[<Emit("process.env.VITE_SUPABASE_ANON_KEY")>]
-let supabaseAnonKey: string = jsNative
-
-// src/Supabase.fs
-module Supabase
-
-let client =
-    Supabase.createClient Config.supabaseUrl Config.supabaseAnonKey
-```
-
-Environment files:
-```bash
-# .env.local
-VITE_SUPABASE_URL=https://project.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJI...
-
-# .env.production
-VITE_SUPABASE_URL=https://prod-project.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJI...
-```
-
-**Detection:**
-- Search for hardcoded URLs: `grep -r "supabase.co" src/`
-- Try changing environment - how many files need updates?
-
-**Phase to address:** Phase 0 (Project setup) - Set up environment config immediately.
-
-### Pitfall 13: Email Verification Not Required
-
-**What goes wrong:** Users can sign up with fake emails and immediately use the app. Account enumeration possible. Spam accounts created.
+**What goes wrong:** Audit log table grows unbounded. After 6 months, reaches 100K rows, slows down queries, increases backup size.
 
 **Why it happens:**
-- Supabase allows unverified users by default
-- Convenience during development
-- Forgetting to enable before launch
+- Audit log is append-only (no deletes)
+- Every admin action adds row
+- No automatic archival or cleanup
+- pgAudit can generate enormous volume if misconfigured
+
+**Consequences:**
+- Slow queries on audit log (no partitioning)
+- Increased storage costs
+- Slow backups (large table to dump)
 
 **Prevention:**
-```sql
--- Require email verification
--- Supabase Dashboard → Authentication → Settings
--- Enable "Enable email confirmations"
-
--- Or via SQL
-UPDATE auth.config
-SET email_confirmations_enabled = true;
-```
-
-Fable client checks:
-```fsharp
-let checkEmailVerified (user: Supabase.Auth.User) =
-    if not user.EmailConfirmedAt.HasValue then
-        // Show "Please verify your email" message
-        Router.navigate("verify-email")
-```
+1. **Partition by month** - Only recent data needs fast access:
+   ```sql
+   CREATE TABLE admin_audit_log (
+     timestamp TIMESTAMPTZ NOT NULL,
+     ...
+   ) PARTITION BY RANGE (timestamp);
+   ```
+2. **Archive old partitions** - After 3 months, export to S3, drop partition
+3. **Monitor row count** - Alert if > 50K rows (unexpected for ~20 users)
+4. **Use BRIN indexes** - Efficient for append-only tables:
+   ```sql
+   CREATE INDEX idx_audit_timestamp ON admin_audit_log USING BRIN (timestamp);
+   ```
+5. **Limit audit scope** - Only log admin deletions, not every user action
 
 **Detection:**
-- Check auth settings in Supabase Dashboard
-- Test signup flow - can you use app before verifying?
-- Look for unverified users in database
+- Query row count monthly: `SELECT COUNT(*) FROM admin_audit_log`
+- Monitor Supabase storage dashboard
+- Check query performance: `EXPLAIN ANALYZE SELECT * FROM admin_audit_log WHERE ...`
 
-**Phase to address:** Phase 1 (Auth setup) - Enable before user testing.
+**Phase to address:** Phase 3 (Audit Log Setup) - Configure partitioning from start
 
-### Pitfall 14: No User Feedback During Photo Upload
+**Reference:**
+- [Production-Ready Audit Logs](https://medium.com/@sehban.alam/lets-build-production-ready-audit-logs-in-postgresql-7125481713d8)
+- [Postgres Audit Logging Guide](https://www.bytebase.com/blog/postgres-audit-logging/)
 
-**What goes wrong:** User uploads photo, no indication of progress. User clicks "Upload" again, creating duplicates. Edge Function takes 30 seconds but user sees nothing.
+---
+
+### Pitfall 10: IndexedDB Version Bump Breaks Existing Offline Users
+
+**What goes wrong:** Deploy new code with `dbVersion = 2` (to add new object store). Users with open tabs on `dbVersion = 1` get blocked, can't access IndexedDB until they reload.
 
 **Why it happens:**
-- Async upload without progress tracking
-- No loading states in UI
-- Edge Function processing time not communicated
+- IndexedDB version upgrades require all connections to close
+- If user has app open in 2 tabs, upgrade blocks
+- No automatic reload mechanism
+- User sees cryptic error: "VersionError: An attempt was made to open a database using a lower version than the existing version"
+
+**Consequences:**
+- Offline mode stops working until manual reload
+- User confusion: "Why isn't offline mode working?"
+- Data stuck in old version (can't sync)
 
 **Prevention:**
-```fsharp
-type UploadState =
-    | Idle
-    | Uploading of progress: int  // 0-100
-    | Processing                   // Edge Function analyzing
-    | Success of exercises: Exercise list
-    | Failed of error: string
-
-let uploadPhoto model file dispatch =
-    promise {
-        dispatch (SetUploadState (Uploading 0))
-
-        // Upload with progress tracking
-        let! uploadResult =
-            supabase.Storage
-                .From("workout-photos")
-                .Upload(file.name, file, {|
-                    onProgress = fun progress ->
-                        let percent = int (progress.Loaded / progress.Total * 100.0)
-                        dispatch (SetUploadState (Uploading percent))
-                |})
-
-        match uploadResult with
-        | Ok data ->
-            dispatch (SetUploadState Processing)
-
-            // Call Edge Function
-            let! analyzeResult = callAnalyzeFunction data.Key
-
-            match analyzeResult with
-            | Ok exercises ->
-                dispatch (SetUploadState (Success exercises))
-            | Error err ->
-                dispatch (SetUploadState (Failed err))
-
-        | Error err ->
-            dispatch (SetUploadState (Failed err))
-    }
-
-let view model dispatch =
-    match model.UploadState with
-    | Idle -> uploadButton
-    | Uploading progress ->
-        Html.div [
-            prop.text (sprintf "Uploading... %d%%" progress)
-            progressBar progress
-        ]
-    | Processing ->
-        Html.div [
-            prop.text "Analyzing workout photo..."
-            spinner
-        ]
-    | Success exercises -> showExercises exercises
-    | Failed error -> showError error
-```
+1. **Handle version change gracefully**:
+   ```javascript
+   db.onversionchange = () => {
+     db.close()
+     alert("App updated. Please reload the page.")
+     // Or auto-reload: window.location.reload()
+   }
+   ```
+2. **Test multi-tab scenario** - Open app in 2 tabs, deploy new version, verify behavior
+3. **Service Worker reload prompt** - Notify user of update:
+   ```javascript
+   navigator.serviceWorker.addEventListener('controllerchange', () => {
+     if (confirm('New version available. Reload?')) {
+       window.location.reload()
+     }
+   })
+   ```
+4. **Backward-compatible migrations** - Add new stores without removing old ones initially
 
 **Detection:**
-- Test upload with slow network (Chrome DevTools throttling)
-- Monitor user behavior - do they click upload multiple times?
-- Check for duplicate uploads in database
+- Monitor browser console for "VersionError"
+- Test with multiple tabs open
+- User reports: "Offline mode stopped working after update"
 
-**Phase to address:** Phase 3 (Photo upload UI) - Implement with upload feature.
+**Phase to address:** Phase 1 (Schema Migration) - Coordinate with service worker
 
-### Pitfall 15: Workout Data Not Normalized in Database
+**Reference:**
+- [Dexie: Migrating existing DB](https://dexie.org/docs/Tutorial/Migrating-existing-DB-to-Dexie)
+- [IndexedDB: Using IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB)
 
-**What goes wrong:** Exercise names stored inconsistently: "Bench Press", "bench press", "BenchPress", making analytics and search impossible.
+---
+
+### Pitfall 11: Forgetting to Update Supabase RLS Policies for New Schema
+
+**What goes wrong:** Add new `workouts_v2` table, deploy frontend, forget to add RLS policies. Users get "permission denied" errors or can see other users' data.
 
 **Why it happens:**
-- No exercise reference table
-- Free-text input without validation
-- OCR output not normalized
+- RLS policies tied to table name
+- New table defaults to NO RLS POLICIES (wide open or completely locked depending on RLS enabled/disabled)
+- Easy to forget during migration rush
+
+**Consequences:**
+- Data leak: Users see other users' workouts
+- App broken: Users can't create workouts (RLS blocks insert)
+- Security audit failure
 
 **Prevention:**
-```sql
--- Create exercise reference table
-CREATE TABLE exercises (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL UNIQUE,
-  normalized_name TEXT NOT NULL UNIQUE, -- lowercase, no spaces
-  category TEXT NOT NULL, -- 'strength', 'cardio', etc.
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Workout sets reference exercise table
-CREATE TABLE workout_sets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  workout_id UUID REFERENCES workouts(id) ON DELETE CASCADE,
-  exercise_id UUID REFERENCES exercises(id), -- Foreign key
-  sets INT NOT NULL,
-  reps INT NOT NULL,
-  weight DECIMAL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Index for fast lookups
-CREATE INDEX idx_exercises_normalized_name ON exercises(normalized_name);
-```
-
-Edge Function normalization:
-```typescript
-// Normalize exercise name before lookup/insert
-function normalizeExerciseName(name: string): string {
-  return name.toLowerCase()
-    .replace(/[^a-z0-9]/g, '') // Remove non-alphanumeric
-    .trim();
-}
-
-async function getOrCreateExercise(name: string) {
-  const normalized = normalizeExerciseName(name);
-
-  // Try to find existing
-  const { data: existing } = await supabase
-    .from('exercises')
-    .select('id')
-    .eq('normalized_name', normalized)
-    .single();
-
-  if (existing) return existing.id;
-
-  // Create new
-  const { data: created } = await supabase
-    .from('exercises')
-    .insert({
-      name: name,
-      normalized_name: normalized,
-      category: inferCategory(name)
-    })
-    .select('id')
-    .single();
-
-  return created.id;
-}
-```
+1. **Enable RLS immediately** - First line in migration:
+   ```sql
+   CREATE TABLE workouts_v2 (...);
+   ALTER TABLE workouts_v2 ENABLE ROW LEVEL SECURITY;
+   ```
+2. **Copy policies from old table** - Mirror existing policies:
+   ```sql
+   CREATE POLICY "Users can view own workouts" ON workouts_v2
+     FOR SELECT TO authenticated
+     USING ((SELECT auth.uid()) = user_id);
+   -- Repeat for INSERT, UPDATE, DELETE
+   ```
+3. **Test RLS in dev** - Create test user, try to read other user's data → should fail
+4. **Supabase Advisor** - Check Dashboard → Database → Advisors → RLS warnings
 
 **Detection:**
-- Query distinct exercise names: `SELECT DISTINCT name FROM workout_sets`
-- Check for duplicates with different casing
-- Test search/analytics features - do they work?
+- Try to SELECT from workouts_v2 as different user
+- Supabase logs show RLS violations
+- User reports: "I can see someone else's workouts" OR "App says permission denied"
 
-**Phase to address:** Phase 2 (Database schema design) - Design normalized schema from start.
+**Phase to address:** Phase 1 (Schema Migration) - Part of migration script
+
+**Reference:**
+- [Supabase Row Level Security Guide](https://designrevision.com/blog/supabase-row-level-security)
+- [RLS Best Practices](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices)
+
+---
+
+### Pitfall 12: Edit/Delete Icons Not Visible on Mobile Touch Screens
+
+**What goes wrong:** Edit/delete icons shown on hover (CSS `:hover`). On mobile (no hover), icons never appear. Users can't delete their own workouts.
+
+**Why it happens:**
+- Desktop pattern: Show icons on row hover
+- Mobile has no hover state (tap = click, not hover)
+- CSS `:hover` ignored or buggy on touch devices
+
+**Consequences:**
+- Feature inaccessible on mobile
+- Users resort to desktop to delete records
+- Poor mobile UX (defeats mobile-first design)
+
+**Prevention:**
+1. **Always-visible icons on mobile** - Use media query:
+   ```css
+   .edit-icon {
+     opacity: 0;
+   }
+   .row:hover .edit-icon {
+     opacity: 1;
+   }
+   @media (max-width: 768px) {
+     .edit-icon {
+       opacity: 1;  /* Always visible on mobile */
+     }
+   }
+   ```
+2. **Swipe gesture** - Left swipe reveals delete button (iOS pattern)
+3. **Long press** - Hold record for 500ms → show context menu
+4. **Test on real device** - iPhone Safari, Android Chrome
+
+**Detection:**
+- Test on mobile: Try to delete workout → icons should be visible
+- User feedback: "How do I delete a workout on my phone?"
+
+**Phase to address:** Phase 5 (Edit/Delete UI) - Mobile-first design requirement
+
+---
 
 ## Phase-Specific Warnings
 
 | Phase Topic | Likely Pitfall | Mitigation |
 |-------------|---------------|------------|
-| **Phase 0: Project Setup** | No migration system initialized | Run `supabase init` before creating any tables |
-| **Phase 1: Database & Auth** | RLS not enabled on tables/storage | Enable RLS immediately, test with Security Advisor |
-| **Phase 1: Auth Setup** | Gmail SMTP misconfigured | Use App Password, test email delivery before proceeding |
-| **Phase 2: Schema Design** | Manual schema changes in UI | Use migrations only, check into git |
-| **Phase 2: Schema Design** | Workout data not normalized | Create exercise reference table, use foreign keys |
-| **Phase 3: Photo Upload** | Storage RLS missing | Implement Storage policies before enabling uploads |
-| **Phase 3: Upload UI** | No progress feedback | Add upload progress and processing states |
-| **Phase 4: State Management** | Excessive re-renders | Use Feliz.UseElmish or Elmish.Store for component state |
-| **Phase 4: API Integration** | Promise/Async interop issues | Use Fable.Promise consistently, establish error handling pattern |
-| **Phase 5: Edge Functions** | Trying to use F# for Edge Functions | Write Edge Functions in TypeScript from the start |
-| **Phase 5: OCR Integration** | Trusting OCR output blindly | Validate all OCR output, store raw data for reprocessing |
-| **Phase 6: Production Prep** | Service role key in client | Audit codebase for exposed secrets before deploy |
-| **Phase 6: Performance** | Large bundle size | Optimize with [<Erase>], code splitting, bundle analysis |
-| **Phase 7: CI/CD** | Migrations not tested | Add migration testing to CI pipeline |
+| **Phase 1: Schema Migration** | Dropping UNIQUE constraint locks table | Use blue-green migration, test on snapshot, schedule during low-usage |
+| **Phase 1: Schema Migration** | Queue operations fail after schema change | Version queue operations, clear queue before migration |
+| **Phase 1: Schema Migration** | IndexedDB version bump blocks users | Handle onversionchange, prompt reload |
+| **Phase 1: Schema Migration** | Forget RLS on new table | Enable RLS immediately, copy from old table, test with different user |
+| **Phase 2: UI Architecture** | State explosion with tabs/date/filters | Normalize state, URL as source of truth, derive computed values |
+| **Phase 3: Audit Log Setup** | Admin can delete audit trail | No DELETE policy on audit_log, append-only design |
+| **Phase 3: Audit Log Setup** | Circular reference in audit log | Denormalize user info (store email as TEXT) |
+| **Phase 3: Audit Log Setup** | Trigger overhead slows writes | Only audit admin actions, use table-specific triggers |
+| **Phase 3: Audit Log Setup** | Storage growth not monitored | Partition by month, archive old data, monitor row count |
+| **Phase 4: Photo Gallery** | Client-side thumbnails overload CPU | Use Supabase Image Transformations or pre-generate on upload |
+| **Phase 5: Edit/Delete** | Race condition with offline sync | Sync before allowing edits, tombstone cancelled operations |
+| **Phase 5: Edit/Delete** | Hover-only icons don't work on touch | Always-visible on mobile, swipe gestures, test on real device |
+
+---
+
+## Quick Reference: Pre-Deployment Checklist
+
+Before deploying v2.0 migration, verify:
+
+- [ ] **Schema migration tested on production snapshot** - No data loss, completes in <1s
+- [ ] **Offline queue cleared or versioned** - Users synced before migration OR queue handles old/new schema
+- [ ] **Audit log RLS policies prevent deletion** - No DELETE policy on admin_audit_log
+- [ ] **Audit log denormalizes user info** - Stores email as TEXT, not foreign key
+- [ ] **Image thumbnails generated server-side** - Using Supabase transformations or pre-generated
+- [ ] **State management tested** - Tab change preserves date, URL syncs with state, back button works
+- [ ] **Edit/delete disabled during sync** - Button disabled if pendingCount > 0
+- [ ] **IndexedDB version bump handled** - onversionchange prompts reload
+- [ ] **RLS policies added to new tables** - workouts_v2 has same policies as workouts
+- [ ] **Mobile edit/delete icons visible** - Always-on for touch devices
+- [ ] **Audit log partitioned** - BRIN index, partition by month if expecting high volume
+- [ ] **Trigger performance benchmarked** - Audit trigger doesn't slow writes >100ms
+
+---
+
+## Confidence Assessment
+
+| Pitfall Category | Confidence | Source |
+|------------------|------------|--------|
+| Schema Migration | HIGH | PostgreSQL official docs, production experience with ACCESS EXCLUSIVE locks |
+| Offline Sync Breakage | HIGH | Common pattern in PWA migrations, IndexedDB versioning docs |
+| Audit Log Design | HIGH | Supabase audit blog, PostgreSQL trigger research |
+| RLS Policy Mistakes | HIGH | Supabase RLS docs, security best practices |
+| Photo Performance | MEDIUM | Supabase Image Transformations docs (Pro tier feature, may not apply) |
+| State Management | MEDIUM | React patterns apply to Elmish, but F# specifics less documented |
+| Race Conditions | MEDIUM | General offline-first patterns, need app-specific testing |
+| Mobile UX | HIGH | Standard mobile-first patterns |
+
+---
 
 ## Sources
 
-### Supabase Security and RLS
-- [Supabase Row Level Security (RLS): Complete Guide 2026](https://vibeappscanner.com/supabase-row-level-security)
-- [Supabase Security Flaw: 170+ Apps Exposed by Missing RLS](https://byteiota.com/supabase-security-flaw-170-apps-exposed-by-missing-rls/)
-- [Moltbook Data Breach: Supabase RLS Security Lessons](https://bastion.tech/blog/moltbook-security-lessons-ai-agents)
-- [Supabase Pitfalls: Avoid These Common Mistakes for a Robust Backend](https://hrekov.com/blog/supabase-common-mistakes)
-- [Best Practices for Supabase | Security, Scaling & Maintainability](https://www.leanware.co/insights/supabase-best-practices)
-- [10 Common Supabase Security Misconfigurations](https://modernpentest.com/blog/supabase-security-misconfigurations)
+**Schema Migration & Performance:**
+- [PostgreSQL: Documentation: 5.5 Constraints](https://www.postgresql.org/docs/current/ddl-constraints.html)
+- [CommandPrompt: How to DROP UNIQUE CONSTRAINT in PostgreSQL](https://www.commandprompt.com/education/how-to-drop-unique-constraint-in-postgresql/)
+- [PostgreSQL Triggers in 2026: Design, Performance, and Production Reality](https://thelinuxcode.com/postgresql-triggers-in-2026-design-performance-and-production-reality/)
+- [Performance: Generic vs Table-Specific Triggers](https://www.cybertec-postgresql.com/en/performance-differences-between-normal-and-generic-audit-triggers/)
 
-### Supabase Storage
-- [Storage Access Control | Supabase Docs](https://supabase.com/docs/guides/storage/security/access-control)
-- [How to secure file uploads in Supabase storage?](https://bootstrapped.app/guide/how-to-secure-file-uploads-in-supabase-storage)
-- [Supabase Storage: How to Implement File Upload Properly](https://nikofischer.com/supabase-storage-file-upload-guide)
+**Audit Logging:**
+- [Supabase: Postgres Auditing in 150 lines of SQL](https://supabase.com/blog/postgres-audit)
+- [Production-Ready Audit Logs in PostgreSQL](https://medium.com/@sehban.alam/lets-build-production-ready-audit-logs-in-postgresql-7125481713d8)
+- [Bootstrapped: How to implement audit logs in Supabase](https://bootstrapped.app/guide/how-to-implement-audit-logs-in-supabase)
+- [Postgres Audit Logging Guide](https://www.bytebase.com/blog/postgres-audit-logging/)
 
-### Supabase Email/SMTP
-- [Using Google SMTP with Supabase Custom SMTP](https://supabase.com/docs/guides/troubleshooting/using-google-smtp-with-supabase-custom-smtp-ZZzU4Y)
-- [Supabase Auth Email Sending Failed](https://drdroid.io/stack-diagnosis/supabase-auth-email-sending-failed)
+**Offline Sync & IndexedDB:**
+- [Offline-first frontend apps in 2025: IndexedDB and SQLite](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
+- [Dexie: Migrating existing DB](https://dexie.org/docs/Tutorial/Migrating-existing-DB-to-Dexie)
+- [MDN: Using IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB)
+- [How to Build Offline Capabilities](https://oneuptime.com/blog/post/2026-01-30-offline-capabilities/view)
 
-### Supabase Migrations
-- [Database Migrations | Supabase Docs](https://supabase.com/docs/guides/deployment/database-migrations)
-- [Declarative database schemas | Supabase Docs](https://supabase.com/docs/guides/local-development/declarative-database-schemas)
-- [Supabase CLI Best Practices](https://bix-tech.com/supabase-cli-best-practices-how-to-boost-security-and-control-in-your-development-workflow/)
-- [How to handle Supabase schema versioning?](https://bootstrapped.app/guide/how-to-handle-supabase-schema-versioning)
+**Conflict Resolution:**
+- [Optimistic UI Updates and Conflict Resolution](https://borstch.com/snippet/optimistic-ui-updates-and-conflict-resolution)
+- [Offline vs Real-Time Sync: Managing Data Conflicts](https://www.adalo.com/posts/offline-vs-real-time-sync-managing-data-conflicts)
 
-### Supabase Edge Functions
-- [Edge Functions Troubleshooting](https://supabase.com/docs/guides/functions/troubleshooting)
-- [Getting Started with Edge Functions](https://supabase.com/docs/guides/functions/quickstart)
+**Supabase Storage & Images:**
+- [Supabase Storage Image Transformations](https://supabase.com/docs/guides/storage/serving/image-transformations)
+- [Image Manipulation with Edge Functions](https://supabase.com/docs/guides/functions/examples/image-manipulation)
+- [Dexie: Keep storing large images, just don't index binary data](https://medium.com/dexie-js/keep-storing-large-images-just-dont-index-the-binary-data-itself-10b9d9c5c5d7)
 
-### Fable/Elmish State Management
-- [Excessive re-rerendering · Issue #55 · elmish/react](https://github.com/elmish/react/issues/55)
-- [Optimizing F# and React Integration with Elmish Store](https://dev.to/lkrzywizna/optimizing-f-and-react-integration-with-elmish-store-a-guide-to-efficient-state-management-316m)
-- [Elmish Components with Elmish 4 and UseElmish](https://fable.io/blog/2022/2022-10-13-use-elmish.html)
-- [Pros/cons of Elmish vs plain React components · Issue #154](https://github.com/elmish/elmish/issues/154)
+**RLS & Security:**
+- [Supabase Row Level Security: Complete Guide (2026)](https://designrevision.com/blog/supabase-row-level-security)
+- [Supabase RLS Best Practices: Production Patterns](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices)
+- [Row Level Security | Supabase Docs](https://supabase.com/docs/guides/database/postgres/row-level-security)
 
-### Fable Promise/Async Interop
-- [async best practice with fable calling 'traditional callback' apis · Issue #146](https://github.com/fable-compiler/Fable/issues/146)
-- [Task vs Promise · Issue #3672](https://github.com/fable-compiler/Fable/issues/3672)
-- [Fable.Promise Documentation](https://fable.io/fable-promise/reference/Fable.Promise/global-promise.html)
+**State Management:**
+- [React State Management in 2025: What You Actually Need](https://www.developerway.com/posts/react-state-management-2025)
+- [State Management in React (2026): Best Practices, Tools & Real-World Patterns](https://www.c-sharpcorner.com/article/state-management-in-react-2026-best-practices-tools-real-world-patterns/)
 
-### Fable Performance
-- [React performance in a fable world](https://vbfox.github.io/FableConf2018ReactPerf/)
-- [Road to Fable 2.0: Lightweight types? · Issue #1318](https://github.com/fable-compiler/Fable/issues/1318)
-- [Fable 2 Interview with Alfonso García-Caro](https://www.infoq.com/news/2019/01/fable-2-release-interview/)
-
-### OCR/ML Integration
-- [State of OCR technology in 2026](https://research.aimultiple.com/ocr-technology/)
-- [Building Deep Learning-Based OCR Model: Lessons Learned](https://neptune.ai/blog/building-deep-learning-based-ocr-model)
-- [Best OCR Models Comparison Guide in 2026](https://www.f22labs.com/blogs/ocr-models-comparison/)
-
-### Workout App Database Design
-- [How to Build a Database Schema for a Fitness Tracking Application?](https://www.back4app.com/tutorials/how-to-build-a-database-schema-for-a-fitness-tracking-application)
-- [Designing a data structure to track workouts](https://1df.co/designing-data-structure-to-track-workouts/)
-- [How to design a scalable data model for a personalized workout tracking app](https://www.dittofi.com/learn/how-to-design-a-data-model-for-a-workout-tracking-app)
+**Admin Security:**
+- [ManageEngine: How to detect and prevent privilege escalation attacks](https://www.manageengine.com/log-management/cyber-security/privilege-escalation-attack.html)
+- [Mastering Privilege Escalation: Techniques & Prevention Strategies](https://www.adminbyrequest.com/en/blogs/mastering-privilege-escalation-techniques-prevention-strategies)

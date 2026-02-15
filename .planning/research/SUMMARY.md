@@ -1,254 +1,357 @@
 # Project Research Summary
 
-**Project:** Rollbook - Workout Tracking Web App
-**Domain:** Small team (up to 20 people) fitness tracking with photo-based logging
-**Researched:** 2026-02-10
+**Project:** Rollbook v2.0 UI Refactoring
+**Domain:** Workout tracking web app (live system migration)
+**Researched:** 2026-02-15
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Rollbook is a small team workout tracking app that differentiates through privacy-first team visibility and photo-based logging. The recommended approach is a Fable (F#/Elmish) + Supabase stack that balances type safety on the frontend with zero-ops backend infrastructure. This stack is well-suited for a 5-20 person team scale and aligns with 2026 standards for mobile-first PWAs.
+Rollbook v2.0 transforms a working one-record-per-day workout tracker into a multi-record-per-day system with enhanced UI, text/photo records, and admin audit logging. The core challenge is migrating a live production system with ~20 active users while preserving data integrity and maintaining offline-first functionality.
 
-The core technology decisions center on Fable 4.28.0 (stable, not 5.0-alpha) with Feliz 2.9.0 for React bindings, Vite 6.x for bundling, and Tailwind CSS 4.0 for styling. The backend leverages Supabase's managed PostgreSQL with Row-Level Security (RLS), authentication, storage, and Edge Functions (TypeScript/Deno). Deploy the static frontend to Cloudflare Pages for unlimited bandwidth and global CDN distribution. The critical architectural insight is that Supabase client must use JavaScript SDK (@supabase/supabase-js) with F# bindings, NOT the .NET-only supabase-fsharp library.
+The recommended approach prioritizes safety through blue-green schema migration, uses existing Fable/Elmish/Supabase stack with minimal additions (date-fns, yet-another-react-lightbox), and builds in phases that stabilize the database schema before layering UI complexity. Critical stack decisions: custom admin audit table (not supa_audit extension), soft deletes for undo capability, and server-side thumbnail generation for performance.
 
-The primary risk is RLS misconfiguration leading to data exposure - this has affected 170+ Supabase apps in recent security audits. Mitigation requires enabling RLS on every table from day one, using migration-based schema management, and testing access control with multiple user accounts before launch. Secondary risks include Promise/Async interop complexity in Fable and Gmail SMTP configuration for auth emails (requires App Password with 2FA). Build order must follow dependencies: Database/RLS → Auth → Core Features → Storage/Edge Functions.
+Key risks center on the breaking schema change: dropping the `PRIMARY KEY (user_id, workout_date)` constraint requires careful offline queue versioning, RLS policy updates, and IndexedDB migration to avoid data loss or sync conflicts. Secondary risks include state management complexity with multiple UI dimensions (tabs, date navigation, filters), audit log performance if triggers are misconfigured, and mobile UX challenges with edit/delete interactions on touch devices.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Standard 2026 stack for functional frontend + serverless backend combines Fable/Feliz for type-safe F# UI with Supabase for zero-ops infrastructure. Frontend compiles to JavaScript via Fable, bundles with Vite, and deploys as static SPA. Backend provides managed PostgreSQL, authentication, file storage, and serverless Edge Functions.
+v2.0 requires minimal new dependencies. The existing Fable 4.28.0 + Feliz 2.9.0 + Supabase stack handles most features. Key additions focus on date operations and photo gallery UI while avoiding bloat.
 
 **Core technologies:**
-- **Fable 4.28.0 + Feliz 2.9.0**: F# to JavaScript compiler with React bindings — stable production versions with .NET 8/9/10 support. NOT 5.0-alpha or 3.0-rc (too risky).
-- **Vite 6.x + vite-plugin-fable**: Modern bundler with HMR — 2025 standard, superior to Webpack for dev experience and build speed.
-- **Supabase (managed)**: Backend-as-a-Service with PostgreSQL 15, Auth, Storage, Edge Functions — handles infrastructure, scaling, backups for small teams.
-- **@supabase/supabase-js (JavaScript SDK)**: Official client for browser — CRITICAL: use JS SDK with F# bindings, NOT supabase-fsharp which is .NET-only.
-- **Tailwind CSS 4.0**: Utility-first CSS with zero config — mobile-first utilities, single CSS line import, uses PostCSS plugin.
-- **Cloudflare Pages**: Static hosting with unlimited bandwidth — best global performance vs Netlify/Vercel bandwidth limits.
+- **date-fns 4.1.0 + Fable.DateFunctions 3.9.0**: Industry-standard date library (200M+ weekly downloads) with F# bindings for prev/next navigation and Korean date formatting. Replaces manual DateHelpers.fs calculations.
+- **yet-another-react-lightbox 3.29.1**: Modern React photo gallery with thumbnail plugin. Better maintained than PhotoSwipe (last updated 2023), confirmed React 19 compatible, plugin architecture fits incremental development.
+- **Custom admin_audit_log table**: PostgreSQL table with JSONB metadata for undo/restore. Simpler than supa_audit extension for v2.0 scope, allows denormalized actor information to survive user deletions.
+- **Supabase CLI migrations**: Built-in `supabase db diff` generates migration SQL, tracks history, supports rollback. No external tools (Flyway, Liquibase) needed.
 
-**Critical version decisions:**
-- Use stable releases only (Fable 4.28.0, Feliz 2.9.0) — alpha/RC versions too risky for production
-- Node.js 18+ required for Workbox v7 (PWA support)
-- Edge Functions run on Deno 2.1 (TypeScript only, NOT F#)
+**What NOT to add:**
+- No UI component libraries (HeadlessUI, Radix UI) — Tailwind CSS + Feliz handles tabs and modals
+- No rich text editors — plain text notes sufficient
+- No bulk operations UI — adds complexity without demand
+- No React Query — Supabase client handles caching
 
 ### Expected Features
 
-MVP focuses on fast logging and privacy-first team motivation. Photo-based AI logging is a major differentiator but defer to v2 due to complexity. One-tap logging and offline mode are competitive advantages over feature-heavy apps.
+Research identified clear table stakes vs differentiators vs anti-features based on multi-record fitness app patterns.
 
 **Must have (table stakes):**
-- Quick workout logging (manual entry) — users expect <30 seconds per exercise, core value prop
-- Basic progress tracking — sets, reps, dates, trends, streaks, personal records
-- Mobile-responsive design — 80%+ usage on mobile, desktop-first = DOA
-- Offline functionality — gym connectivity unreliable, must work without internet and sync later
-- Manual entry/editing — users expect to fix mistakes, no edit = abandonment
-- User authentication — email/password baseline for team context
-- Data export — users want ownership, no export = trust issue
-- Clean, intuitive UI — opened 3-10x per session, cluttered UI = friction = abandonment
+- Multiple records per day (core promise of schema change)
+- View all records for selected date (calendar drill-down)
+- Edit and delete own records (basic CRUD expectations)
+- Text notes on records (fitness apps without notes feel incomplete in 2026)
+- Record count badges on calendar (visual feedback for activity)
+- Timestamp display (multiple records per day means "when" matters)
+- Admin can delete any record (cleanup duty)
+- Photo thumbnail gallery (click to enlarge is expected behavior)
 
 **Should have (differentiators):**
-- One-tap logging — faster than template-based, pre-filled "Today's workout" button
-- Privacy-first team visibility — team sees ONLY monthly workout count, not details (rare in fitness apps)
-- Small team optimization — built for 5-20 people, not 50k (market whitespace)
-- Habit streaks (team-aware) — "Team worked out 47 times this month" without individual pressure
-- Workout history calendar — visual consistency feedback, low complexity, high perceived value
-- Minimal app footprint — fast load (<2s), small install, works on older phones
+- Audit log with undo (rare in fitness apps, builds trust)
+- Privacy-first multi-record (team sees aggregates, not timing patterns)
+- Fast delete without confirmation (trust + speed with undo safety net)
+- Multiple admin roles (reduces bus factor for small teams)
+- Admin action visibility (transparency prevents confusion)
 
-**Defer to v2+:**
-- Photo-based auto-record (OCR/AI) — highest differentiator but highest complexity, validate core hypothesis first
-- Workout templates — only if users request, many won't need
-- Native mobile apps — PWA first, native only if traction proves it
-- Advanced analytics/graphs — wait for user requests, most won't care (<10% power users)
-- Wearable integration — complex, low ROI for logging use case
-
-**Anti-features (do NOT build):**
-- Social feed/comments — creates surveillance feeling, kills motivation in workplace wellness
-- Nutrition tracking — scope creep, 3x complexity, different problem domain
-- Gamification/leaderboards — toxic for small teams, feels like performance reviews
-- Exercise library/database — maintenance nightmare, user-generated tags work fine
-- Video tutorials/form checking — different product, AI form analysis still unreliable in 2026
+**Defer (anti-features):**
+- Workout templates/routines (scope creep, high complexity)
+- Detailed workout structure (sets/reps tracking kills "minimal friction" value prop)
+- Record categories/tags (decision fatigue, reduces completion rate)
+- Rich text notes (over-engineering for short entries)
+- Photo editing/filters (different product)
+- Bulk operations (clutters mobile UI)
 
 ### Architecture Approach
 
-Elmish MVU (Model-View-Update) architecture on frontend with Supabase backend enforcing security via Row-Level Security (RLS). All data access controlled by PostgreSQL RLS policies using JWT claims, ensuring defense-in-depth even if client is compromised. Edge Functions handle server-side validation and business logic.
+The architecture integrates new features into the existing Elmish MVU pattern with careful schema migration strategy. The critical insight: migrating from composite primary key to auto-increment ID is a breaking change affecting database, Elmish state, offline queue, and RLS policies simultaneously.
 
 **Major components:**
-1. **Elmish Model/Update/View** — Immutable app state with pure update functions, async operations via Cmd.OfAsync, stateless view rendering via Feliz
-2. **Supabase Client Wrapper** — F# bindings to JavaScript SDK, Promise→Async conversion, unified error handling with Result types
-3. **PostgreSQL + RLS** — Database with row-level security policies (`auth.uid() = user_id`), enforces access control at database layer
-4. **Storage + RLS** — S3-compatible file storage with path-based RLS (`bucket_id = 'workout-photos' AND foldername[1] = auth.uid()`), auto-incrementing upload IDs
-5. **Edge Functions (TypeScript/Deno)** — Server-side image validation, auto-workout creation, business logic that client shouldn't bypass
+1. **Schema migration (workouts table)** — Add `id BIGSERIAL PRIMARY KEY`, drop `UNIQUE(user_id, workout_date)` constraint, add `record_type`, `notes`, `photo_url`, `deleted_at` columns. Blue-green migration with backup table for rollback.
+2. **Elmish state refactoring (Dashboard.fs)** — Lift `selectedDate` to Dashboard state (shared across tabs), change from `WorkoutRecord option` to `WorkoutRecord array`, add `RecordType` discriminated union (WorkoutRecord | TextRecord | PhotoRecord).
+3. **Offline queue versioning (offline/Types.fs)** — Add version field to queued operations, track `recordId` for update/delete operations, handle old/new schema during migration window.
+4. **Admin audit system (admin_audit_log table)** — Denormalized actor info (email as TEXT), JSONB metadata for undo/restore, RLS prevents deletion (append-only), table-specific triggers for performance.
+5. **RLS policy updates** — Add UPDATE/DELETE policies for own-record modification, soft delete enforcement, admin override for restore operations.
 
-**Key patterns:**
-- Cmd.OfAsync for all side effects (never in Update function) — maintains pure MVU architecture
-- JWT-based RLS enforcement — `auth.uid()` in policies, defense-in-depth security
-- Loading states with AsyncState<'T> — track Idle | Loading | Success | Error per operation
-- Local storage session persistence — Supabase SDK auto-persists, Elmish restores on init
-- Edge Functions for server-side logic — input validation, cross-entity operations, heavy computation
-
-**Build order dependencies:**
-1. Database schema + RLS policies (foundation)
-2. Auth integration (required for all subsequent features)
-3. One-tap workout logging (core loop)
-4. Storage + Edge Functions (depends on auth and workout table)
-5. Views/Statistics (depends on workout data existing)
-6. Admin features (depends on stable auth system)
+**Build order rationale:** Schema migration first (stabilizes data model), then type system (F# types match new schema), then UI components (build on stable foundation). This minimizes risk by avoiding UI work on unstable schema.
 
 ### Critical Pitfalls
 
-Research identified 15 pitfalls ranging from critical (security breaches) to minor (annoyance). Top 5 that could derail the project:
+Research identified 12 pitfalls across critical/moderate/minor severity. Top 5 require immediate attention during Phase 1.
 
-1. **RLS disabled or misconfigured** — 170+ Supabase apps exposed databases in 2025 (CVE-2025-48757), 83% involve RLS issues. Enable RLS on EVERY table from day one, create policies immediately, test with Security Advisor.
-2. **Service role key exposed in client** — Service role bypasses RLS, grants full database access. Use anon key only in Fable client, service role ONLY in Edge Functions, add .env to .gitignore immediately.
-3. **Manual schema changes via Studio UI** — Cannot replicate across environments. Use Supabase CLI migrations from day zero, version control ALL migrations, never use Studio for schema changes in production.
-4. **Edge Functions written in F#** — Edge Functions run on Deno (TypeScript/JavaScript only), NOT .NET runtime. Write Edge Functions in TypeScript from start, or use custom Fable build pipeline to transpile.
-5. **Photo upload without Storage RLS** — Users can view/delete others' photos, storage costs spiral. Implement Storage RLS before enabling uploads, validate file size/type client and server-side.
+1. **Dropping composite primary key without migration strategy** — ACCESS EXCLUSIVE lock blocks all reads/writes during migration. Prevention: Blue-green migration (create workouts_v2, dual-write, switch reads, drop old), test on production snapshot, schedule during low-usage window.
 
-**Phase-specific warnings:**
-- Phase 0 (Setup): Initialize migrations before creating any tables
-- Phase 1 (Auth): Enable email verification, test Gmail SMTP with App Password
-- Phase 2 (Schema): Use migrations only, normalize workout data (exercise reference table)
-- Phase 3 (Upload): Storage RLS + progress feedback UI required
-- Phase 4 (State): Watch for excessive re-renders, use Feliz.UseElmish for component state
-- Phase 5 (Edge Functions): Validate all OCR output, store raw data for reprocessing
+2. **Offline sync breaking after schema migration** — Queue holds operations for old schema (`onConflict: "user_id,workout_date"` no longer valid). Prevention: Version queue operations, clear queue before migration OR handle version mismatch in sync logic, test offline-to-online flow.
+
+3. **Admin audit log circular reference** — If admin deletes another admin's account, foreign key to audit_log breaks. Prevention: Denormalize actor info (store email as TEXT, not FK), snapshot full context in JSONB, never CASCADE delete audit log.
+
+4. **RLS policy does not prevent admin from deleting audit log** — Malicious admin could cover tracks. Prevention: No DELETE policy on audit_log (append-only), archive old data instead of deleting, separate backup of audit log.
+
+5. **Optimistic UI update races with offline sync** — User deletes workout offline, sync replays queued CREATE, workout reappears (zombie record). Prevention: Sync before allowing edits (disable buttons if pendingCount > 0), tombstone pattern for cancelled operations, conflict resolution UI.
 
 ## Implications for Roadmap
 
-Based on architecture dependencies and feature priorities, recommend 6-phase structure with clear validation gates.
+Based on research, suggested phase structure prioritizes safety and dependencies:
 
-### Phase 1: Foundation (Database + Auth)
-**Rationale:** Backend must exist before frontend can interact. Auth provides user context for all RLS policies. These are foundational dependencies with zero overlap potential.
-**Delivers:** Database schema with RLS enabled, email/password authentication, session persistence
-**Addresses:** User authentication (table stakes), data security foundation
-**Avoids:** RLS misconfiguration pitfall, service role key exposure
-**Duration estimate:** 1 week
-**Research flag:** Standard patterns, skip research-phase
+### Phase 1: Schema Migration & Type System (Days 1-4)
+**Rationale:** Database schema must stabilize before any UI work. Breaking change affects all downstream components. Blue-green migration minimizes downtime risk.
 
-### Phase 2: Core Loop (One-Tap Workout Logging)
-**Rationale:** Primary value proposition, validates product hypothesis before investing in complex features. Requires only Auth + DB (no external dependencies).
-**Delivers:** Manual workout logging, CRUD operations, today's workout detection and toggle
-**Addresses:** Quick workout logging (table stakes), one-tap logging (differentiator)
-**Avoids:** Scope creep into photo/AI features before validating core loop
-**Duration estimate:** 1 week
-**Research flag:** Standard CRUD patterns, skip research-phase
+**Delivers:**
+- Migrated `workouts` table with new schema
+- `admin_audit_log` table created
+- `is_admin` boolean added to users
+- F# types updated (RecordType DU, WorkoutRecordV2)
+- Supabase API functions for new schema
+- RLS policies updated
 
-### Phase 3: Progress Tracking (Calendar + Stats)
-**Rationale:** Requires existing workout data to display. Pure read operations, no complex writes. Provides immediate value feedback loop.
-**Delivers:** Workout history calendar, monthly counts, personal streaks, edit/delete logs
-**Addresses:** Basic progress tracking (table stakes), calendar view (differentiator)
-**Avoids:** Building complex analytics before understanding user needs
-**Duration estimate:** 1 week
-**Research flag:** Standard data aggregation, skip research-phase
+**Addresses (from FEATURES):** Foundation for multiple records per day
 
-### Phase 4: Team Features (Privacy-First Visibility)
-**Rationale:** Once individual value proven, layer on team motivation. Privacy is a selling point, must get right from day one.
-**Delivers:** Team roster, aggregated monthly counts (no individual workout details), privacy controls
-**Addresses:** Small team optimization (differentiator), privacy-first visibility (differentiator)
-**Avoids:** Social feed anti-pattern, surveillance feeling
-**Duration estimate:** 1 week
-**Research flag:** Privacy architecture needs validation — RECOMMEND /gsd:research-phase for RLS policy design
+**Avoids (from PITFALLS):** Pitfall 1 (migration locking), Pitfall 2 (offline sync breaking), Pitfall 11 (missing RLS policies)
 
-### Phase 5: Offline Mode + PWA
-**Rationale:** Expected by users (gym connectivity unreliable), complex sync logic, build after core features stable.
-**Delivers:** Service worker, IndexedDB local storage, sync algorithm, PWA manifest, offline detection
-**Addresses:** Offline functionality (table stakes), minimal app footprint (differentiator)
-**Avoids:** Offline mode complexity derailing core feature development
-**Duration estimate:** 1-2 weeks
-**Research flag:** Sync conflict resolution needs research — RECOMMEND /gsd:research-phase for IndexedDB + Supabase sync patterns
+**Research flag:** Standard pattern, skip research-phase. Follow PostgreSQL migration best practices.
 
-### Phase 6: Production Prep (Performance + Security Audit)
-**Rationale:** Address bundle size, security audit, migration testing before launch.
-**Delivers:** Code splitting, bundle optimization, Security Advisor audit, CI/CD pipeline with migration tests
-**Addresses:** Minimal app footprint (differentiator), clean UI (table stakes)
-**Avoids:** Large bundle size pitfall, RLS misconfiguration pitfall
-**Duration estimate:** 1 week
-**Research flag:** Performance optimization patterns — RECOMMEND /gsd:research-phase for Fable bundle optimization techniques
+---
 
-### Post-MVP: Photo Upload + OCR (Defer to v2)
-**Rationale:** Highest differentiator but highest complexity. Validate core hypothesis with manual logging first. Requires stable storage, Edge Functions, ML integration.
-**Delivers:** Photo upload with progress UI, Storage RLS, Edge Function for image validation, OCR integration (future), auto-workout creation
-**Addresses:** Photo-based auto-record (differentiator, deferred)
-**Avoids:** Over-engineering v1 with unproven ML accuracy, OCR validation pitfall
-**Duration estimate:** 2-3 weeks when prioritized
-**Research flag:** ML/OCR integration needs deep research — RECOMMEND /gsd:research-phase for Vision API comparison, accuracy benchmarks
+### Phase 2: Date Navigation & Dashboard State (Days 5-6)
+**Rationale:** Shared date state is core to new UX. Lifting `selectedDate` to Dashboard enables tab switching without losing context. Dependencies ready (schema migrated, types defined).
+
+**Delivers:**
+- DateNavigation component (prev/next, date picker)
+- Dashboard state refactored with `selectedDate`
+- Elmish messages for date changes
+- Load records for selected date
+
+**Uses (from STACK):** date-fns + Fable.DateFunctions for date arithmetic
+
+**Implements (from ARCHITECTURE):** DateNavigation component, Dashboard state management
+
+**Avoids (from PITFALLS):** Pitfall 8 (state complexity explosion) by normalizing state shape early
+
+**Research flag:** Standard Elmish pattern, skip research-phase.
+
+---
+
+### Phase 3: Multi-Record List & Add Operations (Days 7-9)
+**Rationale:** Display is safer than edit/delete. Users can see multiple records before introducing destructive operations. Validates schema migration worked correctly.
+
+**Delivers:**
+- RecordList component (displays WorkoutRecordV2 array)
+- RecordItem component (renders by RecordType)
+- RecordForm component (add workout/text/photo)
+- Empty state UI
+
+**Addresses (from FEATURES):** View all records for day, distinguish records visually, timestamp display
+
+**Implements (from ARCHITECTURE):** RecordList, RecordItem, RecordForm components
+
+**Avoids (from PITFALLS):** Pitfall 12 (mobile touch icons) by designing mobile-first from start
+
+**Research flag:** Standard React patterns, skip research-phase.
+
+---
+
+### Phase 4: Photo Gallery with Lightbox (Days 10-11)
+**Rationale:** Photo feature is isolated, can be built in parallel with edit/delete. Thumbnail performance is critical for mobile UX.
+
+**Delivers:**
+- F# bindings for yet-another-react-lightbox
+- PhotoGallery with thumbnail grid
+- Lightbox modal on click
+- Integration with existing photo upload
+
+**Uses (from STACK):** yet-another-react-lightbox, Supabase Image Transformations (or pre-generated thumbnails)
+
+**Addresses (from FEATURES):** Photo thumbnail gallery (table stakes)
+
+**Avoids (from PITFALLS):** Pitfall 6 (client-side thumbnail overload) by using server-side transformations
+
+**Research flag:** Lightbox library integration — SKIP research (clear choice from STACK.md, good documentation).
+
+---
+
+### Phase 5: Edit & Delete Own Records (Days 12-13)
+**Rationale:** Destructive operations come after display validated. RLS must be correct before allowing deletes. Offline sync coordination is critical.
+
+**Delivers:**
+- Edit mode for RecordItem
+- Delete with confirmation/undo
+- RLS policy verification
+- Soft delete implementation
+
+**Addresses (from FEATURES):** Edit own records, delete own records (table stakes)
+
+**Implements (from ARCHITECTURE):** RLS UPDATE/DELETE policies, soft delete pattern
+
+**Avoids (from PITFALLS):** Pitfall 7 (optimistic UI race) by syncing before allowing edits
+
+**Research flag:** Standard CRUD + RLS, skip research-phase. Test RLS thoroughly.
+
+---
+
+### Phase 6: Calendar Integration (Days 14-15)
+**Rationale:** Calendar depends on multi-record API working correctly. Count badges require aggregation queries. Navigation ties everything together.
+
+**Delivers:**
+- Calendar shows record count badges
+- Click date navigates to day detail
+- Monthly batch loading (performance)
+- ProgressView and TeamView updated
+
+**Addresses (from FEATURES):** Calendar with record count (table stakes), date navigation
+
+**Implements (from ARCHITECTURE):** Calendar batch loading, client-side grouping
+
+**Avoids (from PITFALLS):** Anti-pattern 5 (N+1 queries) by loading month in one query
+
+**Research flag:** Standard aggregation pattern, skip research-phase.
+
+---
+
+### Phase 7: Admin Audit Log & Undo (Days 16-18)
+**Rationale:** Audit log is complex (triggers, RPC, UI) but isolated. Can be developed late without blocking user features. Critical for admin trust.
+
+**Delivers:**
+- Audit log triggers (admin actions only)
+- AuditLog UI component
+- Undo/restore RPC function
+- AdminRoleManager component
+
+**Addresses (from FEATURES):** Admin audit log, multiple admin roles
+
+**Implements (from ARCHITECTURE):** admin_audit_log table, soft delete workflow, PostgreSQL RPC
+
+**Avoids (from PITFALLS):** Pitfall 3 (circular reference), Pitfall 4 (admin deletes audit), Pitfall 5 (trigger performance)
+
+**Research flag:** Audit log trigger optimization — NEEDS RESEARCH if performance issues observed during Phase 5. Otherwise use table-specific triggers from ARCHITECTURE.md.
+
+---
+
+### Phase 8: Offline Queue Refactor (Days 19-20)
+**Rationale:** Offline sync must handle new schema (recordId, update/delete operations). Deferred until core features stable. High risk of regressions.
+
+**Delivers:**
+- Versioned queue operations
+- Update/delete queue support
+- Conflict resolution logic
+- IndexedDB version bump handling
+
+**Addresses (from FEATURES):** Maintains offline-first value prop
+
+**Implements (from ARCHITECTURE):** Queue versioning, tombstone pattern
+
+**Avoids (from PITFALLS):** Pitfall 2 (offline sync breaking), Pitfall 7 (race conditions), Pitfall 10 (IndexedDB version bump)
+
+**Research flag:** Offline sync conflict resolution — NEEDS RESEARCH. PITFALLS.md identifies race conditions but no detailed resolution strategy. Consider researching Operational Transformation or CRDT patterns if conflicts become frequent.
+
+---
+
+### Phase 9: Polish & Testing (Days 21-22)
+**Rationale:** Final phase for mobile responsiveness, loading states, error handling. E2E testing validates all phases integrated correctly.
+
+**Delivers:**
+- Mobile responsive tabs/navigation
+- Loading states for async operations
+- Error boundaries and user feedback
+- Empty state refinements
+- E2E test scenarios
+
+**Addresses (from FEATURES):** All table stakes features validated
+
+**Avoids (from PITFALLS):** All minor pitfalls caught in testing
+
+**Research flag:** Skip research-phase. Standard QA patterns.
+
+---
 
 ### Phase Ordering Rationale
 
-- **Dependencies drive order:** Database → Auth → Core Features → Team → Offline. Each phase depends on previous phases being stable.
-- **Value delivery increments:** Phase 2 (core loop) is minimum viable product for single user. Phase 3 adds progress tracking. Phase 4 adds team differentiation. Phase 5 adds competitive parity (offline). Phase 6 ensures production-ready.
-- **Risk mitigation:** Address RLS security in Phase 1 before any data exists. Validate core hypothesis (manual logging) before investing in complex OCR/ML (deferred to v2).
-- **Parallelization opportunity:** After Phase 2, Phases 3 and 4 can be built concurrently by different developers (read-only views vs team features).
-- **Testing sequence:** Backend (SQL) → Auth (manual) → Core loop (E2E) → Team features (multi-user) → Offline (sync conflict scenarios) → Performance (Lighthouse audits)
+**Schema-first approach:** Phases 1-2 stabilize data layer and state management before touching UI. Prevents building components on unstable foundation.
+
+**Display before destroy:** Phases 3-4 (view, add) come before Phase 5 (edit, delete). Users can verify migration worked before attempting destructive operations.
+
+**Admin features last:** Phase 7 (audit log) is isolated, doesn't block user features. Can be delayed if schedule slips.
+
+**Offline sync deferred:** Phase 8 waits until core CRUD stable. Minimizes rework from schema/API changes during early phases.
+
+**Dependency-aware grouping:**
+- Phase 2 needs Phase 1 (types)
+- Phase 3 needs Phase 2 (date state)
+- Phase 5 needs Phase 3 (display working)
+- Phase 6 needs Phase 5 (API stable)
+- Phase 8 needs Phase 5 (CRUD operations defined)
+
+**Pitfall mitigation alignment:**
+- Critical pitfalls addressed in Phase 1 (migration, RLS, offline queue)
+- Moderate pitfalls addressed in Phases 4-5 (photo performance, optimistic UI)
+- Minor pitfalls caught in Phase 9 (testing)
 
 ### Research Flags
 
 **Phases needing deeper research during planning:**
-- **Phase 4 (Team Features):** Privacy-first RLS policy design for aggregated stats view. Need research on PostgreSQL views + RLS interaction, team roster permission models.
-- **Phase 5 (Offline Mode):** IndexedDB + Supabase sync conflict resolution patterns. Sparse documentation on Elmish + service worker integration.
-- **Phase 6 (Performance):** Fable bundle optimization techniques ([<Erase>] attributes, code splitting, tree-shaking). Need research on vite-plugin-fable optimization strategies.
-- **Post-MVP (Photo OCR):** Vision API comparison (Google Cloud Vision, AWS Rekognition, Azure Computer Vision), OCR accuracy benchmarks for handwritten workout notes, Edge Function ML pipeline design.
+- **Phase 7 (Audit Log):** If trigger performance becomes an issue (>100ms write latency), research async audit logging patterns or LISTEN/NOTIFY approach.
+- **Phase 8 (Offline Sync):** Conflict resolution strategy incomplete. If race conditions occur frequently, research CRDT (Conflict-free Replicated Data Types) or Operational Transformation patterns for offline-first apps.
 
 **Phases with standard patterns (skip research-phase):**
-- **Phase 1 (Foundation):** Database schema + RLS patterns well-documented in Supabase docs. Email/password auth is baseline Supabase feature.
-- **Phase 2 (Core Loop):** CRUD operations on Supabase follow standard PostgREST patterns. Elmish state management well-documented.
-- **Phase 3 (Progress Tracking):** Data aggregation and calendar UI are standard web dev patterns. No novel architecture needed.
+- **Phase 1:** PostgreSQL migrations, RLS policies — well-documented in Supabase docs
+- **Phase 2:** Elmish state management, date libraries — standard F# patterns
+- **Phase 3:** React component composition — established patterns
+- **Phase 4:** Lightbox integration — clear library choice from STACK.md
+- **Phase 5:** CRUD operations with RLS — standard Supabase pattern
+- **Phase 6:** Calendar aggregation queries — standard SQL GROUP BY
+- **Phase 9:** Testing and polish — standard QA
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All versions verified from official NuGet/npm registries and GitHub releases. Fable 4.28.0 + Feliz 2.9.0 + Vite 6.x + Supabase are production-ready 2026 standards. |
-| Features | HIGH | Table stakes and anti-features validated across 10+ fitness app comparison articles. Differentiators (privacy-first, photo-based) aligned with 2026 market gaps. |
-| Architecture | HIGH | Elmish MVU + Supabase RLS patterns well-documented. Build order dependencies verified through Supabase docs and Fable community examples. |
-| Pitfalls | HIGH | Critical pitfalls (RLS misconfiguration, service role exposure) verified through recent security incidents (CVE-2025-48757, Moltbook breach). |
+| Stack | HIGH | All versions verified from npm/NuGet. date-fns and yet-another-react-lightbox are industry standards with active maintenance. Custom audit table approach documented in multiple production examples. |
+| Features | HIGH | Table stakes validated from fitness app UX research (FitNotes, Hevy, Strong patterns). Multi-record-per-day is standard in 2026 fitness apps. Anti-features identified from scope creep analysis. |
+| Architecture | HIGH | Schema migration pattern from official PostgreSQL docs. Elmish MVU is proven for complex state. RLS policies follow Supabase best practices. Soft delete + audit log is industry standard. |
+| Pitfalls | HIGH | Critical pitfalls (1-4) sourced from PostgreSQL locking docs, Supabase audit blog, production outage reports. Offline sync issues (2, 7) documented in PWA migration case studies. Mobile UX pitfall (12) from standard touch interaction patterns. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-While research confidence is high, several areas need validation during implementation:
+Research was comprehensive, but several areas need validation during implementation:
 
-- **Photo OCR accuracy:** Research shows 70-90% accuracy for printed text, 40-70% for handwriting. Real-world accuracy with workout board photos unknown. Address in v2 with user testing and validation UI.
-- **Offline sync conflict resolution:** Elmish + service worker + IndexedDB integration has limited examples. Need Phase 5 research to design conflict resolution strategy (last-write-wins vs manual resolution).
-- **Team stats RLS design:** Aggregated views with partial privacy (show counts, hide details) requires careful RLS policy design. Validate in Phase 4 research that PostgreSQL views can enforce team-visible aggregation while protecting individual row access.
-- **Fable bundle size optimization:** vite-plugin-fable is relatively new. Best practices for minimizing bundle size ([<Erase>] usage, tree-shaking, code splitting) need Phase 6 research and Lighthouse benchmarking.
-- **Gmail SMTP reliability:** Gmail relay requires App Password + 2FA + SPF/DKIM/DMARC. Daily sending limits unknown for small team scale. May need fallback to Resend/SendGrid if verification emails fail at scale.
+- **Offline sync conflict resolution:** PITFALLS.md identifies race conditions but doesn't provide detailed conflict resolution strategy. Current mitigation (disable edits if pendingCount > 0) is conservative. If users demand offline edit capability, research CRDT or OT patterns in Phase 8.
+
+- **Supabase Image Transformations availability:** STACK.md recommends server-side thumbnail generation via Supabase Image Transformations, but this is a Pro plan feature. Verify plan status before Phase 4. Fallback: Pre-generate thumbnails on upload via Edge Function.
+
+- **Audit log trigger performance at scale:** ARCHITECTURE.md suggests table-specific triggers are faster than generic triggers, but no benchmarking data for this specific workload. Monitor write latency in Phase 7. If >100ms, consider async audit logging (LISTEN/NOTIFY pattern).
+
+- **IndexedDB migration edge cases:** PITFALLS.md covers basic version bump handling, but multi-tab scenarios with pending queue operations need testing. Simulate: User has 2 tabs open, queued operations in both, version bump deployed. Expected: Both tabs prompt reload. Actual behavior may vary by browser.
+
+- **Mobile calendar UX:** FEATURES.md describes count badges, but research didn't validate optimal touch target size for calendar dates with badges. Test Phase 6 on real devices (iPhone SE, older Android) to verify 44x44px minimum touch target met.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-All research files (STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md) include comprehensive source citations. Aggregated here for reference:
-
-**Technology stack:**
-- Fable GitHub Releases, Feliz NuGet packages (official version verification)
-- Supabase official documentation (Auth, Storage, Edge Functions, RLS)
-- Vite documentation, vite-plugin-fable GitHub
-
-**Feature landscape:**
-- 12+ fitness app comparison articles (2026 market analysis)
-- Privacy research from USENIX Security Conference, Consumer Reports
-- Simple Workout Log, Alpha Progression (competitor analysis)
-
-**Architecture patterns:**
-- Elmish official documentation, Fable blog (MVU architecture)
-- Supabase RLS documentation, multi-tenant application guides
-- Edge Functions examples from official Supabase GitHub
-
-**Domain pitfalls:**
-- CVE-2025-48757 (170+ exposed Lovable apps), Moltbook breach analysis
-- Supabase Security Advisor documentation
-- Fable Promise interop GitHub issues, performance analysis
+- Official Supabase documentation (migrations, RLS, storage, audit logs)
+- PostgreSQL official docs (ALTER TABLE, constraints, triggers)
+- npm package pages (date-fns, yet-another-react-lightbox) — versions verified, weekly downloads confirmed
+- Fable.DateFunctions NuGet page and GitHub (maintained by Zaid Ajaj, Feliz author)
+- MDN Web Docs (IndexedDB versioning)
 
 ### Secondary (MEDIUM confidence)
-- Community blog posts on Supabase best practices
-- Stack Overflow discussions on Fable/Elmish state management
-- Fitness app UX design principles from Stormotion, TopFlight Apps
+- Fitness app UX research (FitNotes, Hevy, Strong) — patterns confirmed across multiple apps
+- Supabase community blog (audit logging patterns, RLS best practices)
+- PostgreSQL trigger performance comparison (CYBERTEC blog) — generic vs table-specific triggers
+- Offline-first app patterns (LogRocket, Adalo) — conflict resolution strategies
+- React state management guides (2026 best practices)
 
 ### Tertiary (LOW confidence, needs validation)
-- OCR accuracy estimates (need real-world testing with workout photos)
-- Bundle size optimization claims (need benchmarking)
-- Offline-first sync patterns (need implementation validation)
+- Supabase Image Transformations (Pro plan feature, pricing not verified)
+- Async audit logging performance claims (no benchmark data for this specific workload)
+- CRDT/OT patterns for offline conflict resolution (not yet researched, flagged for Phase 8 if needed)
 
 ---
-*Research completed: 2026-02-10*
-*Ready for roadmap: yes*
+
+**Research completed:** 2026-02-15
+**Ready for roadmap:** YES
+
+**Next steps for orchestrator:**
+1. Use phase structure above as starting point for roadmap creation
+2. Flag Phase 7 and Phase 8 for potential deeper research during planning
+3. Validate Supabase plan includes Image Transformations before Phase 4
+4. Allocate testing time in Phase 9 for mobile UX validation
+5. Consider buffer days between phases for integration testing
