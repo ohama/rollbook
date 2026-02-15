@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Team Features** - Team workout visibility (members can view each other's records)
 - [x] **Phase 5: Photo Upload** - Photo-based workout logging
 - [x] **Phase 6: Production Ready** - Offline PWA, admin tools, performance optimization
-- [ ] **Phase 7: Local Deployment** - Mac Mini + Cloudflare Tunnel로 포트 노출 없이 프로덕션 서비스 운영
+- [x] **Phase 7: Local Deployment** - Mac Mini + Cloudflare Tunnel로 포트 노출 없이 프로덕션 서비스 운영
 
 ## Phase Details
 
@@ -158,11 +158,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Cloudflare Tunnel setup (install cloudflared, create tunnel, configure DNS)
-- [ ] 07-02-PLAN.md — Production build configuration (.env.production, vite.config.js, build test)
-- [ ] 07-03-PLAN.md — launchd service automation (Supabase, Frontend, Tunnel)
-- [ ] 07-04-PLAN.md — End-to-end verification (HTTPS, MX records, full user flow)
-- [ ] 07-05-PLAN.md — Write Phase 7 tutorial (tutorial/07-local-deployment.md)
+- [x] 07-01-PLAN.md — Cloudflare Tunnel setup (install cloudflared, create tunnel, configure DNS)
+- [x] 07-02-PLAN.md — Production build configuration (.env.production, vite.config.js, build test)
+- [x] 07-03-PLAN.md — launchd service automation (Supabase, Frontend, Tunnel)
+- [x] 07-04-PLAN.md — End-to-end verification (HTTPS, MX records, full user flow)
+- [x] 07-05-PLAN.md — Write Phase 7 tutorial (tutorial/07-local-deployment.md)
 
 **Details:**
 Phase 7 transitions from local development to production deployment on Mac Mini. Plan 07-01 installs cloudflared, creates a named tunnel, configures config.yml for routing, and sets DNS records for frontend and API subdomains with automatic HTTPS. Plan 07-02 creates .env.production with tunnel domain URLs, updates vite.config.js allowedHosts, builds production bundle, and tests via tunnel. Plan 07-03 creates three launchd plist files for Supabase, Frontend (vite preview), and cloudflared to auto-start on boot with proper dependency ordering. Plan 07-04 performs comprehensive verification: HTTPS certificate, Google Workspace MX preservation, complete user flow from signup to team features. Plan 07-05 documents the entire deployment process in a Korean tutorial for beginners, covering tunnel concepts, DNS configuration, service automation, and troubleshooting.
@@ -191,8 +191,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Team Features | 6/6 | ✅ Complete | 2026-02-10 |
 | 5. Photo Upload | 7/7 | ✅ Complete | 2026-02-10 |
 | 6. Production Ready | 8/8 | ✅ Complete | 2026-02-10 |
-| 7. Local Deployment | 0/5 | ⏳ Not Started | - |
+| 7. Local Deployment | 5/5 | ✅ Complete | 2026-02-15 |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-12 (Phase 7 replaced with Local Deployment milestone)*
+*Last updated: 2026-02-15 (Phase 7 complete)*

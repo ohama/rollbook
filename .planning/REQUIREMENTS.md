@@ -53,26 +53,26 @@ Requirements for local deployment milestone.
 
 ### Tunnel & Domain
 
-- [ ] **TUNL-01**: cloudflared 터널 생성 및 config.yml 설정
-- [ ] **TUNL-02**: 자체 도메인 DNS 레코드 등록 (프론트엔드 + API 서브도메인)
-- [ ] **TUNL-03**: HTTPS 자동 인증서 동작 확인
-- [ ] **TUNL-04**: Google Workspace MX 레코드 보존 확인
+- [x] **TUNL-01**: cloudflared 터널 생성 및 config.yml 설정
+- [x] **TUNL-02**: 자체 도메인 DNS 레코드 등록 (프론트엔드 + API 서브도메인)
+- [x] **TUNL-03**: HTTPS 자동 인증서 동작 확인
+- [x] **TUNL-04**: Google Workspace MX 레코드 보존 확인
 
 ### Production Build
 
-- [ ] **PROD-01**: .env.production에 터널 도메인 URL 설정
-- [ ] **PROD-02**: vite.config.js preview allowedHosts에 도메인 추가
-- [ ] **PROD-03**: 프로덕션 빌드 및 터널 경유 동작 확인
+- [x] **PROD-01**: .env.production에 터널 도메인 URL 설정
+- [x] **PROD-02**: vite.config.js preview allowedHosts에 도메인 추가
+- [x] **PROD-03**: 프로덕션 빌드 및 터널 경유 동작 확인
 
 ### Service Automation
 
-- [ ] **AUTO-01**: cloudflared launchd 서비스 등록
-- [ ] **AUTO-02**: Supabase + Frontend + cloudflared 전체 launchd 자동 시작
-- [ ] **AUTO-03**: Mac Mini 재부팅 후 전체 서비스 자동 복구 확인
+- [x] **AUTO-01**: cloudflared launchd 서비스 등록
+- [x] **AUTO-02**: Supabase + Frontend + cloudflared 전체 launchd 자동 시작
+- [x] **AUTO-03**: Mac Mini 재부팅 후 전체 서비스 자동 복구 확인
 
 ### Documentation
 
-- [ ] **DOCS-02**: Phase 7 배포 튜토리얼 작성 (tutorial/07-local-deployment.md, 한글, 초보 개발자 대상)
+- [x] **DOCS-02**: Phase 7 배포 튜토리얼 작성 (tutorial/07-local-deployment.md, 한글, 초보 개발자 대상)
 
 ## v2 Requirements
 
@@ -144,24 +144,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TECH-01 | Phase 1 | Complete |
 | DOCS-01 | All Phases | Complete |
 
-| TUNL-01 | Phase 7 | Pending |
-| TUNL-02 | Phase 7 | Pending |
-| TUNL-03 | Phase 7 | Pending |
-| TUNL-04 | Phase 7 | Pending |
-| PROD-01 | Phase 7 | Pending |
-| PROD-02 | Phase 7 | Pending |
-| PROD-03 | Phase 7 | Pending |
-| AUTO-01 | Phase 7 | Pending |
-| AUTO-02 | Phase 7 | Pending |
-| AUTO-03 | Phase 7 | Pending |
-| DOCS-02 | Phase 7 | Pending |
+| TUNL-01 | Phase 7 | Complete |
+| TUNL-02 | Phase 7 | Complete |
+| TUNL-03 | Phase 7 | Complete |
+| TUNL-04 | Phase 7 | Complete |
+| PROD-01 | Phase 7 | Complete |
+| PROD-02 | Phase 7 | Complete |
+| PROD-03 | Phase 7 | Complete |
+| AUTO-01 | Phase 7 | Complete |
+| AUTO-02 | Phase 7 | Complete |
+| AUTO-03 | Phase 7 | Complete |
+| DOCS-02 | Phase 7 | Complete |
 
 **Coverage:**
 - v1.0 requirements: 19 total (17 complete, 2 deferred)
-- v1.1 requirements: 11 total
+- v1.1 requirements: 11 total (11 complete)
 - Mapped to phases: 11
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2025-02-10*
-*Last updated: 2026-02-12 (Milestone v1.1 requirements added)*
+*Last updated: 2026-02-15 (Milestone v1.1 complete)*
