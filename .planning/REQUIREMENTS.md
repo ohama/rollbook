@@ -9,10 +9,10 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ### UI Layout
 
-- [ ] **UI-01**: 사용자가 이전/다음 달 버튼으로 날짜를 탐색할 수 있다
-- [ ] **UI-02**: 1줄에 날짜 네비게이션이 표시된다 (이전 달 `<|` / 년월일 / 다음 달 `|>`)
-- [ ] **UI-03**: 2줄에 나/우리 탭이 표시되고, 선택된 탭이 강조색으로 변한다
-- [ ] **UI-04**: 3줄 콘텐츠 영역이 운동 기록 / 달력 / 기록 내용 간 전환된다
+- [x] **UI-01**: 사용자가 이전/다음 달 버튼으로 날짜를 탐색할 수 있다
+- [x] **UI-02**: 1줄에 날짜 네비게이션이 표시된다 (이전 달 `<|` / 년월일 / 다음 달 `|>`)
+- [x] **UI-03**: 2줄에 나/우리 탭이 표시되고, 선택된 탭이 강조색으로 변한다
+- [x] **UI-04**: 3줄 콘텐츠 영역이 운동 기록 / 달력 / 기록 내용 간 전환된다
 
 ### Records
 
@@ -88,10 +88,10 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 |-------------|-------|--------|
 | MIG-01 | Phase 8 | Complete |
 | MIG-02 | Phase 8 | Complete |
-| UI-01 | Phase 9 | Pending |
-| UI-02 | Phase 9 | Pending |
-| UI-03 | Phase 9 | Pending |
-| UI-04 | Phase 9 | Pending |
+| UI-01 | Phase 9 | Complete |
+| UI-02 | Phase 9 | Complete |
+| UI-03 | Phase 9 | Complete |
+| UI-04 | Phase 9 | Complete |
 | REC-01 | Phase 10 | Pending |
 | REC-02 | Phase 10 | Pending |
 | REC-03 | Phase 10 | Pending |
@@ -128,4 +128,4 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-02-15*
-*Last updated: 2026-02-16 — MIG-01, MIG-02 complete (Phase 8)*
+*Last updated: 2026-02-16 — UI-01~04 complete (Phase 9)*

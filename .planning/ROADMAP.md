@@ -140,9 +140,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Date navigation UI with month browsing and year rollover
-- [ ] 09-02-PLAN.md — View scope tab switcher (나/우리) with active state highlighting
-- [ ] 09-03-PLAN.md — Content area switching with lifted date state
+- [x] 09-01-PLAN.md — Date navigation UI with month browsing and year rollover (COMPLETED 2026-02-16)
+- [x] 09-02-PLAN.md — View scope tab switcher (나/우리) with active state highlighting (COMPLETED 2026-02-16)
+- [x] 09-03-PLAN.md — Content area switching with lifted date state (COMPLETED 2026-02-16)
 
 ### Phase 10: Multi-Record CRUD
 **Goal**: Users can create, edit, and delete multiple workout records per day
@@ -231,7 +231,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 6. Admin & Offline | v1.0 | 8/8 | Complete | 2026-02-10 |
 | 7. Mac Mini Deployment | v1.1 | 6/6 | Complete | 2026-02-15 |
 | 8. Schema Migration | v2.0 | 3/3 | Complete | 2026-02-16 |
-| 9. UI Layout & Navigation | v2.0 | 0/3 | Not started | - |
+| 9. UI Layout & Navigation | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 10. Multi-Record CRUD | v2.0 | 0/TBD | Not started | - |
 | 11. Calendar Integration | v2.0 | 0/TBD | Not started | - |
 | 12. Detail Views | v2.0 | 0/TBD | Not started | - |
@@ -239,4 +239,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 14. Admin & Audit | v2.0 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-16 — Phase 8 complete (schema migration, F# types, offline sync)*
+*Last updated: 2026-02-16 — Phase 9 complete (date navigation, view scope tabs, content switching)*
