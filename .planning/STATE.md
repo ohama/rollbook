@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 ## Current Position
 
 Phase: 9 of 14 (UI Layout & Navigation)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-02-16 — Completed 09-01-PLAN.md (Date Navigation)
+Last activity: 2026-02-16 — Completed 09-02-PLAN.md (View Scope Tab Switcher)
 
-Progress: [████████████░░░░░░░░] 56% (v1.0 + v1.1 complete, v2.0 Phase 8 complete, Phase 9 started)
+Progress: [████████████░░░░░░░░] 57% (v1.0 + v1.1 complete, v2.0 Phase 8 complete, Phase 9 plan 2/3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 52 (Phases 1-8, Phase 9 plan 1)
-- Average duration: ~43 min (weighted average including Phase 9)
+- Total plans completed: 53 (Phases 1-8, Phase 9 plans 1-2)
+- Average duration: ~42 min (weighted average including Phase 9)
 
 **By Phase:**
 
@@ -34,14 +34,14 @@ Progress: [████████████░░░░░░░░] 56% (v1
 | 6. Admin & Offline | 8 | ~6.0h | ~45min |
 | 7. Mac Mini Deployment | 6 | ~4.5h | ~45min |
 | 8. Schema Migration | 3 | ~1.0h | ~20min |
-| 9. UI Layout & Navigation | 1/3 | ~4min | ~4min |
+| 9. UI Layout & Navigation | 2/3 | ~7min | ~3.5min |
 
 **Recent Trend:**
 - v1.0 + v1.1 shipped in 6 days (2026-02-10 → 2026-02-15)
 - Phase 8 completed 2026-02-16 (schema migration + F# types + offline sync)
 - Phase 9 started 2026-02-16 (date navigation)
 
-*Updated: 2026-02-16 after Phase 9 Plan 01 completion*
+*Updated: 2026-02-16 after Phase 9 Plan 02 completion*
 
 ## Accumulated Context
 
@@ -64,6 +64,8 @@ Recent decisions affecting current work:
 - **Cloudflare Tunnel config mode**: Use local config.yml instead of --token for ingress rules (v2.0 Phase 8)
 - **Date navigation pattern**: Reuse proven ProgressView/TeamView pattern for year rollover (v2.0 Phase 9)
 - **Mobile-first layout**: Single-row flexbox with short button text to prevent wrapping on 375px screens (v2.0 Phase 9)
+- **ViewScope discriminated union**: Personal | TeamView for type-safe view selection (avoids collision with TabMode's Team) (v2.0 Phase 9)
+- **Default to Personal view**: 나 tab selected by default — matches user expectation for personal-first (v2.0 Phase 9)
 
 ### Pending Todos
 
@@ -82,8 +84,8 @@ None.
 
 **Phase 9 (UI Layout & Navigation) — IN PROGRESS:**
 - ✅ Plan 01: Date navigation with year rollover (4 min)
-- ⏳ Plan 02: Calendar grid integration (pending)
-- ⏳ Plan 03: Multi-record UI (pending)
+- ✅ Plan 02: View scope tab switcher 나/우리 (3 min)
+- ⏳ Plan 03: Calendar grid integration (pending)
 
 **Research flags:**
 - Phase 14 (Admin Audit): 트리거 성능 이슈 발생 시 추가 연구 필요
@@ -92,9 +94,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Completed 09-01-PLAN.md (Date Navigation)
+Stopped at: Completed 09-02-PLAN.md (View Scope Tab Switcher)
 Resume file: None
 
 ---
 
-**Next step:** `/gsd:execute-plan 09-02` to add calendar grid integration
+**Next step:** `/gsd:execute-plan 09-03` to add calendar grid integration
