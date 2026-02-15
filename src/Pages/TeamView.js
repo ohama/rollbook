@@ -29,52 +29,24 @@ export function TeamViewPage() {
     const setCurrentMonth = patternInput_1[1];
     const currentMonth = patternInput_1[0] | 0;
     const patternInput_2 = reactApi.useState([]);
-    const setMembers = patternInput_2[1];
     const members = patternInput_2[0];
     const patternInput_3 = reactApi.useState(true);
     const setLoading = patternInput_3[1];
-    const loading = patternInput_3[0];
     const patternInput_4 = reactApi.useState(undefined);
     const setError = patternInput_4[1];
-    const error = patternInput_4[0];
-    const goToNextMonth = () => {
-        if (currentMonth === 12) {
-            setCurrentYear(currentYear + 1);
-            setCurrentMonth(1);
-        }
-        else {
-            setCurrentMonth(currentMonth + 1);
-        }
-    };
-    const goToPrevMonth = () => {
-        if (currentMonth === 1) {
-            setCurrentYear(currentYear - 1);
-            setCurrentMonth(12);
-        }
-        else {
-            setCurrentMonth(currentMonth - 1);
-        }
-    };
     const dependencies = [currentYear, currentMonth];
     reactApi.useEffect(() => {
         setLoading(true);
         setError(undefined);
         const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
             const startDate = formatDateString(currentYear, currentMonth, 1);
-            const lastDay = getDaysInMonth(currentYear, currentMonth) | 0;
-            const endDate = formatDateString(currentYear, currentMonth, lastDay);
-            return getTeamWorkouts(startDate, endDate).then((_arg) => {
-                const workouts = _arg;
-                return getTeamProfiles().then((_arg_1) => {
-                    const profiles = _arg_1;
-                    const teamMembers = groupWorkoutsByUser(workouts, profiles);
-                    setMembers(teamMembers);
-                    setLoading(false);
-                    return Promise.resolve();
-                });
-            });
+            const endDate = formatDateString(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
+            return getTeamWorkouts(startDate, endDate).then((_arg) => (getTeamProfiles().then((_arg_1) => {
+                patternInput_2[1](groupWorkoutsByUser(_arg, _arg_1));
+                setLoading(false);
+                return Promise.resolve();
+            })));
         }).catch((_arg_2) => {
-            const ex = _arg_2;
             setError("팀 데이터를 불러올 수 없습니다");
             setLoading(false);
             return Promise.resolve();
@@ -85,7 +57,13 @@ export function TeamViewPage() {
         let elems;
         return append(singleton(createElement("div", createObj(ofArray([["className", "flex items-center justify-between bg-white rounded-lg shadow-sm p-4"], (elems = [createElement("button", {
             onClick: (_arg_3) => {
-                goToPrevMonth();
+                if (currentMonth === 1) {
+                    setCurrentYear(currentYear - 1);
+                    setCurrentMonth(12);
+                }
+                else {
+                    setCurrentMonth(currentMonth - 1);
+                }
             },
             className: "p-2 hover:bg-gray-100 rounded-lg transition-colors",
             children: "<",
@@ -94,7 +72,13 @@ export function TeamViewPage() {
             children: toText(printf("%d년 %d월"))(currentYear)(currentMonth),
         }), createElement("button", {
             onClick: (_arg_4) => {
-                goToNextMonth();
+                if (currentMonth === 12) {
+                    setCurrentYear(currentYear + 1);
+                    setCurrentMonth(1);
+                }
+                else {
+                    setCurrentMonth(currentMonth + 1);
+                }
             },
             className: "p-2 hover:bg-gray-100 rounded-lg transition-colors",
             children: ">",
@@ -110,30 +94,24 @@ export function TeamViewPage() {
                 return singleton(["children", toText(printf("총 %d회 운동"))(totalWorkouts)]);
             }))))], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))], ["children", reactApi.Children.toArray(Array.from(elems_2))])])))), delay(() => {
                 let elems_4;
-                if (loading) {
+                if (patternInput_3[0]) {
                     return singleton(createElement("div", {
                         className: "text-center py-8 text-gray-500",
                         children: "로딩 중...",
                     }));
                 }
                 else {
-                    const matchValue = error;
-                    if (matchValue == null) {
-                        return (members.length === 0) ? singleton(createElement("div", {
-                            className: "text-center py-8 text-gray-500",
-                            children: "팀원이 없습니다",
-                        })) : singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_4 = ofArray(map((m_1) => {
-                            let elems_3;
-                            return createElement("div", createObj(ofArray([["key", m_1.UserId], (elems_3 = [createElement(TeamMemberCard, m_1)], ["children", reactApi.Children.toArray(Array.from(elems_3))])])));
-                        }, members)), ["children", reactApi.Children.toArray(Array.from(elems_4))])]))));
-                    }
-                    else {
-                        const msg = matchValue;
-                        return singleton(createElement("div", {
-                            className: "text-center py-8 text-red-600",
-                            children: msg,
-                        }));
-                    }
+                    const matchValue = patternInput_4[0];
+                    return (matchValue == null) ? ((members.length === 0) ? singleton(createElement("div", {
+                        className: "text-center py-8 text-gray-500",
+                        children: "팀원이 없습니다",
+                    })) : singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_4 = ofArray(map((m_1) => {
+                        let elems_3;
+                        return createElement("div", createObj(ofArray([["key", m_1.UserId], (elems_3 = [createElement(TeamMemberCard, m_1)], ["children", reactApi.Children.toArray(Array.from(elems_3))])])));
+                    }, members)), ["children", reactApi.Children.toArray(Array.from(elems_4))])]))))) : singleton(createElement("div", {
+                        className: "text-center py-8 text-red-600",
+                        children: matchValue,
+                    }));
                 }
             }));
         }));

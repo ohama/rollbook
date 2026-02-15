@@ -1,17 +1,23 @@
 import { Union, Record } from "../fable_modules/fable-library-js.4.28.0/Types.js";
-import { union_type, float64_type, int32_type, obj_type, array_type, record_type, option_type, string_type } from "../fable_modules/fable-library-js.4.28.0/Reflection.js";
+import { union_type, float64_type, obj_type, array_type, record_type, option_type, string_type, int32_type } from "../fable_modules/fable-library-js.4.28.0/Reflection.js";
 
 export class WorkoutRecord extends Record {
-    constructor(user_id, workout_date, created_at) {
+    constructor(id, user_id, workout_date, record_type, text_content, photo_url, created_at, updated_at, deleted_at) {
         super();
+        this.id = (id | 0);
         this.user_id = user_id;
         this.workout_date = workout_date;
+        this.record_type = record_type;
+        this.text_content = text_content;
+        this.photo_url = photo_url;
         this.created_at = created_at;
+        this.updated_at = updated_at;
+        this.deleted_at = deleted_at;
     }
 }
 
 export function WorkoutRecord_$reflection() {
-    return record_type("Supabase.Types.WorkoutRecord", [], WorkoutRecord, () => [["user_id", string_type], ["workout_date", string_type], ["created_at", option_type(string_type)]]);
+    return record_type("Supabase.Types.WorkoutRecord", [], WorkoutRecord, () => [["id", int32_type], ["user_id", string_type], ["workout_date", string_type], ["record_type", string_type], ["text_content", option_type(string_type)], ["photo_url", option_type(string_type)], ["created_at", option_type(string_type)], ["updated_at", option_type(string_type)], ["deleted_at", option_type(string_type)]]);
 }
 
 export class WorkoutResponse extends Record {

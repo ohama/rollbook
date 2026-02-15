@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import React from "react";
-import { defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 import { createObj } from "../fable_modules/fable-library-js.4.28.0/Util.js";
+import { defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 import { reactApi } from "../fable_modules/Feliz.2.9.0/Interop.fs.js";
 import { ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 import { map, singleton, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
@@ -11,10 +11,9 @@ export function MemberListItem(memberListItemInputProps) {
     let elems_1, elems;
     const onDelete = memberListItemInputProps.onDelete;
     const profile = memberListItemInputProps.profile;
-    const displayName = defaultArg(profile.display_name, profile.email);
     return createElement("div", createObj(ofArray([["className", "flex items-center justify-between p-4 bg-white rounded-lg shadow mb-2"], (elems_1 = [createElement("div", createObj(ofArray([["className", "flex-1"], (elems = [createElement("p", {
         className: "font-medium text-gray-900",
-        children: displayName,
+        children: defaultArg(profile.display_name, profile.email),
     }), createElement("p", {
         className: "text-sm text-gray-500",
         children: profile.email,

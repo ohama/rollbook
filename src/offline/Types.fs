@@ -5,12 +5,16 @@ type OperationType =
     | CreateWorkout
     | DeleteWorkout
 
-/// A queued offline operation
+/// A queued offline operation (v2 schema)
 type QueuedOperation = {
     id: int option           // Auto-increment ID from IndexedDB
     operationType: string    // "CreateWorkout" | "DeleteWorkout"
+    recordId: int option     // For update/delete by record id (Phase 10+)
     userId: string           // User ID
     workoutDate: string      // YYYY-MM-DD format
+    recordType: string       // "workout" | "text" | "photo"
+    textContent: string option // For text records
+    photoUrl: string option  // For photo records
     timestamp: float         // Date.now() when queued
     retryCount: int          // Number of sync attempts
 }

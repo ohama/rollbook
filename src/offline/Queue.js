@@ -11,43 +11,25 @@ const dbVersion = 2;
 const storeName = "queue";
 
 function getDb() {
-    const upgradeConfig = {
-        upgrade: (db, oldVersion) => {
-            // Version 1 -> 2: Clear queue for schema migration (safe for ~20 users)
-            if (oldVersion === 1) {
-                if (db.objectStoreNames.contains(storeName)) {
-                    db.deleteObjectStore(storeName);
+    const upgradeConfig = ({
+            upgrade(db, oldVersion, _newVersion, transaction) {
+                if (!db.objectStoreNames.contains(storeName)) {
+                    db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+                } else if (oldVersion < 2) {
+                    transaction.objectStore(storeName).clear();
+                    console.log('Cleared v1 queue during upgrade to v2');
                 }
             }
-            // Create or recreate queue store
-            if (!(db.objectStoreNames.contains(storeName))) {
-                db.createObjectStore(storeName, {
-                    keyPath: "id",
-                    autoIncrement: true,
-                });
-            }
-        },
-    };
+        });
     return openDB(dbName)(dbVersion)(upgradeConfig);
 }
 
 /**
- * Enqueue a workout operation for offline sync (v2 schema with new fields)
+ * Enqueue a workout operation for offline sync
  */
-export function enqueue(operationType, userId, workoutDate, recordType = "workout", textContent = null, photoUrl = null) {
+export function enqueue(operationType, userId, workoutDate) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
-        const operation = {
-            id: undefined,
-            operationType: (operationType.tag === 1) ? "DeleteWorkout" : "CreateWorkout",
-            userId: userId,
-            workoutDate: workoutDate,
-            timestamp: Date.now(),
-            retryCount: 0,
-            // v2 schema fields
-            recordType: recordType,
-            textContent: textContent,
-            photoUrl: photoUrl,
-        };
+        const operation = new QueuedOperation(undefined, (operationType.tag === 1) ? "DeleteWorkout" : "CreateWorkout", undefined, userId, workoutDate, "workout", undefined, undefined, Date.now(), 0);
         return (_arg.add(storeName, operation)).then((_arg_1) => (Promise.resolve(new QueueResult(0, [_arg_1]))));
     }))).catch((_arg_2) => (Promise.resolve(new QueueResult(1, [_arg_2.message])))))));
 }
@@ -81,8 +63,12 @@ export function incrementRetry(operationId) {
                 const updated = {
                     id: operationId,
                     operationType: operation.operationType,
+                    recordId: operation.recordId,
                     userId: operation.userId,
                     workoutDate: operation.workoutDate,
+                    recordType: operation.recordType,
+                    textContent: operation.textContent,
+                    photoUrl: operation.photoUrl,
                     timestamp: operation.timestamp,
                     retryCount: operation.retryCount + 1,
                 };

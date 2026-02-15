@@ -2,9 +2,9 @@ import { PromiseBuilder__For_1565554B, PromiseBuilder__Delay_62FBFDE1, PromiseBu
 import { promise as promise_4 } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
 import { printf, toConsole } from "../fable_modules/fable-library-js.4.28.0/String.js";
 import * as Client from "../Supabase/Client";
+import { defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 import { defaultOf, equals } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { getPendingCount, getAllPending, incrementRetry, dequeue } from "./Queue.js";
-import { defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 import { SyncStatus, SyncResult } from "./Types.js";
 import { onStatusChange, onVisibilityChange, isOnline } from "./NetworkStatus.js";
 import { awaitPromise, startImmediate } from "../fable_modules/fable-library-js.4.28.0/Async.js";
@@ -40,50 +40,32 @@ function replayOperation(operation) {
     return PromiseBuilder__Run_212F1D4B(promise_4, PromiseBuilder__Delay_62FBFDE1(promise_4, () => (PromiseBuilder__Delay_62FBFDE1(promise_4, () => {
         const supabase = Client;
         const client = supabase.supabase;
+        const opId = defaultArg(operation.id, 0) | 0;
         const matchValue = operation.operationType;
-        return (matchValue === "CreateWorkout") ? (() => {
-            // Build insert payload with new schema fields
-            const payload = {
-                user_id: operation.userId,
-                workout_date: operation.workoutDate,
-                record_type: operation.recordType || 'workout',
-            };
-            // Add optional fields if present
-            if (operation.textContent) {
-                payload.text_content = operation.textContent;
+        switch (matchValue) {
+            case "CreateWorkout":
+                return ((client.from("workouts")).insert({
+                    user_id: operation.userId,
+                    workout_date: operation.workoutDate,
+                    record_type: (operation.recordType == null) ? "workout" : operation.recordType,
+                    text_content: operation.textContent,
+                    photo_url: operation.photoUrl,
+                })).then((_arg) => {
+                    const error = _arg.error;
+                    return equals(error, defaultOf()) ? (dequeue(opId).then((_arg_1) => (Promise.resolve(new SyncResult(0, [opId]))))) : (incrementRetry(opId).then((_arg_2) => (Promise.resolve(new SyncResult(1, [opId, error.message])))));
+                });
+            case "DeleteWorkout": {
+                const nowIso = new Date().toISOString();
+                return (((((client.from("workouts")).update({
+                    deleted_at: nowIso,
+                })).eq("user_id", operation.userId)).eq("workout_date", operation.workoutDate)).is("deleted_at", defaultOf())).then((_arg_3) => {
+                    const error_1 = _arg_3.error;
+                    return equals(error_1, defaultOf()) ? (dequeue(opId).then((_arg_4) => (Promise.resolve(new SyncResult(0, [opId]))))) : (incrementRetry(opId).then((_arg_5) => (Promise.resolve(new SyncResult(1, [opId, error_1.message])))));
+                });
             }
-            if (operation.photoUrl) {
-                payload.photo_url = operation.photoUrl;
-            }
-
-            toConsole(printf("Syncing CreateWorkout: user=%s, date=%s, type=%s"))(operation.userId)(operation.workoutDate)(payload.record_type);
-
-            // Use simple insert (no onConflict - new schema allows multiple records per day)
-            return ((client.from("workouts")).insert(payload)).then((_arg) => {
-                const error = _arg.error;
-                if (equals(error, defaultOf())) {
-                    toConsole(printf("✓ CreateWorkout synced successfully (op id=%d)"))(defaultArg(operation.id, 0));
-                    return dequeue(defaultArg(operation.id, 0)).then((_arg_1) => (Promise.resolve(new SyncResult(0, [defaultArg(operation.id, 0)]))));
-                } else {
-                    toConsole(printf("✗ CreateWorkout failed: %s (op id=%d)"))(error.message)(defaultArg(operation.id, 0));
-                    return incrementRetry(defaultArg(operation.id, 0)).then((_arg_2) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), error.message]))));
-                }
-            });
-        })() : ((matchValue === "DeleteWorkout") ? (() => {
-            // Use soft delete (UPDATE deleted_at = now()) instead of hard DELETE
-            toConsole(printf("Syncing DeleteWorkout: user=%s, date=%s"))(operation.userId)(operation.workoutDate);
-
-            return ((((client.from("workouts")).update({ deleted_at: new Date().toISOString() })).eq("user_id", operation.userId)).eq("workout_date", operation.workoutDate)).then((_arg_3) => {
-                const error_1 = _arg_3.error;
-                if (equals(error_1, defaultOf())) {
-                    toConsole(printf("✓ DeleteWorkout synced successfully (op id=%d)"))(defaultArg(operation.id, 0));
-                    return dequeue(defaultArg(operation.id, 0)).then((_arg_4) => (Promise.resolve(new SyncResult(0, [defaultArg(operation.id, 0)]))));
-                } else {
-                    toConsole(printf("✗ DeleteWorkout failed: %s (op id=%d)"))(error_1.message)(defaultArg(operation.id, 0));
-                    return incrementRetry(defaultArg(operation.id, 0)).then((_arg_5) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), error_1.message]))));
-                }
-            });
-        })() : (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), "Unknown operation type"]))));
+            default:
+                return Promise.resolve(new SyncResult(1, [opId, "Unknown operation type"]));
+        }
     }).catch((_arg_6) => (incrementRetry(defaultArg(operation.id, 0)).then((_arg_7) => (Promise.resolve(new SyncResult(1, [defaultArg(operation.id, 0), _arg_6.message])))))))));
 }
 

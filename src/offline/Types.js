@@ -17,19 +17,23 @@ export function OperationType_$reflection() {
 }
 
 export class QueuedOperation extends Record {
-    constructor(id, operationType, userId, workoutDate, timestamp, retryCount) {
+    constructor(id, operationType, recordId, userId, workoutDate, recordType, textContent, photoUrl, timestamp, retryCount) {
         super();
         this.id = id;
         this.operationType = operationType;
+        this.recordId = recordId;
         this.userId = userId;
         this.workoutDate = workoutDate;
+        this.recordType = recordType;
+        this.textContent = textContent;
+        this.photoUrl = photoUrl;
         this.timestamp = timestamp;
         this.retryCount = (retryCount | 0);
     }
 }
 
 export function QueuedOperation_$reflection() {
-    return record_type("Offline.Types.QueuedOperation", [], QueuedOperation, () => [["id", option_type(int32_type)], ["operationType", string_type], ["userId", string_type], ["workoutDate", string_type], ["timestamp", float64_type], ["retryCount", int32_type]]);
+    return record_type("Offline.Types.QueuedOperation", [], QueuedOperation, () => [["id", option_type(int32_type)], ["operationType", string_type], ["recordId", option_type(int32_type)], ["userId", string_type], ["workoutDate", string_type], ["recordType", string_type], ["textContent", option_type(string_type)], ["photoUrl", option_type(string_type)], ["timestamp", float64_type], ["retryCount", int32_type]]);
 }
 
 export class QueueResult extends Union {

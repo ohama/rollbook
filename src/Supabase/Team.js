@@ -27,15 +27,8 @@ export function getTeamWorkouts(startDate, endDate) {
             ascending: false,
         });
         return query.then((_arg) => {
-            const result = _arg;
-            const data = result.data;
-            if (data == null) {
-                return Promise.resolve([]);
-            }
-            else {
-                const rawWorkouts = data;
-                return Promise.resolve(map(parseWorkoutWithProfile, rawWorkouts));
-            }
+            const data = _arg.data;
+            return (data == null) ? (Promise.resolve([])) : (Promise.resolve(map(parseWorkoutWithProfile, data)));
         });
     }));
 }
@@ -49,8 +42,7 @@ export function getTeamProfiles() {
             ascending: true,
         });
         return query.then((_arg) => {
-            const result = _arg;
-            const data = result.data;
+            const data = _arg.data;
             return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
         });
     }));
@@ -68,9 +60,7 @@ export function groupWorkoutsByUser(workouts, allProfiles) {
         const userId = tupledArg[0];
         const userWorkouts = tupledArg[1];
         const profile = orElse(bind((w_1) => w_1.profile, tryHead(userWorkouts)), tryFind(userId, profileMap));
-        const displayName = defaultArgWith(bind((p_1) => p_1.display_name, profile), () => defaultArg(map_1((p_2) => p_2.email, profile), "Unknown"));
-        const email = defaultArg(map_1((p_3) => p_3.email, profile), "");
-        return new TeamMemberSummary(userId, displayName, email, userWorkouts.length, map((w_2) => w_2.workout_date, userWorkouts));
+        return new TeamMemberSummary(userId, defaultArgWith(bind((p_1) => p_1.display_name, profile), () => defaultArg(map_1((p_2) => p_2.email, profile), "Unknown")), defaultArg(map_1((p_3) => p_3.email, profile), ""), userWorkouts.length, map((w_2) => w_2.workout_date, userWorkouts));
     }, Array_groupBy((w) => w.user_id, workouts, {
         Equals: (x_1, y_1) => (x_1 === y_1),
         GetHashCode: stringHash,
@@ -78,8 +68,7 @@ export function groupWorkoutsByUser(workouts, allProfiles) {
     const usersWithWorkouts = ofArray_1(map((m) => m.UserId, grouped), {
         Compare: comparePrimitives,
     });
-    const usersWithoutWorkouts = map((p_5) => (new TeamMemberSummary(p_5.id, defaultArg(p_5.display_name, p_5.email), p_5.email, 0, [])), allProfiles.filter((p_4) => !contains(p_4.id, usersWithWorkouts)));
-    return sortByDescending((m_1) => m_1.WorkoutCount, append(grouped, usersWithoutWorkouts), {
+    return sortByDescending((m_1) => m_1.WorkoutCount, append(grouped, map((p_5) => (new TeamMemberSummary(p_5.id, defaultArg(p_5.display_name, p_5.email), p_5.email, 0, [])), allProfiles.filter((p_4) => !contains(p_4.id, usersWithWorkouts)))), {
         Compare: comparePrimitives,
     });
 }

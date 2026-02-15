@@ -34,24 +34,12 @@ export function ResetPasswordPage(resetPasswordPageInputProps) {
     patternInput = reactApi.useState(initial);
     const state = patternInput[0];
     const setState = patternInput[1];
-    const validateForm = () => {
-        if (state.password.length < 6) {
-            return "비밀번호는 6자 이상이어야 합니다";
-        }
-        else if (state.password !== state.confirmPassword) {
-            return "비밀번호가 일치하지 않습니다";
-        }
-        else {
-            return undefined;
-        }
-    };
     const handleUpdate = () => {
-        const matchValue = validateForm();
+        const matchValue = (state.password.length < 6) ? "비밀번호는 6자 이상이어야 합니다" : ((state.password !== state.confirmPassword) ? "비밀번호가 일치하지 않습니다" : undefined);
         if (matchValue == null) {
             setState(new ResetPasswordState(state.password, state.confirmPassword, true, undefined, state.success));
             const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (updatePassword(state.password).then((_arg) => {
-                const result = _arg;
-                const matchValue_1 = result.error;
+                const matchValue_1 = _arg.error;
                 if (matchValue_1 == null) {
                     setState(new ResetPasswordState(state.password, state.confirmPassword, false, state.error, true));
                     return Promise.resolve();
@@ -65,8 +53,7 @@ export function ResetPasswordPage(resetPasswordPageInputProps) {
             void pr;
         }
         else {
-            const err = matchValue;
-            setState(new ResetPasswordState(state.password, state.confirmPassword, state.loading, err, state.success));
+            setState(new ResetPasswordState(state.password, state.confirmPassword, state.loading, matchValue, state.success));
         }
     };
     return createElement(AuthLayout, {

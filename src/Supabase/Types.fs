@@ -46,11 +46,17 @@ type AuthChangeEvent =
     | [<CompiledName("PASSWORD_RECOVERY")>] PasswordRecovery
     | [<CompiledName("INITIAL_SESSION")>] InitialSession
 
-/// Workout record from workouts table
+/// Workout record from workouts table (v2.0 schema)
 type WorkoutRecord = {
+    id: int                      // BIGSERIAL primary key
     user_id: string
-    workout_date: string  // YYYY-MM-DD format (ISO date string)
+    workout_date: string         // YYYY-MM-DD format (ISO date string)
+    record_type: string          // "workout" | "text" | "photo"
+    text_content: string option  // For text records
+    photo_url: string option     // For photo records
     created_at: string option
+    updated_at: string option    // Track edits
+    deleted_at: string option    // Soft delete timestamp (NULL = active)
 }
 
 /// Response from workout operations

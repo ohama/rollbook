@@ -10,39 +10,97 @@ let getTodayDateString () : string =
     let now = System.DateTime.Now
     emitJsExpr now "$0.toLocaleDateString('en-CA')"
 
-/// Get a single workout record for a user and date
+/// Get a single workout record for a user and date (first non-deleted)
 let getWorkout (userId: string) (date: string) : JS.Promise<WorkoutRecord option> =
     promise {
         let query =
-            supabase?from("workouts")?select("*")?eq("user_id", userId)?eq("workout_date", date)?maybeSingle()
+            supabase
+                ?from("workouts")
+                ?select("*")
+                ?eq("user_id", userId)
+                ?eq("workout_date", date)
+                ?is("deleted_at", null)
+                ?limit(1)
         let! result = query
         let data = result?data
         if isNull data then
             return None
         else
-            return Some (unbox<WorkoutRecord> data)
+            let records = unbox<WorkoutRecord array> data
+            if records.Length = 0 then
+                return None
+            else
+                return Some records.[0]
     }
 
-/// Upsert a workout record (idempotent - handles double-clicks)
+/// Get all non-deleted records for a user and date
+let getWorkoutsForDate (userId: string) (date: string) : JS.Promise<WorkoutRecord array> =
+    promise {
+        let query =
+            supabase
+                ?from("workouts")
+                ?select("*")
+                ?eq("user_id", userId)
+                ?eq("workout_date", date)
+                ?is("deleted_at", null)
+                ?order("created_at", createObj ["ascending" ==> true])
+        let! result = query
+        let data = result?data
+        if isNull data then
+            return [||]
+        else
+            return unbox<WorkoutRecord array> data
+    }
+
+/// Create a workout record (simple insert, no onConflict)
+/// Backward compatible: same signature as old upsertWorkout
 let upsertWorkout (userId: string) (date: string) : JS.Promise<WorkoutResponse> =
     promise {
         let record = createObj [
             "user_id" ==> userId
             "workout_date" ==> date
+            "record_type" ==> "workout"
         ]
-        let options = createObj [
-            "onConflict" ==> "user_id,workout_date"
-        ]
-        let query = supabase?from("workouts")?upsert(record, options)?select()
+        let query = supabase?from("workouts")?insert(record)?select()
         let! result = query
         return unbox<WorkoutResponse> result
     }
 
-/// Delete a workout record
+/// Alias for upsertWorkout (Phase 10+ name)
+let createWorkout = upsertWorkout
+
+/// Soft-delete workout records for a user and date
+/// Transitional: deletes ALL non-deleted records for user+date
+/// Phase 10 will update to delete by individual record id
 let deleteWorkout (userId: string) (date: string) : JS.Promise<obj> =
     promise {
+        let nowIso : string = emitJsExpr () "new Date().toISOString()"
+        let updates = createObj [
+            "deleted_at" ==> nowIso
+        ]
         let query =
-            supabase?from("workouts")?delete()?eq("user_id", userId)?eq("workout_date", date)
+            supabase
+                ?from("workouts")
+                ?update(updates)
+                ?eq("user_id", userId)
+                ?eq("workout_date", date)
+                ?is("deleted_at", null)
+        let! result = query
+        return result
+    }
+
+/// Soft-delete a single workout record by id (Phase 10+)
+let deleteWorkoutById (recordId: int) : JS.Promise<obj> =
+    promise {
+        let nowIso : string = emitJsExpr () "new Date().toISOString()"
+        let updates = createObj [
+            "deleted_at" ==> nowIso
+        ]
+        let query =
+            supabase
+                ?from("workouts")
+                ?update(updates)
+                ?eq("id", recordId)
         let! result = query
         return result
     }
@@ -51,7 +109,13 @@ let deleteWorkout (userId: string) (date: string) : JS.Promise<obj> =
 let updateWorkout (userId: string) (date: string) (updates: obj) : JS.Promise<WorkoutResponse> =
     promise {
         let query =
-            supabase?from("workouts")?update(updates)?eq("user_id", userId)?eq("workout_date", date)?select()
+            supabase
+                ?from("workouts")
+                ?update(updates)
+                ?eq("user_id", userId)
+                ?eq("workout_date", date)
+                ?is("deleted_at", null)
+                ?select()
         let! result = query
         return unbox<WorkoutResponse> result
     }
@@ -59,8 +123,8 @@ let updateWorkout (userId: string) (date: string) (updates: obj) : JS.Promise<Wo
 /// Get workout records for a user with optional date range filtering
 let getWorkouts (userId: string) (startDate: string option) (endDate: string option) : JS.Promise<WorkoutRecord array> =
     promise {
-        // Start with base query
-        let mutable query = supabase?from("workouts")?select("*")?eq("user_id", userId)
+        // Start with base query filtering soft-deleted records
+        let mutable query = supabase?from("workouts")?select("*")?eq("user_id", userId)?is("deleted_at", null)
 
         // Add optional date filters
         match startDate with

@@ -6,25 +6,26 @@ open Offline.Types
 
 /// Database name and version
 let private dbName = "rollbook-offline"
-let private dbVersion = 1
+let private dbVersion = 2
 let private storeName = "queue"
 
 /// Import idb library
 [<Import("openDB", from="idb")>]
 let private openDB: string -> int -> obj -> JS.Promise<obj> = jsNative
 
-/// Get or create the database
+/// Get or create the database (v2: clears v1 queue on upgrade)
 let private getDb () : JS.Promise<obj> =
     let upgradeConfig =
-        createObj [
-            "upgrade" ==> fun (db: obj) ->
-                // Create queue store with auto-increment key
-                if not (db?objectStoreNames?contains(storeName)) then
-                    db?createObjectStore(storeName, createObj [
-                        "keyPath" ==> "id"
-                        "autoIncrement" ==> true
-                    ]) |> ignore
-        ]
+        emitJsExpr storeName """({
+            upgrade(db, oldVersion, _newVersion, transaction) {
+                if (!db.objectStoreNames.contains($0)) {
+                    db.createObjectStore($0, { keyPath: 'id', autoIncrement: true });
+                } else if (oldVersion < 2) {
+                    transaction.objectStore($0).clear();
+                    console.log('Cleared v1 queue during upgrade to v2');
+                }
+            }
+        })"""
     openDB dbName dbVersion upgradeConfig
 
 /// Enqueue a workout operation for offline sync
@@ -38,8 +39,12 @@ let enqueue (operationType: OperationType) (userId: string) (workoutDate: string
                     match operationType with
                     | CreateWorkout -> "CreateWorkout"
                     | DeleteWorkout -> "DeleteWorkout"
+                recordId = None
                 userId = userId
                 workoutDate = workoutDate
+                recordType = "workout"
+                textContent = None
+                photoUrl = None
                 timestamp = JS.Constructors.Date.now()
                 retryCount = 0
             }
@@ -84,8 +89,12 @@ let incrementRetry (operationId: int) : JS.Promise<bool> =
                     createObj [
                         "id" ==> operationId
                         "operationType" ==> operation?operationType
+                        "recordId" ==> operation?recordId
                         "userId" ==> operation?userId
                         "workoutDate" ==> operation?workoutDate
+                        "recordType" ==> operation?recordType
+                        "textContent" ==> operation?textContent
+                        "photoUrl" ==> operation?photoUrl
                         "timestamp" ==> operation?timestamp
                         "retryCount" ==> (unbox<int> operation?retryCount + 1)
                     ]

@@ -63,14 +63,11 @@ export function PhotoGallery(photoGalleryInputProps) {
     let elems_4;
     const userId = photoGalleryInputProps.userId;
     const patternInput = reactApi.useState([]);
-    const setPhotos = patternInput[1];
     const photos = patternInput[0];
     const patternInput_1 = reactApi.useState(true);
     const setLoading = patternInput_1[1];
-    const loading = patternInput_1[0];
     const patternInput_2 = reactApi.useState(undefined);
     const setError = patternInput_2[1];
-    const error = patternInput_2[0];
     const dependencies = [userId];
     reactApi.useEffect(() => {
         const pr_1 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
@@ -80,26 +77,18 @@ export function PhotoGallery(photoGalleryInputProps) {
                 let pr;
                 const filesResult = _arg;
                 if (filesResult.tag === 1) {
-                    const msg = filesResult.fields[0];
                     setError("사진을 불러올 수 없습니다");
                     setLoading(false);
                     return Promise.resolve();
                 }
                 else {
-                    const filenames = filesResult.fields[0];
                     return ((pr = map((filename) => PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
                         const path = toText(printf("%s/%s"))(userId)(filename);
                         return createSignedUrl(bucketName, path, 3600).then((_arg_1) => {
                             const urlResult = _arg_1;
-                            if (urlResult.tag === 1) {
-                                return Promise.resolve(undefined);
-                            }
-                            else {
-                                const url = urlResult.fields[0];
-                                return Promise.resolve(new PhotoItem(filename, url, extractDate(filename)));
-                            }
+                            return (urlResult.tag === 1) ? (Promise.resolve(undefined)) : (Promise.resolve(new PhotoItem(filename, urlResult.fields[0], extractDate(filename))));
                         });
-                    })), filenames.filter((name) => {
+                    })), filesResult.fields[0].filter((name) => {
                         if ((name.endsWith(".jpg") ? true : name.endsWith(".jpeg")) ? true : name.endsWith(".png")) {
                             return true;
                         }
@@ -107,18 +96,15 @@ export function PhotoGallery(photoGalleryInputProps) {
                             return name.endsWith(".webp");
                         }
                     })), Promise.all(pr))).then((_arg_2) => {
-                        const photoItems = _arg_2;
-                        const validPhotos = sortByDescending((p) => p.Date, choose((x) => x, photoItems), {
+                        patternInput[1](sortByDescending((p) => p.Date, choose((x) => x, _arg_2), {
                             Compare: comparePrimitives,
-                        });
-                        setPhotos(validPhotos);
+                        }));
                         setLoading(false);
                         return Promise.resolve();
                     });
                 }
             });
         }).catch((_arg_3) => {
-            const ex = _arg_3;
             setError("사진 로딩 실패");
             setLoading(false);
             return Promise.resolve();
@@ -130,39 +116,33 @@ export function PhotoGallery(photoGalleryInputProps) {
         children: "내 운동 사진",
     })), delay(() => {
         let elems, elems_3;
-        if (loading) {
+        if (patternInput_1[0]) {
             return singleton(createElement("div", {
                 className: "text-center py-8 text-gray-500",
                 children: "사진 로딩 중...",
             }));
         }
         else {
-            const matchValue = error;
-            if (matchValue == null) {
-                return (photos.length === 0) ? singleton(createElement("div", createObj(ofArray([["className", "text-center py-8 text-gray-500"], (elems = [createElement("p", {
-                    className: "text-4xl mb-2",
-                    children: "📷",
-                }), createElement("p", {
-                    children: "아직 업로드한 사진이 없습니다",
-                })], ["children", reactApi.Children.toArray(Array.from(elems))])])))) : singleton(createElement("div", createObj(ofArray([["className", "grid grid-cols-2 md:grid-cols-3 gap-4"], (elems_3 = ofArray(map((photo) => {
-                    let elems_2, elems_1;
-                    return createElement("div", createObj(ofArray([["key", photo.Filename], ["className", "relative aspect-square rounded-lg overflow-hidden shadow-sm"], (elems_2 = [createElement("img", {
-                        src: photo.SignedUrl,
-                        alt: toText(printf("%s 운동 사진"))(photo.Date),
-                        className: "w-full h-full object-cover",
-                    }), createElement("div", createObj(ofArray([["className", "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2"], (elems_1 = [createElement("span", {
-                        className: "text-white text-sm font-medium",
-                        children: formatDateKorean(photo.Date),
-                    })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))], ["children", reactApi.Children.toArray(Array.from(elems_2))])])));
-                }, photos)), ["children", reactApi.Children.toArray(Array.from(elems_3))])]))));
-            }
-            else {
-                const msg_1 = matchValue;
-                return singleton(createElement("div", {
-                    className: "text-center py-8 text-red-600",
-                    children: msg_1,
-                }));
-            }
+            const matchValue = patternInput_2[0];
+            return (matchValue == null) ? ((photos.length === 0) ? singleton(createElement("div", createObj(ofArray([["className", "text-center py-8 text-gray-500"], (elems = [createElement("p", {
+                className: "text-4xl mb-2",
+                children: "📷",
+            }), createElement("p", {
+                children: "아직 업로드한 사진이 없습니다",
+            })], ["children", reactApi.Children.toArray(Array.from(elems))])])))) : singleton(createElement("div", createObj(ofArray([["className", "grid grid-cols-2 md:grid-cols-3 gap-4"], (elems_3 = ofArray(map((photo) => {
+                let elems_2, elems_1;
+                return createElement("div", createObj(ofArray([["key", photo.Filename], ["className", "relative aspect-square rounded-lg overflow-hidden shadow-sm"], (elems_2 = [createElement("img", {
+                    src: photo.SignedUrl,
+                    alt: toText(printf("%s 운동 사진"))(photo.Date),
+                    className: "w-full h-full object-cover",
+                }), createElement("div", createObj(ofArray([["className", "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2"], (elems_1 = [createElement("span", {
+                    className: "text-white text-sm font-medium",
+                    children: formatDateKorean(photo.Date),
+                })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))], ["children", reactApi.Children.toArray(Array.from(elems_2))])])));
+            }, photos)), ["children", reactApi.Children.toArray(Array.from(elems_3))])]))))) : singleton(createElement("div", {
+                className: "text-center py-8 text-red-600",
+                children: matchValue,
+            }));
         }
     })))), ["children", reactApi.Children.toArray(Array.from(elems_4))])])));
 }

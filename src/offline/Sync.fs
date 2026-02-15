@@ -48,48 +48,57 @@ let private replayOperation (operation: QueuedOperation) : JS.Promise<SyncResult
             let supabase = importAll<obj> "../Supabase/Client"
             let client = supabase?supabase
 
+            let opId = Option.defaultValue 0 operation.id
+
             match operation.operationType with
             | "CreateWorkout" ->
-                // Upsert workout
+                // Simple insert (no onConflict - v2 schema allows multiple records per day)
                 let! response =
                     client
                         ?from("workouts")
-                        ?upsert(
+                        ?insert(
                             createObj [
                                 "user_id" ==> operation.userId
                                 "workout_date" ==> operation.workoutDate
-                            ],
-                            createObj ["onConflict" ==> "user_id,workout_date"]
+                                "record_type" ==> (if isNull (box operation.recordType) then "workout" else operation.recordType)
+                                "text_content" ==> operation.textContent
+                                "photo_url" ==> operation.photoUrl
+                            ]
                         )
 
                 let error = response?error
                 match box error with
                 | null ->
-                    let! _ = dequeue (Option.defaultValue 0 operation.id)
-                    return Synced (Option.defaultValue 0 operation.id)
+                    let! _ = dequeue opId
+                    return Synced opId
                 | _ ->
-                    let! _ = incrementRetry (Option.defaultValue 0 operation.id)
-                    return SyncFailed (Option.defaultValue 0 operation.id, error?message |> unbox<string>)
+                    let! _ = incrementRetry opId
+                    return SyncFailed (opId, error?message |> unbox<string>)
 
             | "DeleteWorkout" ->
+                // Soft delete: UPDATE deleted_at instead of hard DELETE
+                // Transitional: soft-deletes all records for user+date
+                // Phase 10 will update to delete by recordId
+                let nowIso : string = emitJsExpr () "new Date().toISOString()"
                 let! response =
                     client
                         ?from("workouts")
-                        ?delete()
+                        ?update(createObj ["deleted_at" ==> nowIso])
                         ?eq("user_id", operation.userId)
                         ?eq("workout_date", operation.workoutDate)
+                        ?is("deleted_at", null)
 
                 let error = response?error
                 match box error with
                 | null ->
-                    let! _ = dequeue (Option.defaultValue 0 operation.id)
-                    return Synced (Option.defaultValue 0 operation.id)
+                    let! _ = dequeue opId
+                    return Synced opId
                 | _ ->
-                    let! _ = incrementRetry (Option.defaultValue 0 operation.id)
-                    return SyncFailed (Option.defaultValue 0 operation.id, error?message |> unbox<string>)
+                    let! _ = incrementRetry opId
+                    return SyncFailed (opId, error?message |> unbox<string>)
 
             | _ ->
-                return SyncFailed (Option.defaultValue 0 operation.id, "Unknown operation type")
+                return SyncFailed (opId, "Unknown operation type")
         with exn ->
             let! _ = incrementRetry (Option.defaultValue 0 operation.id)
             return SyncFailed (Option.defaultValue 0 operation.id, exn.Message)
