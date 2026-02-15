@@ -5,18 +5,18 @@
 See: .planning/PROJECT.md (updated 2026-02-15)
 
 **Core value:** 원탭 운동 기록 — 앱을 열고 "오늘 운동했다" 버튼 하나로 기록 완료
-**Current focus:** Planning next milestone
+**Current focus:** v2.0 UI Refactoring — defining requirements
 
 ## Current Position
 
-Phase: Not started
-Plan: Not started
-Status: Between milestones — v1.1 shipped, next milestone not yet planned
-Last activity: 2026-02-15 — v1.1 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-15 — Milestone v2.0 started
 
-Progress: ██████████ 100% (v1.1)
+Progress: ░░░░░░░░░░ 0%
 
-**Next action:** `/gsd:new-milestone`
+**Next action:** Define requirements → Create roadmap
 
 ## Performance Metrics
 
@@ -43,10 +43,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: v1.1 milestone archived
+Stopped at: Defining v2.0 requirements
 Resume file: None
-Next: `/gsd:new-milestone`
+Next: Define requirements → Create roadmap
 
 ---
 *Last updated: 2026-02-15*
-*v1.1 milestone archived*
+*v2.0 milestone started*

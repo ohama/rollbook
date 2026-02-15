@@ -32,7 +32,16 @@
 
 ### Active
 
-(Next milestone에서 정의)
+- [ ] 새 UI 레이아웃 (날짜 네비게이션 + 나/우리 탭 + 콘텐츠 영역)
+- [ ] 하루 복수 기록 (DB 스키마 변경, UNIQUE 제약 제거)
+- [ ] 텍스트 기록 (운동 기록에 메모 추가)
+- [ ] 사진 기록 (썸네일 + 클릭 확대)
+- [ ] 달력 뷰 개선 (날짜별 기록 횟수, 클릭 시 상세 내용)
+- [ ] 기록 수정/삭제 (본인 것만, 아이콘 표시)
+- [ ] 나/우리 달력 통합 (탭 전환으로 내 기록 / 팀 기록)
+- [ ] 복수 관리자 지원 (관리자 지정 기능)
+- [ ] 관리자 기록 삭제 권한
+- [ ] 관리자 감사 로그 (행동 기록 + 복구 기능)
 
 ### Out of Scope
 
@@ -44,6 +53,7 @@
 - 영양/식단 추적 — 범위 외, 별도 앱 영역
 - 소셜 피드/댓글 — 프라이버시 중심 설계와 충돌
 - Apple Health/Google Fit 연동 — 추후 고려
+- 우리 텍스트 탭 — v2.0에서 보류, 추후 고려
 
 ## Context
 
@@ -95,5 +105,16 @@ Deployed on Mac Mini via Cloudflare Tunnel (rollbook.hariplan.com).
 | SendGrid SMTP | Gmail SMTP 대신 (rate limit 대응) | ✓ Good |
 | Domain-agnostic workbox | path-based 매칭 (tunnel 호환) | ✓ Good |
 
+## Current Milestone: v2.0 UI Refactoring
+
+**Goal:** UI 전면 개편 — 날짜 네비게이션, 나/우리 탭, 하루 복수 기록, 텍스트/사진 기록, 관리자 확장
+
+**Target features:**
+- 새 UI 레이아웃 (3줄 구조: 날짜 네비 / 탭 / 콘텐츠)
+- 하루 복수 기록 + 텍스트/사진 기록
+- 달력 뷰 (횟수 표시, 상세 드릴다운)
+- 기록 수정/삭제
+- 복수 관리자 + 감사 로그 + 복구
+
 ---
-*Last updated: 2026-02-15 after v1.1 milestone*
+*Last updated: 2026-02-15 after v2.0 milestone start*
