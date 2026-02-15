@@ -124,7 +124,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Database schema migration with blue-green pattern
+- [x] 08-01-PLAN.md — Database schema migration with blue-green pattern (COMPLETED 2026-02-15)
 - [ ] 08-02-PLAN.md — Frontend types and API updates (remove onConflict)
 - [ ] 08-03-PLAN.md — Offline sync logic migration and verification
 
@@ -228,7 +228,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 5. Photo Storage | v1.0 | 8/8 | Complete | 2026-02-10 |
 | 6. Admin & Offline | v1.0 | 8/8 | Complete | 2026-02-10 |
 | 7. Mac Mini Deployment | v1.1 | 6/6 | Complete | 2026-02-15 |
-| 8. Schema Migration | v2.0 | 0/3 | Ready to execute | - |
+| 8. Schema Migration | v2.0 | 1/3 | In progress | - |
 | 9. UI Layout & Navigation | v2.0 | 0/TBD | Not started | - |
 | 10. Multi-Record CRUD | v2.0 | 0/TBD | Not started | - |
 | 11. Calendar Integration | v2.0 | 0/TBD | Not started | - |
@@ -237,4 +237,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 14. Admin & Audit | v2.0 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-15 — v2.0 roadmap created*
+*Last updated: 2026-02-15 — Phase 8 Plan 01 completed (schema migration SQL)*

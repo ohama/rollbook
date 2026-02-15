@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 ## Current Position
 
 Phase: 8 of 14 (Schema Migration)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-15 — v2.0 roadmap created
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-15 — Completed 08-01-PLAN.md (Schema migration SQL)
 
-Progress: [███████████░░░░░░░░░] 50% (v1.0 + v1.1 complete, v2.0 starting)
+Progress: [███████████░░░░░░░░░] 51% (v1.0 + v1.1 complete, v2.0 Phase 8 started)
 
 ## Performance Metrics
 
@@ -52,7 +52,10 @@ Recent decisions affecting current work:
 - **browser-image-compression**: 클라이언트 압축 max 1MB (v1.0)
 - **IndexedDB + Background Sync**: 오프라인 지원 (v1.0)
 - **launchd 자동 시작**: Mac Mini 부팅 시 서비스 시작 (v1.1)
-- **하루 1회 기록 모델**: UNIQUE(userId, date) 제약으로 단순화 (v1.0) — v2.0에서 제거 예정
+- **Blue-green schema migration**: workouts → workouts_v1_backup, 7-day retention (v2.0 Phase 8)
+- **BIGSERIAL id PRIMARY KEY**: Replaces composite (user_id, workout_date) for multiple records per day (v2.0 Phase 8)
+- **record_type CHECK constraint**: Enforces workout/text/photo values at database level (v2.0 Phase 8)
+- **Soft delete with deleted_at**: Enables undo functionality in v2.0 UI (v2.0 Phase 8)
 
 ### Pending Todos
 
@@ -60,11 +63,12 @@ None yet.
 
 ### Blockers/Concerns
 
-**Phase 8 (Schema Migration) risks:**
-- Breaking change: UNIQUE(user_id, workout_date) 제약 제거 필요
-- 오프라인 큐 호환성 확보 필요 (버전 관리)
-- RLS 정책 업데이트 필요 (새 스키마 반영)
-- 기존 데이터 손실 방지 (blue-green migration)
+**Phase 8 (Schema Migration) - Plan 01 complete, next concerns:**
+- ✅ Blue-green migration created (zero data loss guaranteed)
+- ✅ RLS 정책 업데이트 완료 (새 스키마 반영)
+- ⚠️ Production migration deferred to user action (apply via Supabase Dashboard)
+- ⚠️ 오프라인 큐 호환성 필요 (Plan 08-02, 08-03): id 대신 composite key 사용 중
+- ⚠️ Frontend types update needed: Remove onConflict: 'user_id,workout_date' (Plan 08-02)
 
 **Research flags:**
 - Phase 14 (Admin Audit): 트리거 성능 이슈 발생 시 추가 연구 필요
@@ -73,9 +77,9 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: v2.0 roadmap created with 7 phases (8-14)
+Stopped at: Completed 08-01-PLAN.md (Schema migration SQL created)
 Resume file: None
 
 ---
 
-**Next step:** `/gsd:plan-phase 8` to start Schema Migration planning
+**Next step:** `/gsd:execute-plan 08-02` to update frontend types and API (remove onConflict)
