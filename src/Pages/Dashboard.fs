@@ -390,57 +390,75 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                     | Home ->
                         Html.div [
                             prop.children [
-                                // Welcome card
+                                // Record creation buttons row
                                 Html.div [
-                                    prop.className "bg-white rounded-2xl shadow-sm p-6 mb-6"
+                                    prop.className "bg-white rounded-xl shadow-sm p-4 mb-4"
                                     prop.children [
-                                        Html.h2 [
-                                            prop.className "text-lg font-semibold text-gray-800 mb-2"
-                                            prop.text "환영합니다!"
+                                        Html.h3 [
+                                            prop.className "text-sm font-medium text-gray-500 mb-3"
+                                            prop.text "기록 추가"
                                         ]
-                                        Html.p [
-                                            prop.className "text-gray-600"
+                                        Html.div [
+                                            prop.className "flex gap-2"
                                             prop.children [
-                                                Html.text "로그인 이메일: "
-                                                Html.span [
-                                                    prop.className "font-medium"
-                                                    prop.text (user.email |> Option.defaultValue "N/A")
+                                                // Workout button (instant create, no modal)
+                                                Html.button [
+                                                    prop.onClick (fun _ -> handleCreateWorkout())
+                                                    prop.className "flex-1 px-3 py-3 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200 transition-colors text-center"
+                                                    prop.text "운동"
+                                                ]
+                                                // Text memo button (opens modal)
+                                                Html.button [
+                                                    prop.onClick (fun _ -> setEditState RecordEditState.CreatingText)
+                                                    prop.className "flex-1 px-3 py-3 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors text-center"
+                                                    prop.text "메모"
+                                                ]
+                                                // Photo button (uses existing PhotoUploadButton from Components.PhotoUpload)
+                                                Html.div [
+                                                    prop.className "flex-1"
+                                                    prop.children [
+                                                        PhotoUploadButton user.id (fun () ->
+                                                            setRefreshKey (refreshKey + 1)
+                                                        )
+                                                    ]
                                                 ]
                                             ]
                                         ]
                                     ]
                                 ]
 
-                                // Workout toggle (with refresh key)
+                                // Today's records list
                                 Html.div [
-                                    prop.className "bg-white rounded-2xl shadow-sm p-6 text-center mb-6"
-                                    prop.children [
-                                        WorkoutToggle user.id refreshKey
-                                    ]
-                                ]
-
-                                // Photo upload (NEW)
-                                Html.div [
-                                    prop.className "bg-white rounded-2xl shadow-sm p-6 mb-6"
+                                    prop.className "bg-white rounded-xl shadow-sm p-4 mb-4"
                                     prop.children [
                                         Html.h3 [
-                                            prop.className "text-lg font-semibold text-gray-800 mb-4"
-                                            prop.text "사진으로 운동 기록"
+                                            prop.className "text-sm font-medium text-gray-500 mb-3"
+                                            prop.text (sprintf "오늘의 기록 (%d)" todayRecords.Length)
                                         ]
-                                        Html.p [
-                                            prop.className "text-sm text-gray-500 mb-4"
-                                            prop.text "사진을 올리면 자동으로 오늘 운동 기록이 생성됩니다"
-                                        ]
-                                        PhotoUploadButton user.id (fun () ->
-                                            // Increment refresh key to trigger re-fetch
-                                            setRefreshKey (refreshKey + 1)
-                                        )
+                                        if recordsLoading then
+                                            Html.div [
+                                                prop.className "text-center text-gray-400 py-4"
+                                                prop.text "로딩 중..."
+                                            ]
+                                        elif todayRecords.Length = 0 then
+                                            Html.div [
+                                                prop.className "text-center text-gray-400 py-6"
+                                                prop.text "아직 기록이 없습니다"
+                                            ]
+                                        else
+                                            Html.div [
+                                                prop.className "space-y-2"
+                                                prop.children [
+                                                    for record in todayRecords do
+                                                        RecordItem record user.id handleStartEdit handleDelete
+                                                ]
+                                            ]
                                     ]
                                 ]
 
-                                // Photo gallery (NEW)
+                                // Photo gallery (keep existing)
                                 Html.div [
-                                    prop.className "bg-white rounded-2xl shadow-sm p-6"
+                                    prop.className "bg-white rounded-xl shadow-sm p-6"
                                     prop.children [
                                         PhotoGallery user.id
                                     ]
@@ -462,6 +480,28 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                         ]
                     | Admin ->
                         AdminPage()
+
+                    // Text record edit modal (renders on top when active)
+                    match editState with
+                    | RecordEditState.CreatingText ->
+                        RecordEditModal None "" false handleSaveText (fun () -> setEditState RecordEditState.Idle)
+                    | RecordEditState.EditingText (recordId, currentText) ->
+                        RecordEditModal (Some recordId) currentText false handleSaveText (fun () -> setEditState RecordEditState.Idle)
+                    | RecordEditState.Saving ->
+                        RecordEditModal None "" true (fun _ -> ()) (fun () -> ())
+                    | RecordEditState.Error msg ->
+                        Html.div [
+                            prop.className "fixed bottom-4 left-4 right-4 bg-red-100 text-red-700 p-3 rounded-lg shadow-lg z-50 text-center"
+                            prop.children [
+                                Html.text msg
+                                Html.button [
+                                    prop.onClick (fun _ -> setEditState RecordEditState.Idle)
+                                    prop.className "ml-2 underline"
+                                    prop.text "닫기"
+                                ]
+                            ]
+                        ]
+                    | _ -> Html.none
                 ]
             ]
         ]
