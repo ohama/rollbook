@@ -6,13 +6,20 @@ import { defaultOf, equals } from "../fable_modules/fable-library-js.4.28.0/Util
 
 const dbName = "rollbook-offline";
 
-const dbVersion = 1;
+const dbVersion = 2;
 
 const storeName = "queue";
 
 function getDb() {
     const upgradeConfig = {
-        upgrade: (db) => {
+        upgrade: (db, oldVersion) => {
+            // Version 1 -> 2: Clear queue for schema migration (safe for ~20 users)
+            if (oldVersion === 1) {
+                if (db.objectStoreNames.contains(storeName)) {
+                    db.deleteObjectStore(storeName);
+                }
+            }
+            // Create or recreate queue store
             if (!(db.objectStoreNames.contains(storeName))) {
                 db.createObjectStore(storeName, {
                     keyPath: "id",
@@ -25,43 +32,38 @@ function getDb() {
 }
 
 /**
- * Enqueue a workout operation for offline sync
+ * Enqueue a workout operation for offline sync (v2 schema with new fields)
  */
-export function enqueue(operationType, userId, workoutDate) {
+export function enqueue(operationType, userId, workoutDate, recordType = "workout", textContent = null, photoUrl = null) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
-        const db = _arg;
-        const operation = new QueuedOperation(undefined, (operationType.tag === 1) ? "DeleteWorkout" : "CreateWorkout", userId, workoutDate, Date.now(), 0);
-        return (db.add(storeName, operation)).then((_arg_1) => {
-            const id = _arg_1;
-            return Promise.resolve(new QueueResult(0, [id]));
-        });
-    }))).catch((_arg_2) => {
-        const exn = _arg_2;
-        return Promise.resolve(new QueueResult(1, [exn.message]));
-    }))));
+        const operation = {
+            id: undefined,
+            operationType: (operationType.tag === 1) ? "DeleteWorkout" : "CreateWorkout",
+            userId: userId,
+            workoutDate: workoutDate,
+            timestamp: Date.now(),
+            retryCount: 0,
+            // v2 schema fields
+            recordType: recordType,
+            textContent: textContent,
+            photoUrl: photoUrl,
+        };
+        return (_arg.add(storeName, operation)).then((_arg_1) => (Promise.resolve(new QueueResult(0, [_arg_1]))));
+    }))).catch((_arg_2) => (Promise.resolve(new QueueResult(1, [_arg_2.message])))))));
 }
 
 /**
  * Get all pending operations
  */
 export function getAllPending() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
-        const db = _arg;
-        return (db.getAll(storeName)).then((_arg_1) => {
-            const items = _arg_1;
-            return Promise.resolve(items);
-        });
-    }))).catch((_arg_2) => (Promise.resolve([]))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => ((_arg.getAll(storeName)).then((_arg_1) => (Promise.resolve(_arg_1))))))).catch((_arg_2) => (Promise.resolve([]))))));
 }
 
 /**
  * Remove an operation from the queue (after successful sync)
  */
 export function dequeue(operationId) {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
-        const db = _arg;
-        return (db.delete(storeName, operationId)).then(() => (Promise.resolve(true)));
-    }))).catch((_arg_2) => (Promise.resolve(false))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => ((_arg.delete(storeName, operationId)).then(() => (Promise.resolve(true))))))).catch((_arg_2) => (Promise.resolve(false))))));
 }
 
 /**
@@ -94,22 +96,13 @@ export function incrementRetry(operationId) {
  * Get count of pending operations
  */
 export function getPendingCount() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
-        const db = _arg;
-        return (db.count(storeName)).then((_arg_1) => {
-            const count = _arg_1;
-            return Promise.resolve(count);
-        });
-    }))).catch((_arg_2) => (Promise.resolve(0))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => ((_arg.count(storeName)).then((_arg_1) => (Promise.resolve(_arg_1))))))).catch((_arg_2) => (Promise.resolve(0))))));
 }
 
 /**
  * Clear all queued operations (use with caution)
  */
 export function clear() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => {
-        const db = _arg;
-        return (db.clear(storeName)).then(() => (Promise.resolve(true)));
-    }))).catch((_arg_2) => (Promise.resolve(false))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getDb().then((_arg) => ((_arg.clear(storeName)).then(() => (Promise.resolve(true))))))).catch((_arg_2) => (Promise.resolve(false))))));
 }
 
