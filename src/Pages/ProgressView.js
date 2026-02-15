@@ -3,7 +3,6 @@ import { union_type } from "../fable_modules/fable-library-js.4.28.0/Reflection.
 import { createElement } from "react";
 import React from "react";
 import { reactApi } from "../fable_modules/Feliz.2.9.0/Interop.fs.js";
-import { month, now, year } from "../fable_modules/fable-library-js.4.28.0/Date.js";
 import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "../fable_modules/Fable.Promise.3.2.0/Promise.fs.js";
 import { promise } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
 import { getDaysInMonth, formatDateString } from "../Utils/DateHelpers.js";
@@ -33,36 +32,28 @@ export function ViewMode_$reflection() {
 
 export function ProgressViewPage(progressViewPageInputProps) {
     let elems_2;
+    const month = progressViewPageInputProps.month;
+    const year = progressViewPageInputProps.year;
     const userId = progressViewPageInputProps.userId;
     const patternInput = reactApi.useState(new ViewMode(0, []));
     const viewMode = patternInput[0];
     const setViewMode = patternInput[1];
-    let patternInput_1;
-    const initial_1 = year(now()) | 0;
-    patternInput_1 = reactApi.useState(initial_1);
-    const setCurrentYear = patternInput_1[1];
-    const currentYear = patternInput_1[0] | 0;
-    let patternInput_2;
-    const initial_2 = month(now()) | 0;
-    patternInput_2 = reactApi.useState(initial_2);
-    const setCurrentMonth = patternInput_2[1];
-    const currentMonth = patternInput_2[0] | 0;
-    const patternInput_3 = reactApi.useState([]);
-    const workouts = patternInput_3[0];
-    const patternInput_4 = reactApi.useState(true);
-    const setLoading = patternInput_4[1];
-    const patternInput_5 = reactApi.useState(undefined);
-    const setError = patternInput_5[1];
-    const error = patternInput_5[0];
-    const dependencies = [currentYear, currentMonth];
+    const patternInput_1 = reactApi.useState([]);
+    const workouts = patternInput_1[0];
+    const patternInput_2 = reactApi.useState(true);
+    const setLoading = patternInput_2[1];
+    const patternInput_3 = reactApi.useState(undefined);
+    const setError = patternInput_3[1];
+    const error = patternInput_3[0];
+    const dependencies = [year, month];
     reactApi.useEffect(() => {
         const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
             setLoading(true);
             setError(undefined);
-            const startDate = formatDateString(currentYear, currentMonth, 1);
-            const endDate = formatDateString(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
+            const startDate = formatDateString(year, month, 1);
+            const endDate = formatDateString(year, month, getDaysInMonth(year, month));
             return getWorkouts(userId, startDate, endDate).then((_arg) => {
-                patternInput_3[1](_arg);
+                patternInput_1[1](_arg);
                 setLoading(false);
                 return Promise.resolve();
             });
@@ -91,9 +82,9 @@ export function ProgressViewPage(progressViewPageInputProps) {
             let elems_1;
             return append(singleton(createElement("div", createObj(ofArray([["className", "mb-6"], (elems_1 = [createElement(MonthlyStatsView, {
                 workouts: workouts,
-                year: currentYear,
-                month: currentMonth,
-            })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))), delay(() => (patternInput_4[0] ? singleton(createElement("div", {
+                year: year,
+                month: month,
+            })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))), delay(() => (patternInput_2[0] ? singleton(createElement("div", {
                 className: "text-center text-gray-600 py-8",
                 children: "로딩 중...",
             })) : ((error != null) ? singleton(createElement("div", {
@@ -103,26 +94,12 @@ export function ProgressViewPage(progressViewPageInputProps) {
                 workouts: workouts,
             })) : singleton(createElement(CalendarGrid, {
                 userId: userId,
-                year: currentYear,
-                month: currentMonth,
+                year: year,
+                month: month,
                 workouts: workouts,
                 onPrevMonth: () => {
-                    if (currentMonth === 1) {
-                        setCurrentYear(currentYear - 1);
-                        setCurrentMonth(12);
-                    }
-                    else {
-                        setCurrentMonth(currentMonth - 1);
-                    }
                 },
                 onNextMonth: () => {
-                    if (currentMonth === 12) {
-                        setCurrentYear(currentYear + 1);
-                        setCurrentMonth(1);
-                    }
-                    else {
-                        setCurrentMonth(currentMonth + 1);
-                    }
                 },
             })))))));
         }));

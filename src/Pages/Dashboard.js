@@ -17,8 +17,8 @@ import { singleton as singleton_1, ofArray } from "../fable_modules/fable-librar
 import { month, now, year } from "../fable_modules/fable-library-js.4.28.0/Date.js";
 import { signOut } from "../Supabase/Auth.js";
 import { formatMonthYear } from "../Utils/DateHelpers.js";
-import { ProgressViewPage } from "./ProgressView.js";
 import { TeamViewPage } from "./TeamView.js";
+import { ProgressViewPage } from "./ProgressView.js";
 import { AdminPage } from "./AdminPage.js";
 import { defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 import { PhotoUploadButton } from "../Components/PhotoUpload.js";
@@ -289,9 +289,17 @@ export function DashboardPage(dashboardPageInputProps) {
                 })], ["children", reactApi.Children.toArray(Array.from(elems_4))])])))), delay(() => {
                     let elems_10, elems_6, elems_5, elems_7, elems_8, elems_9;
                     const matchValue = activeTab;
-                    return (matchValue.tag === 1) ? singleton(createElement(ProgressViewPage, {
+                    return (matchValue.tag === 1) ? ((viewScope.tag === 1) ? singleton(createElement(TeamViewPage, {
+                        year: currentYear,
+                        month: currentMonth,
+                    })) : singleton(createElement(ProgressViewPage, {
                         userId: user.id,
-                    })) : ((matchValue.tag === 2) ? singleton(createElement(TeamViewPage, null)) : ((matchValue.tag === 3) ? singleton(createElement(AdminPage, null)) : singleton(createElement("div", createObj(singleton_1((elems_10 = [createElement("div", createObj(ofArray([["className", "bg-white rounded-2xl shadow-sm p-6 mb-6"], (elems_6 = [createElement("h2", {
+                        year: currentYear,
+                        month: currentMonth,
+                    }))) : ((matchValue.tag === 2) ? singleton(createElement("div", {
+                        className: "p-6 text-center text-gray-600",
+                        children: "팀 뷰는 \'Progress\' 탭에서 \'우리\'를 선택하세요",
+                    })) : ((matchValue.tag === 3) ? singleton(createElement(AdminPage, null)) : singleton(createElement("div", createObj(singleton_1((elems_10 = [createElement("div", createObj(ofArray([["className", "bg-white rounded-2xl shadow-sm p-6 mb-6"], (elems_6 = [createElement("h2", {
                         className: "text-lg font-semibold text-gray-800 mb-2",
                         children: "환영합니다!",
                     }), createElement("p", createObj(ofArray([["className", "text-gray-600"], (elems_5 = ["로그인 이메일: ", createElement("span", {
