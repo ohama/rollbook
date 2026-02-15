@@ -86,46 +86,46 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
-| UI-04 | — | Pending |
-| REC-01 | — | Pending |
-| REC-02 | — | Pending |
-| REC-03 | — | Pending |
-| REC-04 | — | Pending |
-| REC-05 | — | Pending |
-| REC-06 | — | Pending |
-| REC-07 | — | Pending |
-| CAL-01 | — | Pending |
-| CAL-02 | — | Pending |
-| CAL-03 | — | Pending |
-| CAL-04 | — | Pending |
-| CAL-05 | — | Pending |
-| DET-01 | — | Pending |
-| DET-02 | — | Pending |
-| DET-03 | — | Pending |
-| DET-04 | — | Pending |
-| PHO-01 | — | Pending |
-| PHO-02 | — | Pending |
-| PHO-03 | — | Pending |
-| ADM-01 | — | Pending |
-| ADM-02 | — | Pending |
-| ADM-03 | — | Pending |
-| ADM-04 | — | Pending |
-| ADM-05 | — | Pending |
-| ADM-06 | — | Pending |
-| ADM-07 | — | Pending |
-| ADM-08 | — | Pending |
-| ADM-09 | — | Pending |
-| MIG-01 | — | Pending |
-| MIG-02 | — | Pending |
+| MIG-01 | Phase 8 | Pending |
+| MIG-02 | Phase 8 | Pending |
+| UI-01 | Phase 9 | Pending |
+| UI-02 | Phase 9 | Pending |
+| UI-03 | Phase 9 | Pending |
+| UI-04 | Phase 9 | Pending |
+| REC-01 | Phase 10 | Pending |
+| REC-02 | Phase 10 | Pending |
+| REC-03 | Phase 10 | Pending |
+| REC-04 | Phase 10 | Pending |
+| REC-05 | Phase 10 | Pending |
+| REC-06 | Phase 10 | Pending |
+| REC-07 | Phase 10 | Pending |
+| CAL-01 | Phase 11 | Pending |
+| CAL-02 | Phase 11 | Pending |
+| CAL-03 | Phase 11 | Pending |
+| CAL-04 | Phase 11 | Pending |
+| CAL-05 | Phase 11 | Pending |
+| DET-01 | Phase 12 | Pending |
+| DET-02 | Phase 12 | Pending |
+| DET-03 | Phase 12 | Pending |
+| DET-04 | Phase 12 | Pending |
+| PHO-01 | Phase 13 | Pending |
+| PHO-02 | Phase 13 | Pending |
+| PHO-03 | Phase 13 | Pending |
+| ADM-01 | Phase 14 | Pending |
+| ADM-02 | Phase 14 | Pending |
+| ADM-03 | Phase 14 | Pending |
+| ADM-04 | Phase 14 | Pending |
+| ADM-05 | Phase 14 | Pending |
+| ADM-06 | Phase 14 | Pending |
+| ADM-07 | Phase 14 | Pending |
+| ADM-08 | Phase 14 | Pending |
+| ADM-09 | Phase 14 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 34 total
-- Mapped to phases: 0
-- Unmapped: 34 ⚠️
+- Mapped to phases: 34/34 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-15*
-*Last updated: 2026-02-15 after initial definition*
+*Last updated: 2026-02-15 — All requirements mapped to phases 8-14*
