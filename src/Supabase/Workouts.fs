@@ -105,6 +105,56 @@ let deleteWorkoutById (recordId: int) : JS.Promise<obj> =
         return result
     }
 
+/// Create a text record for a specific date
+let createTextRecord (userId: string) (date: string) (textContent: string) : JS.Promise<WorkoutResponse> =
+    promise {
+        let record = createObj [
+            "user_id" ==> userId
+            "workout_date" ==> date
+            "record_type" ==> "text"
+            "text_content" ==> textContent
+        ]
+        let query = supabase?from("workouts")?insert(record)?select()
+        let! result = query
+        return unbox<WorkoutResponse> result
+    }
+
+/// Create a photo record for a specific date (with optional text caption)
+let createPhotoRecord (userId: string) (date: string) (photoUrl: string) (textContent: string option) : JS.Promise<WorkoutResponse> =
+    promise {
+        let record = createObj [
+            "user_id" ==> userId
+            "workout_date" ==> date
+            "record_type" ==> "photo"
+            "photo_url" ==> photoUrl
+            yield! match textContent with
+                   | Some text -> [ "text_content" ==> text ]
+                   | None -> []
+        ]
+        let query = supabase?from("workouts")?insert(record)?select()
+        let! result = query
+        return unbox<WorkoutResponse> result
+    }
+
+/// Update a specific workout record by id (for editing text content)
+let updateWorkoutById (recordId: int) (textContent: string) : JS.Promise<WorkoutResponse> =
+    promise {
+        let nowIso : string = emitJsExpr () "new Date().toISOString()"
+        let updates = createObj [
+            "text_content" ==> textContent
+            "updated_at" ==> nowIso
+        ]
+        let query =
+            supabase
+                ?from("workouts")
+                ?update(updates)
+                ?eq("id", recordId)
+                ?is("deleted_at", null)
+                ?select()
+        let! result = query
+        return unbox<WorkoutResponse> result
+    }
+
 /// Update a workout record (for future editing features)
 let updateWorkout (userId: string) (date: string) (updates: obj) : JS.Promise<WorkoutResponse> =
     promise {

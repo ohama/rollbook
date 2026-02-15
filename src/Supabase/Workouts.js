@@ -1,9 +1,11 @@
 import { now as now_1 } from "../fable_modules/fable-library-js.4.28.0/Date.js";
 import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "../fable_modules/Fable.Promise.3.2.0/Promise.fs.js";
 import { supabase } from "./Client.js";
-import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
+import { createObj, defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { promise } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
 import { item } from "../fable_modules/fable-library-js.4.28.0/Array.js";
+import { singleton, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
+import { singleton as singleton_1, empty } from "../fable_modules/fable-library-js.4.28.0/List.js";
 
 /**
  * Get today's date string in YYYY-MM-DD format (local timezone)
@@ -20,7 +22,8 @@ export function getWorkout(userId, date) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = (((((supabase.from("workouts")).select("*")).eq("user_id", userId)).eq("workout_date", date)).is("deleted_at", defaultOf())).limit(1);
         return query.then((_arg) => {
-            const data = _arg.data;
+            const result = _arg;
+            const data = result.data;
             if (data == null) {
                 return Promise.resolve(undefined);
             }
@@ -41,7 +44,8 @@ export function getWorkoutsForDate(userId, date) {
             ascending: true,
         });
         return query.then((_arg) => {
-            const data = _arg.data;
+            const result = _arg;
+            const data = result.data;
             return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
         });
     }));
@@ -59,7 +63,10 @@ export function upsertWorkout(userId, date) {
             record_type: "workout",
         };
         const query = ((supabase.from("workouts")).insert(record)).select();
-        return query.then((_arg) => (Promise.resolve(_arg)));
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
     }));
 }
 
@@ -72,11 +79,15 @@ export const createWorkout = (userId) => ((date) => upsertWorkout(userId, date))
  */
 export function deleteWorkout(userId, date) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const nowIso = new Date().toISOString();
         const updates = {
-            deleted_at: new Date().toISOString(),
+            deleted_at: nowIso,
         };
         const query = ((((supabase.from("workouts")).update(updates)).eq("user_id", userId)).eq("workout_date", date)).is("deleted_at", defaultOf());
-        return query.then((_arg) => (Promise.resolve(_arg)));
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
     }));
 }
 
@@ -85,11 +96,69 @@ export function deleteWorkout(userId, date) {
  */
 export function deleteWorkoutById(recordId) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const nowIso = new Date().toISOString();
         const updates = {
-            deleted_at: new Date().toISOString(),
+            deleted_at: nowIso,
         };
         const query = ((supabase.from("workouts")).update(updates)).eq("id", recordId);
-        return query.then((_arg) => (Promise.resolve(_arg)));
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
+    }));
+}
+
+/**
+ * Create a text record for a specific date
+ */
+export function createTextRecord(userId, date, textContent) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const record = {
+            user_id: userId,
+            workout_date: date,
+            record_type: "text",
+            text_content: textContent,
+        };
+        const query = ((supabase.from("workouts")).insert(record)).select();
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
+    }));
+}
+
+/**
+ * Create a photo record for a specific date (with optional text caption)
+ */
+export function createPhotoRecord(userId, date, photoUrl, textContent) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const record = createObj(toList(delay(() => append(singleton(["user_id", userId]), delay(() => append(singleton(["workout_date", date]), delay(() => append(singleton(["record_type", "photo"]), delay(() => append(singleton(["photo_url", photoUrl]), delay(() => {
+            let text;
+            return (textContent == null) ? empty() : ((text = textContent, singleton_1(["text_content", text])));
+        })))))))))));
+        const query = ((supabase.from("workouts")).insert(record)).select();
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
+    }));
+}
+
+/**
+ * Update a specific workout record by id (for editing text content)
+ */
+export function updateWorkoutById(recordId, textContent) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const nowIso = new Date().toISOString();
+        const updates = {
+            text_content: textContent,
+            updated_at: nowIso,
+        };
+        const query = ((((supabase.from("workouts")).update(updates)).eq("id", recordId)).is("deleted_at", defaultOf())).select();
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
     }));
 }
 
@@ -99,7 +168,10 @@ export function deleteWorkoutById(recordId) {
 export function updateWorkout(userId, date, updates) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = (((((supabase.from("workouts")).update(updates)).eq("user_id", userId)).eq("workout_date", date)).is("deleted_at", defaultOf())).select();
-        return query.then((_arg) => (Promise.resolve(_arg)));
+        return query.then((_arg) => {
+            const result = _arg;
+            return Promise.resolve(result);
+        });
     }));
 }
 
@@ -117,7 +189,8 @@ export function getWorkouts(userId, startDate, endDate) {
                     ascending: false,
                 }));
                 return query.then((_arg) => {
-                    const data = _arg.data;
+                    const result = _arg;
+                    const data = result.data;
                     return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
                 });
             }));
