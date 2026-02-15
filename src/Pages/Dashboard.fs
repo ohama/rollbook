@@ -19,6 +19,9 @@ open Utils.DateHelpers
 /// Tab mode for dashboard navigation
 type TabMode = Home | Progress | Team | Admin
 
+/// View scope for dashboard content (나 vs 우리)
+type ViewScope = Personal | TeamView
+
 [<ReactComponent>]
 let WorkoutToggle (userId: string) (refreshKey: int) =
     let (hasWorkedOut, setHasWorkedOut) = React.useState(false)
@@ -145,6 +148,9 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
     // Date navigation state
     let (currentYear, setCurrentYear) = React.useState(System.DateTime.Now.Year)
     let (currentMonth, setCurrentMonth) = React.useState(System.DateTime.Now.Month)
+
+    // View scope state
+    let (viewScope, setViewScope) = React.useState(Personal)  // Default to "나"
 
     // Month navigation functions with year rollover
     let goToNextMonth () =
