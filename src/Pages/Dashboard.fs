@@ -373,9 +373,18 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                             ]
                         ]
                     | Progress ->
-                        ProgressViewPage user.id
+                        // Progress tab: switches based on viewScope
+                        match viewScope with
+                        | Personal ->
+                            ProgressViewPage user.id currentYear currentMonth
+                        | TeamView ->
+                            TeamViewPage currentYear currentMonth
                     | Team ->
-                        TeamViewPage()
+                        // OLD Team tab (deprecated, show message)
+                        Html.div [
+                            prop.className "p-6 text-center text-gray-600"
+                            prop.text "팀 뷰는 'Progress' 탭에서 '우리'를 선택하세요"
+                        ]
                     | Admin ->
                         AdminPage()
                 ]

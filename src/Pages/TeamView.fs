@@ -9,30 +9,11 @@ open Components.TeamMemberCard
 
 /// Team roster view showing all team members and their monthly workout counts
 [<ReactComponent>]
-let TeamViewPage () =
-    // Date navigation state
-    let (currentYear, setCurrentYear) = React.useState(System.DateTime.Now.Year)
-    let (currentMonth, setCurrentMonth) = React.useState(System.DateTime.Now.Month)
-
+let TeamViewPage (year: int) (month: int) =
     // Data state
     let (members, setMembers) = React.useState<TeamMemberSummary array>([||])
     let (loading, setLoading) = React.useState(true)
     let (error, setError) = React.useState<string option>(None)
-
-    // Month navigation functions with year rollover
-    let goToNextMonth () =
-        if currentMonth = 12 then
-            setCurrentYear (currentYear + 1)
-            setCurrentMonth 1
-        else
-            setCurrentMonth (currentMonth + 1)
-
-    let goToPrevMonth () =
-        if currentMonth = 1 then
-            setCurrentYear (currentYear - 1)
-            setCurrentMonth 12
-        else
-            setCurrentMonth (currentMonth - 1)
 
     // Load team data when month changes
     React.useEffect((fun () ->
@@ -42,9 +23,9 @@ let TeamViewPage () =
         promise {
             try
                 // Calculate date range for the month
-                let startDate = formatDateString currentYear currentMonth 1
-                let lastDay = getDaysInMonth currentYear currentMonth
-                let endDate = formatDateString currentYear currentMonth lastDay
+                let startDate = formatDateString year month 1
+                let lastDay = getDaysInMonth year month
+                let endDate = formatDateString year month lastDay
 
                 // Fetch team data in parallel
                 let! workouts = getTeamWorkouts startDate endDate
@@ -58,32 +39,11 @@ let TeamViewPage () =
                 setError (Some "팀 데이터를 불러올 수 없습니다")
                 setLoading false
         } |> Promise.start
-    ), [| box currentYear; box currentMonth |])
+    ), [| box year; box month |])
 
     Html.div [
         prop.className "space-y-4"
         prop.children [
-            // Month navigation header
-            Html.div [
-                prop.className "flex items-center justify-between bg-white rounded-lg shadow-sm p-4"
-                prop.children [
-                    Html.button [
-                        prop.onClick (fun _ -> goToPrevMonth())
-                        prop.className "p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        prop.text "<"
-                    ]
-                    Html.h2 [
-                        prop.className "text-lg font-semibold text-gray-800"
-                        prop.text (sprintf "%d년 %d월" currentYear currentMonth)
-                    ]
-                    Html.button [
-                        prop.onClick (fun _ -> goToNextMonth())
-                        prop.className "p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        prop.text ">"
-                    ]
-                ]
-            ]
-
             // Team stats summary
             Html.div [
                 prop.className "bg-white rounded-lg shadow-sm p-4"

@@ -13,33 +13,14 @@ open Components.MonthlyStats
 type ViewMode = Calendar | List
 
 [<ReactComponent>]
-let ProgressViewPage (userId: string) =
+let ProgressViewPage (userId: string) (year: int) (month: int) =
     // View mode state
     let (viewMode, setViewMode) = React.useState(Calendar)
-
-    // Date navigation state
-    let (currentYear, setCurrentYear) = React.useState(System.DateTime.Now.Year)
-    let (currentMonth, setCurrentMonth) = React.useState(System.DateTime.Now.Month)
 
     // Data state
     let (workouts, setWorkouts) = React.useState<WorkoutRecord array>([||])
     let (loading, setLoading) = React.useState(true)
     let (error, setError) = React.useState<string option>(None)
-
-    // Month navigation functions
-    let goToNextMonth () =
-        if currentMonth = 12 then
-            setCurrentYear (currentYear + 1)
-            setCurrentMonth 1
-        else
-            setCurrentMonth (currentMonth + 1)
-
-    let goToPrevMonth () =
-        if currentMonth = 1 then
-            setCurrentYear (currentYear - 1)
-            setCurrentMonth 12
-        else
-            setCurrentMonth (currentMonth - 1)
 
     // Load workouts when month changes
     React.useEffect((fun () ->
@@ -49,9 +30,9 @@ let ProgressViewPage (userId: string) =
                 setError None
 
                 // Calculate date range for current month
-                let startDate = formatDateString currentYear currentMonth 1
-                let daysInMonth = getDaysInMonth currentYear currentMonth
-                let endDate = formatDateString currentYear currentMonth daysInMonth
+                let startDate = formatDateString year month 1
+                let daysInMonth = getDaysInMonth year month
+                let endDate = formatDateString year month daysInMonth
 
                 // Fetch workouts for this month
                 let! monthWorkouts = getWorkouts userId (Some startDate) (Some endDate)
@@ -61,7 +42,7 @@ let ProgressViewPage (userId: string) =
                 setError (Some "운동 기록을 불러올 수 없습니다")
                 setLoading false
         } |> Promise.start
-    ), [| box currentYear; box currentMonth |])
+    ), [| box year; box month |])
 
     Html.div [
         prop.className "max-w-4xl mx-auto px-4 py-8"
@@ -99,7 +80,7 @@ let ProgressViewPage (userId: string) =
             Html.div [
                 prop.className "mb-6"
                 prop.children [
-                    MonthlyStatsView workouts currentYear currentMonth
+                    MonthlyStatsView workouts year month
                 ]
             ]
 
@@ -119,7 +100,7 @@ let ProgressViewPage (userId: string) =
             else
                 match viewMode with
                 | Calendar ->
-                    CalendarGrid userId currentYear currentMonth workouts goToPrevMonth goToNextMonth
+                    CalendarGrid userId year month workouts (fun () -> ()) (fun () -> ())
                 | List ->
                     WorkoutListView workouts
         ]
