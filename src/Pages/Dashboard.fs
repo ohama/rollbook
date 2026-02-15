@@ -203,6 +203,27 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
             Html.main [
                 prop.className "max-w-4xl mx-auto px-4 py-8"
                 prop.children [
+                    // Row 1: Date navigation (single line, horizontal)
+                    Html.div [
+                        prop.className "flex items-center justify-between bg-white rounded-lg shadow-sm p-4 mb-4"
+                        prop.children [
+                            Html.button [
+                                prop.onClick (fun _ -> goToPrevMonth())
+                                prop.className "px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors"
+                                prop.text "< 이전"
+                            ]
+                            Html.h2 [
+                                prop.className "text-lg font-semibold text-gray-800"
+                                prop.text (formatMonthYear currentYear currentMonth)
+                            ]
+                            Html.button [
+                                prop.onClick (fun _ -> goToNextMonth())
+                                prop.className "px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors"
+                                prop.text "다음 >"
+                            ]
+                        ]
+                    ]
+
                     // Tab navigation
                     Html.div [
                         prop.className "flex gap-2 mb-6"
