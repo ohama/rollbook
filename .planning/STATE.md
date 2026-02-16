@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 ## Current Position
 
 Phase: 11 of 14 (Calendar Integration)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-02-16 — Completed 11-01-PLAN.md (Count badges & DailyDetailView)
+Last activity: 2026-02-16 — Completed 11-02-PLAN.md (Daily detail routing)
 
-Progress: [███████████████░░░░░] 68% (v1.0 + v1.1 complete, v2.0 Phase 8-11 in progress)
+Progress: [███████████████░░░░░] 69% (v1.0 + v1.1 complete, v2.0 Phase 8-11 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 58 (Phases 1-10 complete, Phase 11 in progress)
-- Average duration: ~36 min (weighted average including Phase 9-11)
+- Total plans completed: 59 (Phases 1-10 complete, Phase 11 in progress)
+- Average duration: ~35 min (weighted average including Phase 9-11)
 
 **By Phase:**
 
@@ -36,7 +36,7 @@ Progress: [███████████████░░░░░] 68% (v1
 | 8. Schema Migration | 3 | ~1.0h | ~20min |
 | 9. UI Layout & Navigation | 3 | ~13min | ~4.3min |
 | 10. Multi-Record CRUD | 3 | ~17min | ~5.7min |
-| 11. Calendar Integration | 1/3 | ~3min | ~3min |
+| 11. Calendar Integration | 2/3 | ~6min | ~3min |
 
 **Recent Trend:**
 - v1.0 + v1.1 shipped in 6 days (2026-02-10 → 2026-02-15)
@@ -44,8 +44,9 @@ Progress: [███████████████░░░░░] 68% (v1
 - Phase 9 completed 2026-02-16 (UI layout with date nav + view switching, 13min total)
 - Phase 10 completed 2026-02-16 (multi-record CRUD, 17min total, 18/18 must-haves verified)
 - Phase 11 Plan 01 completed 2026-02-16 (count badges + DailyDetailView, 3min)
+- Phase 11 Plan 02 completed 2026-02-16 (daily detail routing, 3.3min)
 
-*Updated: 2026-02-16 after 11-01 completion*
+*Updated: 2026-02-16 after 11-02 completion*
 
 ## Accumulated Context
 
@@ -80,6 +81,10 @@ Recent decisions affecting current work:
 - **PhotoUpload URL fetch order**: Fetch signed URL before creating record (finalUrl stored in photo_url field) (v2.0 Phase 10)
 - **Modal rendering location**: Modal match block added after tab content, inside Html.main children for global z-index (v2.0 Phase 10)
 - **Optimistic delete with rollback**: Update local state immediately, delete on server, rollback if error (v2.0 Phase 10)
+- **CalendarViewState DU pattern**: CalendarView | DailyDetailView for drill-down navigation (v2.0 Phase 11)
+- **Module-qualified component calls**: Components.Module.Component avoids DU case name collision (v2.0 Phase 11)
+- **Empty userId for team views**: Team calendar uses userId="" to hide owner-specific edit/delete buttons (v2.0 Phase 11)
+- **Reset view state on month change**: Prevents stale detail view when navigating calendar months (v2.0 Phase 11)
 
 ### Pending Todos
 
@@ -114,10 +119,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-16 02:45:05Z
-Stopped at: Phase 11 Plan 01 complete — count badges + DailyDetailView component created
+Last session: 2026-02-16 11:20:05Z
+Stopped at: Phase 11 Plan 02 complete — calendar drill-down navigation integrated
 Resume file: None
 
 ---
 
-**Next step:** Execute 11-02-PLAN.md (Daily detail routing)
+**Next step:** Execute 11-03-PLAN.md (Full navigation integration)
