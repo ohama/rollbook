@@ -170,10 +170,12 @@ Plans:
   2. "나" 탭에서 나의 달력이 보이고, "우리" 탭에서 팀 전체 달력이 보인다
   3. 달력 날짜를 클릭하면 해당 날의 기록 상세 내용이 표시된다
   4. 상세 화면에서 되돌아가기 아이콘으로 달력으로 복귀할 수 있다
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 11-01: [To be planned]
+- [ ] 11-01-PLAN.md — Calendar count badges and DailyDetailView component
+- [ ] 11-02-PLAN.md — ProgressView and TeamView calendar integration
+- [ ] 11-03-PLAN.md — Human verification of calendar interactions
 
 ### Phase 12: Detail Views
 **Goal**: Users can drill down into daily records for themselves and team members
@@ -235,10 +237,10 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 8. Schema Migration | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 9. UI Layout & Navigation | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 10. Multi-Record CRUD | v2.0 | 3/3 | Complete | 2026-02-16 |
-| 11. Calendar Integration | v2.0 | 0/TBD | Not started | - |
+| 11. Calendar Integration | v2.0 | 0/3 | Not started | - |
 | 12. Detail Views | v2.0 | 0/TBD | Not started | - |
 | 13. Photo Gallery | v2.0 | 0/TBD | Not started | - |
 | 14. Admin & Audit | v2.0 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-16 — Phase 10 complete (3 plans, 18/18 must-haves verified)*
+*Last updated: 2026-02-16 — Phase 11 planned (3 plans ready for execution)*
