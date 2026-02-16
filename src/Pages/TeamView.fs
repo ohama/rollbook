@@ -8,11 +8,14 @@ open Utils.DateHelpers
 open Components.TeamMemberCard
 open Components.Calendar
 open Components.DailyDetailView
+open Components.TeamDayDetailView
+open Components.RecordItem
 
 /// Calendar view state for drill-down navigation
 type CalendarViewState =
     | CalendarView
     | DailyDetailView of selectedDate: string
+    | UserDetailView of selectedDate: string * userId: string
 
 /// Team roster view showing all team members and their monthly workout counts
 [<ReactComponent>]
@@ -121,9 +124,43 @@ let TeamViewPage (year: int) (month: int) =
                     | CalendarView ->
                         CalendarGrid "" year month allWorkouts (fun () -> ()) (fun () -> ()) handleDateClick
                     | DailyDetailView selectedDate ->
-                        Components.DailyDetailView.DailyDetailView selectedDate selectedDateRecords ""
+                        Components.TeamDayDetailView.TeamDayDetailView selectedDate selectedDateRecords
                             (fun () -> setCalendarViewState CalendarView)
-                            (fun _ -> ())
-                            (fun _ -> ())
+                            (fun userId -> setCalendarViewState (UserDetailView (selectedDate, userId)))
+                    | UserDetailView (selectedDate, userId) ->
+                        let userRecords = selectedDateRecords |> Array.filter (fun r -> r.user_id = userId)
+                        Html.div [
+                            prop.className "space-y-4"
+                            prop.children [
+                                Html.div [
+                                    prop.className "flex items-center gap-3 mb-4"
+                                    prop.children [
+                                        Html.button [
+                                            prop.onClick (fun _ -> setCalendarViewState (DailyDetailView selectedDate))
+                                            prop.className "w-11 h-11 flex items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors"
+                                            prop.text "←"
+                                        ]
+                                        Html.h2 [
+                                            prop.className "text-lg font-semibold text-gray-800"
+                                            prop.text (sprintf "%s - 상세 기록" selectedDate)
+                                        ]
+                                    ]
+                                ]
+                                if userRecords.Length = 0 then
+                                    Html.div [
+                                        prop.className "text-center text-gray-400 py-8"
+                                        prop.text "기록이 없습니다"
+                                    ]
+                                else
+                                    Html.div [
+                                        prop.className "space-y-2"
+                                        prop.children [
+                                            for record in userRecords do
+                                                // INTENTIONAL: Empty userId ("") hides edit/delete buttons in team view
+                                                Components.RecordItem.RecordItem record "" (fun _ -> ()) (fun _ -> ())
+                                        ]
+                                    ]
+                            ]
+                        ]
         ]
     ]
