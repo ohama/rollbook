@@ -26,11 +26,11 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ### Calendar
 
-- [ ] **CAL-01**: 달력에 날짜별 기록 횟수가 표시된다
-- [ ] **CAL-02**: "나" 선택 시 나의 달력 기록이 보인다
-- [ ] **CAL-03**: "우리" 선택 시 우리의 달력 기록이 보인다
-- [ ] **CAL-04**: 달력 날짜 클릭 시 해당 날의 기록 내용이 보인다
-- [ ] **CAL-05**: 기록 내용에서 되돌아가기 아이콘으로 달력으로 복귀할 수 있다
+- [x] **CAL-01**: 달력에 날짜별 기록 횟수가 표시된다
+- [x] **CAL-02**: "나" 선택 시 나의 달력 기록이 보인다
+- [x] **CAL-03**: "우리" 선택 시 우리의 달력 기록이 보인다
+- [x] **CAL-04**: 달력 날짜 클릭 시 해당 날의 기록 내용이 보인다
+- [x] **CAL-05**: 기록 내용에서 되돌아가기 아이콘으로 달력으로 복귀할 수 있다
 
 ### Detail View
 
@@ -99,11 +99,11 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 | REC-05 | Phase 10 | Complete |
 | REC-06 | Phase 10 | Complete |
 | REC-07 | Phase 10 | Complete |
-| CAL-01 | Phase 11 | Pending |
-| CAL-02 | Phase 11 | Pending |
-| CAL-03 | Phase 11 | Pending |
-| CAL-04 | Phase 11 | Pending |
-| CAL-05 | Phase 11 | Pending |
+| CAL-01 | Phase 11 | Complete |
+| CAL-02 | Phase 11 | Complete |
+| CAL-03 | Phase 11 | Complete |
+| CAL-04 | Phase 11 | Complete |
+| CAL-05 | Phase 11 | Complete |
 | DET-01 | Phase 12 | Pending |
 | DET-02 | Phase 12 | Pending |
 | DET-03 | Phase 12 | Pending |
@@ -128,4 +128,4 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-02-15*
-*Last updated: 2026-02-16 — REC-01~07 complete (Phase 10)*
+*Last updated: 2026-02-16 — CAL-01~05 complete (Phase 11)*
