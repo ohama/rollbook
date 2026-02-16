@@ -101,6 +101,8 @@ export function ProgressViewPage(progressViewPageInputProps) {
                 },
                 onNextMonth: () => {
                 },
+                onDateClick: (_arg_4) => {
+                },
             })))))));
         }));
     })), ["children", reactApi.Children.toArray(Array.from(elems_2))])])));

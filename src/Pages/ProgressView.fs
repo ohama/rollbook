@@ -100,7 +100,7 @@ let ProgressViewPage (userId: string) (year: int) (month: int) =
             else
                 match viewMode with
                 | Calendar ->
-                    CalendarGrid userId year month workouts (fun () -> ()) (fun () -> ())
+                    CalendarGrid userId year month workouts (fun () -> ()) (fun () -> ()) (fun _ -> ())
                 | List ->
                     WorkoutListView workouts
         ]
