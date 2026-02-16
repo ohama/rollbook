@@ -217,10 +217,13 @@ Plans:
   4. 관리자의 모든 행동이 감사 로그에 기록된다
   5. 관리자 페이지에서 최근 수정 내용 목록을 볼 수 있다
   6. 관리자가 삭제한 기록을 복구할 수 있다
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 14-01: [To be planned]
+- [ ] 14-01-PLAN.md — Audit infrastructure with PostgreSQL triggers
+- [ ] 14-02-PLAN.md — Admin RLS policies and audit query module
+- [ ] 14-03-PLAN.md — Role management functions and AuditLogList component
+- [ ] 14-04-PLAN.md — Complete admin dashboard with restore functionality
 
 ## Progress
 
@@ -242,7 +245,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 11. Calendar Integration | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 12. Detail Views | v2.0 | 2/2 | Complete | 2026-02-16 |
 | 13. Photo Gallery | v2.0 | 2/2 | Complete | 2026-02-16 |
-| 14. Admin & Audit | v2.0 | 0/TBD | Not started | - |
+| 14. Admin & Audit | v2.0 | 0/4 | Not started | - |
 
 ---
-*Last updated: 2026-02-16 — Phase 13 complete (2/2 plans, 3/3 requirements verified)*
+*Last updated: 2026-02-16 — Phase 14 planned (4 plans created)*
