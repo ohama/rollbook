@@ -11,6 +11,7 @@
     <Compile Include="Supabase/Workouts.fs" />
     <Compile Include="Supabase/Team.fs" />
     <Compile Include="Supabase/Admin.fs" />
+    <Compile Include="Supabase/Audit.fs" />
     <Compile Include="Supabase/Auth.fs" />
     <!-- Utilities -->
     <Compile Include="Utils/DateHelpers.fs" />
