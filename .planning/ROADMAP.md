@@ -200,10 +200,11 @@ Plans:
   1. 사진이 썸네일 크기로 보여진다 (로딩 성능 최적화)
   2. 사진 클릭 시 원래 크기로 확대되어 보인다
   3. 확대된 사진을 다시 클릭하면 썸네일로 돌아간다
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 13-01: [To be planned]
+- [ ] 13-01-PLAN.md — PhotoModal component and RecordItem click handler
+- [ ] 13-02-PLAN.md — Wire modal to all call sites and verify
 
 ### Phase 14: Admin & Audit
 **Goal**: Multiple admins can manage members/records with audit logging and undo
@@ -240,8 +241,8 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 10. Multi-Record CRUD | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 11. Calendar Integration | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 12. Detail Views | v2.0 | 2/2 | Complete | 2026-02-16 |
-| 13. Photo Gallery | v2.0 | 0/TBD | Not started | - |
+| 13. Photo Gallery | v2.0 | 0/2 | Not started | - |
 | 14. Admin & Audit | v2.0 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-16 — Phase 12 complete (2/2 plans, 4/4 requirements verified)*
+*Last updated: 2026-02-16 — Phase 13 planned (2 plans ready for execution)*
