@@ -8,9 +8,15 @@ open Utils.DateHelpers
 open Components.Calendar
 open Components.WorkoutList
 open Components.MonthlyStats
+open Components.DailyDetailView
 
 /// View mode for progress tracking
 type ViewMode = Calendar | List
+
+/// Calendar view state for drill-down navigation
+type CalendarViewState =
+    | CalendarView
+    | DailyDetailView of selectedDate: string
 
 [<ReactComponent>]
 let ProgressViewPage (userId: string) (year: int) (month: int) =
@@ -22,12 +28,17 @@ let ProgressViewPage (userId: string) (year: int) (month: int) =
     let (loading, setLoading) = React.useState(true)
     let (error, setError) = React.useState<string option>(None)
 
+    // Calendar view state
+    let (calendarViewState, setCalendarViewState) = React.useState(CalendarViewState.CalendarView)
+    let (selectedDateRecords, setSelectedDateRecords) = React.useState<WorkoutRecord array>([||])
+
     // Load workouts when month changes
     React.useEffect((fun () ->
         promise {
             try
                 setLoading true
                 setError None
+                setCalendarViewState CalendarViewState.CalendarView  // Reset to calendar on month change
 
                 // Calculate date range for current month
                 let startDate = formatDateString year month 1
@@ -43,6 +54,15 @@ let ProgressViewPage (userId: string) (year: int) (month: int) =
                 setLoading false
         } |> Promise.start
     ), [| box year; box month |])
+
+    let handleDateClick (dateString: string) =
+        promise {
+            try
+                let! records = getWorkoutsForDate userId dateString
+                setSelectedDateRecords records
+                setCalendarViewState (CalendarViewState.DailyDetailView dateString)
+            with ex -> ()
+        } |> Promise.start
 
     Html.div [
         prop.className "max-w-4xl mx-auto px-4 py-8"
@@ -100,7 +120,14 @@ let ProgressViewPage (userId: string) (year: int) (month: int) =
             else
                 match viewMode with
                 | Calendar ->
-                    CalendarGrid userId year month workouts (fun () -> ()) (fun () -> ()) (fun _ -> ())
+                    match calendarViewState with
+                    | CalendarView ->
+                        CalendarGrid userId year month workouts (fun () -> ()) (fun () -> ()) handleDateClick
+                    | DailyDetailView selectedDate ->
+                        Components.DailyDetailView.DailyDetailView selectedDate selectedDateRecords userId
+                            (fun () -> setCalendarViewState CalendarView)
+                            (fun _ -> ())  // Empty edit handler
+                            (fun _ -> ())  // Empty delete handler
                 | List ->
                     WorkoutListView workouts
         ]
