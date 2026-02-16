@@ -41,9 +41,9 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ### Photo
 
-- [ ] **PHO-01**: 사진이 최소한의 크기(썸네일)로 보여진다
-- [ ] **PHO-02**: 사진 클릭 시 원래 크기로 보여진다
-- [ ] **PHO-03**: 확대된 사진 다시 클릭 시 작은 사진으로 돌아간다
+- [x] **PHO-01**: 사진이 최소한의 크기(썸네일)로 보여진다
+- [x] **PHO-02**: 사진 클릭 시 원래 크기로 보여진다
+- [x] **PHO-03**: 확대된 사진 다시 클릭 시 작은 사진으로 돌아간다
 
 ### Admin
 
@@ -108,9 +108,9 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 | DET-02 | Phase 12 | Complete |
 | DET-03 | Phase 12 | Complete |
 | DET-04 | Phase 12 | Complete |
-| PHO-01 | Phase 13 | Pending |
-| PHO-02 | Phase 13 | Pending |
-| PHO-03 | Phase 13 | Pending |
+| PHO-01 | Phase 13 | Complete |
+| PHO-02 | Phase 13 | Complete |
+| PHO-03 | Phase 13 | Complete |
 | ADM-01 | Phase 14 | Pending |
 | ADM-02 | Phase 14 | Pending |
 | ADM-03 | Phase 14 | Pending |
@@ -128,4 +128,4 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-02-15*
-*Last updated: 2026-02-16 — DET-01~04 complete (Phase 12)*
+*Last updated: 2026-02-16 — PHO-01~03 complete (Phase 13)*
