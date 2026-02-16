@@ -3,11 +3,15 @@ module Components.DailyDetailView
 open Feliz
 open Supabase.Types
 open Components.RecordItem
+open Components.PhotoModal
 open Utils.DateHelpers
 
 /// Daily detail view showing all records for a specific date
 [<ReactComponent>]
 let DailyDetailView (selectedDate: string) (records: WorkoutRecord array) (currentUserId: string) (onBack: unit -> unit) (onEdit: int -> unit) (onDelete: int -> unit) =
+    // Photo modal state
+    let (expandedPhotoUrl, setExpandedPhotoUrl) = React.useState<string option>(None)
+
     // Format date for display (e.g., "2026년 2월 16일")
     let displayDate =
         // Parse YYYY-MM-DD
@@ -49,8 +53,13 @@ let DailyDetailView (selectedDate: string) (records: WorkoutRecord array) (curre
                     prop.className "space-y-2"
                     prop.children [
                         for record in records do
-                            RecordItem record currentUserId onEdit onDelete
+                            RecordItem record currentUserId onEdit onDelete (fun url -> setExpandedPhotoUrl (Some url))
                     ]
                 ]
+
+            // Photo modal (renders when photo clicked)
+            match expandedPhotoUrl with
+            | Some url -> PhotoModal url (fun () -> setExpandedPhotoUrl None)
+            | None -> Html.none
         ]
     ]
