@@ -34,10 +34,10 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ### Detail View
 
-- [ ] **DET-01**: "나" 선택 시 해당 날의 나의 기록 내용 전부가 보인다
-- [ ] **DET-02**: "우리" 선택 시 해당 날의 이름(횟수) 목록이 보인다
-- [ ] **DET-03**: "우리"에서 이름 클릭 시 그 사람의 해당 날 기록 내용이 보인다
-- [ ] **DET-04**: 한 번 기록 시 텍스트/사진 아이콘, 여러 번 기록 시 아이콘(횟수)로 표시된다
+- [x] **DET-01**: "나" 선택 시 해당 날의 나의 기록 내용 전부가 보인다
+- [x] **DET-02**: "우리" 선택 시 해당 날의 이름(횟수) 목록이 보인다
+- [x] **DET-03**: "우리"에서 이름 클릭 시 그 사람의 해당 날 기록 내용이 보인다
+- [x] **DET-04**: 한 번 기록 시 텍스트/사진 아이콘, 여러 번 기록 시 아이콘(횟수)로 표시된다
 
 ### Photo
 
@@ -104,10 +104,10 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 | CAL-03 | Phase 11 | Complete |
 | CAL-04 | Phase 11 | Complete |
 | CAL-05 | Phase 11 | Complete |
-| DET-01 | Phase 12 | Pending |
-| DET-02 | Phase 12 | Pending |
-| DET-03 | Phase 12 | Pending |
-| DET-04 | Phase 12 | Pending |
+| DET-01 | Phase 12 | Complete |
+| DET-02 | Phase 12 | Complete |
+| DET-03 | Phase 12 | Complete |
+| DET-04 | Phase 12 | Complete |
 | PHO-01 | Phase 13 | Pending |
 | PHO-02 | Phase 13 | Pending |
 | PHO-03 | Phase 13 | Pending |
@@ -128,4 +128,4 @@ Requirements for v2.0 UI Refactoring milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-02-15*
-*Last updated: 2026-02-16 — CAL-01~05 complete (Phase 11)*
+*Last updated: 2026-02-16 — DET-01~04 complete (Phase 12)*
