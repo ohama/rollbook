@@ -10,6 +10,7 @@ open Components.Calendar
 open Components.DailyDetailView
 open Components.TeamDayDetailView
 open Components.RecordItem
+open Components.PhotoModal
 
 /// Calendar view state for drill-down navigation
 type CalendarViewState =
@@ -29,6 +30,9 @@ let TeamViewPage (year: int) (month: int) =
     let (calendarViewState, setCalendarViewState) = React.useState(CalendarViewState.CalendarView)
     let (selectedDateRecords, setSelectedDateRecords) = React.useState<WorkoutRecord array>([||])
     let (allWorkouts, setAllWorkouts) = React.useState<WorkoutRecord array>([||])
+
+    // Photo modal state
+    let (expandedPhotoUrl, setExpandedPhotoUrl) = React.useState<string option>(None)
 
     // Load team data when month changes
     React.useEffect((fun () ->
@@ -157,9 +161,14 @@ let TeamViewPage (year: int) (month: int) =
                                         prop.children [
                                             for record in userRecords do
                                                 // INTENTIONAL: Empty userId ("") hides edit/delete buttons in team view
-                                                Components.RecordItem.RecordItem record "" (fun _ -> ()) (fun _ -> ())
+                                                Components.RecordItem.RecordItem record "" (fun _ -> ()) (fun _ -> ()) (fun url -> setExpandedPhotoUrl (Some url))
                                         ]
                                     ]
+
+                                // Photo modal (renders when photo clicked)
+                                match expandedPhotoUrl with
+                                | Some url -> Components.PhotoModal.PhotoModal url (fun () -> setExpandedPhotoUrl None)
+                                | None -> Html.none
                             ]
                         ]
         ]

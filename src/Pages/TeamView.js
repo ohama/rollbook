@@ -15,6 +15,8 @@ import { printf, toText } from "../fable_modules/fable-library-js.4.28.0/String.
 import { ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 import { TeamDayDetailView } from "../Components/TeamDayDetailView.js";
 import { RecordItem } from "../Components/RecordItem.js";
+import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
+import { PhotoModal } from "../Components/PhotoModal.js";
 import { CalendarGrid } from "../Components/Calendar.js";
 
 export class CalendarViewState extends Union {
@@ -50,6 +52,8 @@ export function TeamViewPage(teamViewPageInputProps) {
     const patternInput_4 = reactApi.useState([]);
     const selectedDateRecords = patternInput_4[0];
     const patternInput_5 = reactApi.useState([]);
+    const patternInput_6 = reactApi.useState(undefined);
+    const setExpandedPhotoUrl = patternInput_6[1];
     const dependencies = [year, month];
     reactApi.useEffect(() => {
         setLoading(true);
@@ -122,7 +126,7 @@ export function TeamViewPage(teamViewPageInputProps) {
                                     children: toText(printf("%s - 상세 기록"))(selectedDate_1),
                                 })], ["children", reactApi.Children.toArray(Array.from(elems_2))])])))), delay(() => {
                                     let elems_3;
-                                    return (userRecords.length === 0) ? singleton(createElement("div", {
+                                    return append((userRecords.length === 0) ? singleton(createElement("div", {
                                         className: "text-center text-gray-400 py-8",
                                         children: "기록이 없습니다",
                                     })) : singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_3 = toList(delay(() => map_1((record) => createElement(RecordItem, {
@@ -132,7 +136,24 @@ export function TeamViewPage(teamViewPageInputProps) {
                                         },
                                         onDelete: (_arg_7) => {
                                         },
-                                    }), userRecords))), ["children", reactApi.Children.toArray(Array.from(elems_3))])]))));
+                                        onPhotoClick: (url) => {
+                                            setExpandedPhotoUrl(url);
+                                        },
+                                    }), userRecords))), ["children", reactApi.Children.toArray(Array.from(elems_3))])])))), delay(() => {
+                                        const matchValue_2 = patternInput_6[0];
+                                        if (matchValue_2 == null) {
+                                            return singleton(defaultOf());
+                                        }
+                                        else {
+                                            const url_1 = matchValue_2;
+                                            return singleton(createElement(PhotoModal, {
+                                                photoUrl: url_1,
+                                                onClose: () => {
+                                                    setExpandedPhotoUrl(undefined);
+                                                },
+                                            }));
+                                        }
+                                    }));
                                 }));
                             })), ["children", reactApi.Children.toArray(Array.from(elems_4))])]))));
                         }
