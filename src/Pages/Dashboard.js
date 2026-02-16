@@ -27,6 +27,7 @@ import { RecordItem } from "../Components/RecordItem.js";
 import { tryFind } from "../fable_modules/fable-library-js.4.28.0/Array.js";
 import { defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 import { PhotoGallery } from "../Components/PhotoGallery.js";
+import { PhotoModal } from "../Components/PhotoModal.js";
 import { RecordEditModal } from "../Components/RecordEditModal.js";
 
 export class TabMode extends Union {
@@ -193,6 +194,8 @@ export function DashboardPage(dashboardPageInputProps) {
     const patternInput_8 = reactApi.useState(new RecordEditState(0, []));
     const setEditState = patternInput_8[1];
     const editState = patternInput_8[0];
+    const patternInput_9 = reactApi.useState(undefined);
+    const setExpandedPhotoUrl = patternInput_9[1];
     const dependencies = [refreshKey];
     reactApi.useEffect(() => {
         const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
@@ -313,7 +316,7 @@ export function DashboardPage(dashboardPageInputProps) {
                     className: "px-6 py-3 rounded-lg font-medium transition-colors " + (equals(activeTab, new TabMode(3, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
                     children: "관리자",
                 })], ["children", reactApi.Children.toArray(Array.from(elems_4))])])))), delay(() => {
-                    let matchValue, elems_11, elems_7, elems_6, value_84, value_89, elems_5, elems_9, elems_10;
+                    let matchValue, elems_11;
                     return append((matchValue = activeTab, (matchValue.tag === 1) ? ((viewScope.tag === 1) ? singleton(createElement(TeamViewPage, {
                         year: currentYear,
                         month: currentMonth,
@@ -324,97 +327,123 @@ export function DashboardPage(dashboardPageInputProps) {
                     }))) : ((matchValue.tag === 2) ? singleton(createElement("div", {
                         className: "p-6 text-center text-gray-600",
                         children: "팀 뷰는 \'Progress\' 탭에서 \'우리\'를 선택하세요",
-                    })) : ((matchValue.tag === 3) ? singleton(createElement(AdminPage, null)) : singleton(createElement("div", createObj(singleton_1((elems_11 = [createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-4 mb-4"], (elems_7 = [createElement("h3", {
-                        className: "text-sm font-medium text-gray-500 mb-3",
-                        children: "기록 추가",
-                    }), createElement("div", createObj(ofArray([["className", "flex gap-2"], (elems_6 = [createElement("button", createObj(ofArray([["onClick", (_arg_20) => {
-                        const pr_1 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
-                            const today_1 = getTodayDateString();
-                            return createWorkout(user.id)(today_1).then((_arg_2) => {
-                                setRefreshKey(refreshKey + 1);
-                                return Promise.resolve();
-                            });
-                        }).catch((_arg_3) => {
-                            return Promise.resolve();
-                        }))));
-                        void pr_1;
-                    }], (value_84 = "flex-1 px-3 py-3 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200 transition-colors text-center", ["className", value_84]), ["children", "운동"]]))), createElement("button", createObj(ofArray([["onClick", (_arg_21) => {
-                        setEditState(new RecordEditState(1, []));
-                    }], (value_89 = "flex-1 px-3 py-3 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors text-center", ["className", value_89]), ["children", "메모"]]))), createElement("div", createObj(ofArray([["className", "flex-1"], (elems_5 = [createElement(PhotoUploadButton, {
-                        userId: user.id,
-                        onUploadComplete: () => {
-                            setRefreshKey(refreshKey + 1);
-                        },
-                    })], ["children", reactApi.Children.toArray(Array.from(elems_5))])])))], ["children", reactApi.Children.toArray(Array.from(elems_6))])])))], ["children", reactApi.Children.toArray(Array.from(elems_7))])]))), createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-4 mb-4"], (elems_9 = toList(delay(() => {
-                        let arg;
-                        return append(singleton(createElement("h3", {
+                    })) : ((matchValue.tag === 3) ? singleton(createElement(AdminPage, null)) : singleton(createElement("div", createObj(singleton_1((elems_11 = toList(delay(() => {
+                        let elems_7, elems_6, value_84, value_89, elems_5;
+                        return append(singleton(createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-4 mb-4"], (elems_7 = [createElement("h3", {
                             className: "text-sm font-medium text-gray-500 mb-3",
-                            children: (arg = (todayRecords.length | 0), toText(printf("오늘의 기록 (%d)"))(arg)),
-                        })), delay(() => {
-                            let elems_8;
-                            return patternInput_7[0] ? singleton(createElement("div", {
-                                className: "text-center text-gray-400 py-4",
-                                children: "로딩 중...",
-                            })) : ((todayRecords.length === 0) ? singleton(createElement("div", {
-                                className: "text-center text-gray-400 py-6",
-                                children: "아직 기록이 없습니다",
-                            })) : singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_8 = toList(delay(() => map((record_1) => createElement(RecordItem, {
-                                record: record_1,
-                                currentUserId: user.id,
-                                onEdit: (recordId_2) => {
-                                    const record = tryFind((r_1) => (r_1.id === recordId_2), todayRecords);
-                                    if (record == null) {
+                            children: "기록 추가",
+                        }), createElement("div", createObj(ofArray([["className", "flex gap-2"], (elems_6 = [createElement("button", createObj(ofArray([["onClick", (_arg_20) => {
+                            const pr_1 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
+                                const today_1 = getTodayDateString();
+                                return createWorkout(user.id)(today_1).then((_arg_2) => {
+                                    setRefreshKey(refreshKey + 1);
+                                    return Promise.resolve();
+                                });
+                            }).catch((_arg_3) => {
+                                return Promise.resolve();
+                            }))));
+                            void pr_1;
+                        }], (value_84 = "flex-1 px-3 py-3 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200 transition-colors text-center", ["className", value_84]), ["children", "운동"]]))), createElement("button", createObj(ofArray([["onClick", (_arg_21) => {
+                            setEditState(new RecordEditState(1, []));
+                        }], (value_89 = "flex-1 px-3 py-3 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors text-center", ["className", value_89]), ["children", "메모"]]))), createElement("div", createObj(ofArray([["className", "flex-1"], (elems_5 = [createElement(PhotoUploadButton, {
+                            userId: user.id,
+                            onUploadComplete: () => {
+                                setRefreshKey(refreshKey + 1);
+                            },
+                        })], ["children", reactApi.Children.toArray(Array.from(elems_5))])])))], ["children", reactApi.Children.toArray(Array.from(elems_6))])])))], ["children", reactApi.Children.toArray(Array.from(elems_7))])])))), delay(() => {
+                            let elems_9;
+                            return append(singleton(createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-4 mb-4"], (elems_9 = toList(delay(() => {
+                                let arg;
+                                return append(singleton(createElement("h3", {
+                                    className: "text-sm font-medium text-gray-500 mb-3",
+                                    children: (arg = (todayRecords.length | 0), toText(printf("오늘의 기록 (%d)"))(arg)),
+                                })), delay(() => {
+                                    let elems_8;
+                                    return patternInput_7[0] ? singleton(createElement("div", {
+                                        className: "text-center text-gray-400 py-4",
+                                        children: "로딩 중...",
+                                    })) : ((todayRecords.length === 0) ? singleton(createElement("div", {
+                                        className: "text-center text-gray-400 py-6",
+                                        children: "아직 기록이 없습니다",
+                                    })) : singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_8 = toList(delay(() => map((record_1) => createElement(RecordItem, {
+                                        record: record_1,
+                                        currentUserId: user.id,
+                                        onEdit: (recordId_2) => {
+                                            const record = tryFind((r_1) => (r_1.id === recordId_2), todayRecords);
+                                            if (record == null) {
+                                            }
+                                            else {
+                                                setEditState(new RecordEditState(3, [recordId_2, defaultArg(record.text_content, "")]));
+                                            }
+                                        },
+                                        onDelete: (recordId_1) => {
+                                            const pr_3 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
+                                                setTodayRecords(todayRecords.filter((r) => (r.id !== recordId_1)));
+                                                return deleteWorkoutById(recordId_1).then((_arg_7) => {
+                                                    setRefreshKey(refreshKey + 1);
+                                                    return Promise.resolve();
+                                                });
+                                            }).catch((_arg_8) => {
+                                                const today_3 = getTodayDateString();
+                                                return getWorkoutsForDate(user.id, today_3).then((_arg_9) => {
+                                                    setTodayRecords(_arg_9);
+                                                    return Promise.resolve();
+                                                });
+                                            }))));
+                                            void pr_3;
+                                        },
+                                        onPhotoClick: (url) => {
+                                            setExpandedPhotoUrl(url);
+                                        },
+                                    }), todayRecords))), ["children", reactApi.Children.toArray(Array.from(elems_8))])])))));
+                                }));
+                            })), ["children", reactApi.Children.toArray(Array.from(elems_9))])])))), delay(() => {
+                                let elems_10;
+                                return append(singleton(createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-6"], (elems_10 = [createElement(PhotoGallery, {
+                                    userId: user.id,
+                                })], ["children", reactApi.Children.toArray(Array.from(elems_10))])])))), delay(() => {
+                                    const matchValue_1 = patternInput_9[0];
+                                    if (matchValue_1 == null) {
+                                        return singleton(defaultOf());
                                     }
                                     else {
-                                        setEditState(new RecordEditState(3, [recordId_2, defaultArg(record.text_content, "")]));
+                                        const url_1 = matchValue_1;
+                                        return singleton(createElement(PhotoModal, {
+                                            photoUrl: url_1,
+                                            onClose: () => {
+                                                setExpandedPhotoUrl(undefined);
+                                            },
+                                        }));
                                     }
-                                },
-                                onDelete: (recordId_1) => {
-                                    const pr_3 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
-                                        setTodayRecords(todayRecords.filter((r) => (r.id !== recordId_1)));
-                                        return deleteWorkoutById(recordId_1).then((_arg_7) => {
-                                            setRefreshKey(refreshKey + 1);
-                                            return Promise.resolve();
-                                        });
-                                    }).catch((_arg_8) => {
-                                        const today_3 = getTodayDateString();
-                                        return getWorkoutsForDate(user.id, today_3).then((_arg_9) => {
-                                            setTodayRecords(_arg_9);
-                                            return Promise.resolve();
-                                        });
-                                    }))));
-                                    void pr_3;
-                                },
-                            }), todayRecords))), ["children", reactApi.Children.toArray(Array.from(elems_8))])])))));
+                                }));
+                            }));
                         }));
-                    })), ["children", reactApi.Children.toArray(Array.from(elems_9))])]))), createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-6"], (elems_10 = [createElement(PhotoGallery, {
-                        userId: user.id,
-                    })], ["children", reactApi.Children.toArray(Array.from(elems_10))])])))], ["children", reactApi.Children.toArray(Array.from(elems_11))])))))))), delay(() => {
+                    })), ["children", reactApi.Children.toArray(Array.from(elems_11))])))))))), delay(() => {
                         let elems_12;
-                        const matchValue_2 = editState;
-                        return (matchValue_2.tag === 1) ? singleton(createElement(RecordEditModal, {
+                        const matchValue_3 = editState;
+                        return (matchValue_3.tag === 1) ? singleton(createElement(RecordEditModal, {
                             initialText: "",
                             saving: false,
                             onSave: handleSaveText,
                             onCancel: () => {
                                 setEditState(new RecordEditState(0, []));
                             },
-                        })) : ((matchValue_2.tag === 3) ? singleton(createElement(RecordEditModal, {
-                            editingRecordId: matchValue_2.fields[0],
-                            initialText: matchValue_2.fields[1],
+                        })) : ((matchValue_3.tag === 3) ? singleton(createElement(RecordEditModal, {
+                            editingRecordId: matchValue_3.fields[0],
+                            initialText: matchValue_3.fields[1],
                             saving: false,
                             onSave: handleSaveText,
                             onCancel: () => {
                                 setEditState(new RecordEditState(0, []));
                             },
-                        })) : ((matchValue_2.tag === 4) ? singleton(createElement(RecordEditModal, {
+                        })) : ((matchValue_3.tag === 4) ? singleton(createElement(RecordEditModal, {
                             initialText: "",
                             saving: true,
                             onSave: (_arg_22) => {
                             },
                             onCancel: () => {
                             },
-                        })) : ((matchValue_2.tag === 6) ? singleton(createElement("div", createObj(ofArray([["className", "fixed bottom-4 left-4 right-4 bg-red-100 text-red-700 p-3 rounded-lg shadow-lg z-50 text-center"], (elems_12 = [matchValue_2.fields[0], createElement("button", {
+                        })) : ((matchValue_3.tag === 6) ? singleton(createElement("div", createObj(ofArray([["className", "fixed bottom-4 left-4 right-4 bg-red-100 text-red-700 p-3 rounded-lg shadow-lg z-50 text-center"], (elems_12 = [matchValue_3.fields[0], createElement("button", {
                             onClick: (_arg_23) => {
                                 setEditState(new RecordEditState(0, []));
                             },

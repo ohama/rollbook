@@ -12,6 +12,7 @@ open Components.PhotoUpload
 open Components.PhotoGallery
 open Components.RecordItem
 open Components.RecordEditModal
+open Components.PhotoModal
 open Offline.NetworkStatus
 open Offline.Queue
 open Offline.Types
@@ -158,6 +159,9 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
     let (todayRecords, setTodayRecords) = React.useState<WorkoutRecord array>([||])
     let (recordsLoading, setRecordsLoading) = React.useState(true)
     let (editState, setEditState) = React.useState<RecordEditState>(RecordEditState.Idle)
+
+    // Photo modal state
+    let (expandedPhotoUrl, setExpandedPhotoUrl) = React.useState<string option>(None)
 
     // Load today's records
     React.useEffect((fun () ->
@@ -450,7 +454,7 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                                 prop.className "space-y-2"
                                                 prop.children [
                                                     for record in todayRecords do
-                                                        RecordItem record user.id handleStartEdit handleDelete
+                                                        RecordItem record user.id handleStartEdit handleDelete (fun url -> setExpandedPhotoUrl (Some url))
                                                 ]
                                             ]
                                     ]
@@ -463,6 +467,11 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                         PhotoGallery user.id
                                     ]
                                 ]
+
+                                // Photo modal (renders when photo clicked)
+                                match expandedPhotoUrl with
+                                | Some url -> PhotoModal url (fun () -> setExpandedPhotoUrl None)
+                                | None -> Html.none
                             ]
                         ]
                     | Progress ->
