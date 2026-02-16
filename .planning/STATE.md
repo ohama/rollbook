@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 ## Current Position
 
 Phase: 14 of 14 (Admin & Audit)
-Plan: 1 of 4 complete
+Plan: 2 of 4 complete
 Status: In progress
-Last activity: 2026-02-16 — Completed 14-01-PLAN.md (Audit Infrastructure)
+Last activity: 2026-02-16 — Completed 14-02-PLAN.md (Admin Audit Policies)
 
-Progress: [██████████████████░░] 94% (v1.0 + v1.1 complete, v2.0 Phase 8-13 complete, Phase 14: 1/4 plans complete)
+Progress: [██████████████████░░] 95% (v1.0 + v1.1 complete, v2.0 Phase 8-13 complete, Phase 14: 2/4 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 66 (Phases 1-13 complete, Phase 14: 1/4)
+- Total plans completed: 67 (Phases 1-13 complete, Phase 14: 2/4)
 - Average duration: ~30 min (weighted average including Phase 9-14)
 
 **By Phase:**
@@ -39,7 +39,7 @@ Progress: [██████████████████░░] 94% (v1
 | 11. Calendar Integration | 3 | ~6min | ~2min |
 | 12. Detail Views | 2 | ~7min | ~3.5min |
 | 13. Photo Gallery | 2 | ~6min | ~3min |
-| 14. Admin & Audit | 1/4 | ~2min | ~2min |
+| 14. Admin & Audit | 2/4 | ~6min | ~3min |
 
 **Recent Trend:**
 - v1.0 + v1.1 shipped in 6 days (2026-02-10 → 2026-02-15)
@@ -49,9 +49,9 @@ Progress: [██████████████████░░] 94% (v1
 - Phase 11 completed 2026-02-16 (calendar integration, 6min total, 4/4 must-haves verified)
 - Phase 12 completed 2026-02-16 (detail views, 7min total, 8/8 must-haves verified)
 - Phase 13 completed 2026-02-16 (photo gallery, 6min total, 7/7 must-haves verified)
-- Phase 14 started 2026-02-16 (admin & audit, plan 01: 2min, 1/1 tasks complete)
+- Phase 14 in progress 2026-02-16 (admin & audit, plan 01: 2min, plan 02: 4min, 2/4 plans complete)
 
-*Updated: 2026-02-16 after Phase 14 Plan 01 completion*
+*Updated: 2026-02-16 after Phase 14 Plan 02 completion*
 
 ## Accumulated Context
 
@@ -104,6 +104,11 @@ Recent decisions affecting current work:
 - **SECURITY DEFINER for auth.users lookup**: Enable email capture without granting direct table access (v2.0 Phase 14)
 - **pg_trigger_depth() recursion guard**: Prevent infinite loop if triggers added to audit table (v2.0 Phase 14)
 - **gen_random_uuid() for workouts audit**: workouts.id is BIGSERIAL, audit.record_id is UUID for consistency (v2.0 Phase 14)
+- **Admin RLS policies for role management**: user_roles INSERT/DELETE gated by is_admin() function (v2.0 Phase 14)
+- **Admin bypass for workouts viewing**: Admins see ALL workouts including soft-deleted for restoration (v2.0 Phase 14)
+- **Audit log read-only RLS**: Only SELECT policy, triggers write and humans read (v2.0 Phase 14)
+- **JSONB as obj type in F#**: Avoid snake_case mismatch, use dynamic ? operator for field access (v2.0 Phase 14)
+- **Result<T, string> for Audit.fs**: Consistent error handling pattern across all audit query functions (v2.0 Phase 14)
 
 ### Pending Todos
 
@@ -150,7 +155,8 @@ None.
 
 **Phase 14 (Admin & Audit) — IN PROGRESS:**
 - ✅ Plan 01: Audit Infrastructure (2 min) — audit.record_version table, log_change() trigger function, 3 table triggers
-- **Total so far:** 2 minutes, 1/4 plans complete
+- ✅ Plan 02: Admin Audit Policies (4 min) — RLS policies for role management and audit viewing, Audit.fs query module
+- **Total so far:** 6 minutes, 2/4 plans complete
 
 **Research flags:**
 - Phase 14 (Admin Audit): 트리거 성능 이슈 발생 시 추가 연구 필요
@@ -159,9 +165,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Completed 14-01-PLAN.md (Audit Infrastructure)
+Stopped at: Completed 14-02-PLAN.md (Admin Audit Policies)
 Resume file: None
 
 ---
 
-**Next step:** Execute 14-02-PLAN.md (Admin UI for role management and audit viewing)
+**Next step:** Execute 14-03-PLAN.md (Admin UI for role management and audit viewing)
