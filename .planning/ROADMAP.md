@@ -186,10 +186,11 @@ Plans:
   2. "우리" 선택 시 해당 날의 이름(횟수) 목록이 보인다
   3. "우리"에서 이름 클릭 시 그 사람의 해당 날 기록 내용이 보인다
   4. 기록이 1개면 텍스트/사진 아이콘, 여러 개면 아이콘(횟수)로 표시된다
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 12-01: [To be planned]
+- [ ] 12-01-PLAN.md — TeamDayDetailView component with user grouping
+- [ ] 12-02-PLAN.md — TeamView three-level navigation integration
 
 ### Phase 13: Photo Gallery
 **Goal**: Photos display as thumbnails and expand to full size on click
@@ -238,9 +239,9 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12 → 13 → 14
 | 9. UI Layout & Navigation | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 10. Multi-Record CRUD | v2.0 | 3/3 | Complete | 2026-02-16 |
 | 11. Calendar Integration | v2.0 | 3/3 | Complete | 2026-02-16 |
-| 12. Detail Views | v2.0 | 0/TBD | Not started | - |
+| 12. Detail Views | v2.0 | 0/2 | Not started | - |
 | 13. Photo Gallery | v2.0 | 0/TBD | Not started | - |
 | 14. Admin & Audit | v2.0 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-16 — Phase 11 complete (3/3 plans executed)*
+*Last updated: 2026-02-16 — Phase 12 planned (2 plans)*
