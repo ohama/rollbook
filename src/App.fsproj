@@ -26,6 +26,7 @@
     <Compile Include="Components/Calendar.fs" />
     <Compile Include="Components/WorkoutList.fs" />
     <Compile Include="Components/RecordItem.fs" />
+    <Compile Include="Components/PhotoModal.fs" />
     <Compile Include="Components/RecordEditModal.fs" />
     <Compile Include="Components/DailyDetailView.fs" />
     <Compile Include="Components/TeamDayDetailView.fs" />
