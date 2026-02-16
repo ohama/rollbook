@@ -61,3 +61,38 @@ export function getAdminCount() {
     }))).catch((_arg_1) => (Promise.resolve(0))))));
 }
 
+/**
+ * Grant admin role to user (admin-only operation via RLS)
+ */
+export function addAdminRole(userId) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (((supabase.from("user_roles")).insert({
+        user_id: userId,
+        role: "admin",
+    })).then((_arg) => {
+        const error = _arg.error;
+        if (equals(error, defaultOf())) {
+            return Promise.resolve(new FSharpResult$2(0, [undefined]));
+        }
+        else {
+            const errorMsg = error.message;
+            return Promise.resolve(new FSharpResult$2(1, [errorMsg]));
+        }
+    }))).catch((_arg_1) => (Promise.resolve(new FSharpResult$2(1, [_arg_1.message])))))));
+}
+
+/**
+ * Revoke admin role from user (admin-only operation via RLS)
+ */
+export function removeAdminRole(userId) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (((((supabase.from("user_roles")).delete()).eq("user_id", userId)).eq("role", "admin")).then((_arg) => {
+        const error = _arg.error;
+        if (equals(error, defaultOf())) {
+            return Promise.resolve(new FSharpResult$2(0, [undefined]));
+        }
+        else {
+            const errorMsg = error.message;
+            return Promise.resolve(new FSharpResult$2(1, [errorMsg]));
+        }
+    }))).catch((_arg_1) => (Promise.resolve(new FSharpResult$2(1, [_arg_1.message])))))));
+}
+

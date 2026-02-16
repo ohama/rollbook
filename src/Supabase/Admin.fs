@@ -86,3 +86,47 @@ let getAdminCount () : JS.Promise<int> =
         with _ ->
             return 0
     }
+
+/// Grant admin role to user (admin-only operation via RLS)
+let addAdminRole (userId: string) : JS.Promise<Result<unit, string>> =
+    promise {
+        try
+            // Insert into user_roles (RLS policy checks is_admin())
+            let! response =
+                supabase
+                    ?from("user_roles")
+                    ?insert(createObj [
+                        "user_id" ==> userId
+                        "role" ==> "admin"
+                    ])
+
+            let error = response?error
+            match box error with
+            | null -> return Result.Ok ()
+            | _ ->
+                let errorMsg = error?message |> unbox<string>
+                return Result.Error errorMsg
+        with exn ->
+            return Result.Error exn.Message
+    }
+
+/// Revoke admin role from user (admin-only operation via RLS)
+let removeAdminRole (userId: string) : JS.Promise<Result<unit, string>> =
+    promise {
+        try
+            let! response =
+                supabase
+                    ?from("user_roles")
+                    ?delete()
+                    ?eq("user_id", userId)
+                    ?eq("role", "admin")
+
+            let error = response?error
+            match box error with
+            | null -> return Result.Ok ()
+            | _ ->
+                let errorMsg = error?message |> unbox<string>
+                return Result.Error errorMsg
+        with exn ->
+            return Result.Error exn.Message
+    }
