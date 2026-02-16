@@ -6,7 +6,7 @@ open Fable.Core.JsInterop
 open Supabase.Types
 
 [<ReactComponent>]
-let RecordItem (record: WorkoutRecord) (currentUserId: string) (onEdit: int -> unit) (onDelete: int -> unit) =
+let RecordItem (record: WorkoutRecord) (currentUserId: string) (onEdit: int -> unit) (onDelete: int -> unit) (onPhotoClick: string -> unit) =
     // Format time from created_at
     let timeDisplay =
         match record.created_at with
@@ -65,7 +65,8 @@ let RecordItem (record: WorkoutRecord) (currentUserId: string) (onEdit: int -> u
                         Html.img [
                             prop.src url
                             prop.alt "운동 사진"
-                            prop.className "w-16 h-16 object-cover rounded mt-1"
+                            prop.className "w-16 h-16 object-cover rounded mt-1 cursor-pointer hover:opacity-80 transition-opacity"
+                            prop.onClick (fun _ -> onPhotoClick url)
                         ]
                     | None -> Html.none
                 ]

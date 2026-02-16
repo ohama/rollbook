@@ -9,6 +9,7 @@ import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 
 export function RecordItem(recordItemInputProps) {
     let elems_3;
+    const onPhotoClick = recordItemInputProps.onPhotoClick;
     const onDelete = recordItemInputProps.onDelete;
     const onEdit = recordItemInputProps.onEdit;
     const currentUserId = recordItemInputProps.currentUserId;
@@ -43,22 +44,31 @@ export function RecordItem(recordItemInputProps) {
                     children: text_1,
                 })))) : singleton(defaultOf())) : singleton(defaultOf())), delay(() => {
                     const matchValue_3 = record.photo_url;
-                    return (matchValue_3 == null) ? singleton(defaultOf()) : singleton(createElement("img", {
-                        src: matchValue_3,
-                        alt: "운동 사진",
-                        className: "w-16 h-16 object-cover rounded mt-1",
-                    }));
+                    if (matchValue_3 == null) {
+                        return singleton(defaultOf());
+                    }
+                    else {
+                        const url = matchValue_3;
+                        return singleton(createElement("img", {
+                            src: url,
+                            alt: "운동 사진",
+                            className: "w-16 h-16 object-cover rounded mt-1 cursor-pointer hover:opacity-80 transition-opacity",
+                            onClick: (_arg) => {
+                                onPhotoClick(url);
+                            },
+                        }));
+                    }
                 }));
             })))), ["children", reactApi.Children.toArray(Array.from(elems_1))])])))), delay(() => {
                 let elems_2;
                 return isOwner ? singleton(createElement("div", createObj(ofArray([["className", "flex-shrink-0 flex items-start gap-2"], (elems_2 = [createElement("button", {
-                    onClick: (_arg) => {
+                    onClick: (_arg_1) => {
                         onEdit(record.id);
                     },
                     className: "text-sm text-blue-600 hover:text-blue-800 transition-colors",
                     children: "수정",
                 }), createElement("button", {
-                    onClick: (_arg_1) => {
+                    onClick: (_arg_2) => {
                         onDelete(record.id);
                     },
                     className: "text-sm text-red-600 hover:text-red-800 transition-colors",
