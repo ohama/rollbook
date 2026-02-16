@@ -3,8 +3,8 @@ import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "..
 import { supabase } from "./Client.js";
 import { promise } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
 import { append, sortByDescending, tryHead, map } from "../fable_modules/fable-library-js.4.28.0/Array.js";
+import { stringHash, comparePrimitives, defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { tryFind, ofArray } from "../fable_modules/fable-library-js.4.28.0/Map.js";
-import { stringHash, comparePrimitives } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { map as map_1, defaultArg, defaultArgWith, bind, orElse } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 import { Array_groupBy } from "../fable_modules/fable-library-js.4.28.0/Seq2.js";
 import { contains, ofArray as ofArray_1 } from "../fable_modules/fable-library-js.4.28.0/Set.js";
@@ -39,6 +39,21 @@ export function getTeamWorkouts(startDate, endDate) {
 export function getTeamProfiles() {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const query = ((supabase.from("profiles")).select("id, email, display_name")).order("email", {
+            ascending: true,
+        });
+        return query.then((_arg) => {
+            const data = _arg.data;
+            return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
+        });
+    }));
+}
+
+/**
+ * Get all team workouts for a specific date (for daily detail view)
+ */
+export function getTeamWorkoutsForDate(date) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const query = ((((supabase.from("workouts")).select("*")).eq("workout_date", date)).is("deleted_at", defaultOf())).order("created_at", {
             ascending: true,
         });
         return query.then((_arg) => {
