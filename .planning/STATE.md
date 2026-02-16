@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 ## Current Position
 
 Phase: 14 of 14 (Admin & Audit)
-Plan: 2 of 4 complete
+Plan: 3 of 4 complete
 Status: In progress
-Last activity: 2026-02-16 — Completed 14-02-PLAN.md (Admin Audit Policies)
+Last activity: 2026-02-16 — Completed 14-03-PLAN.md (Admin Role Management and Audit UI)
 
-Progress: [██████████████████░░] 95% (v1.0 + v1.1 complete, v2.0 Phase 8-13 complete, Phase 14: 2/4 plans complete)
+Progress: [███████████████████░] 97% (v1.0 + v1.1 complete, v2.0 Phase 8-13 complete, Phase 14: 3/4 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 67 (Phases 1-13 complete, Phase 14: 2/4)
+- Total plans completed: 68 (Phases 1-13 complete, Phase 14: 3/4)
 - Average duration: ~30 min (weighted average including Phase 9-14)
 
 **By Phase:**
@@ -39,7 +39,7 @@ Progress: [██████████████████░░] 95% (v1
 | 11. Calendar Integration | 3 | ~6min | ~2min |
 | 12. Detail Views | 2 | ~7min | ~3.5min |
 | 13. Photo Gallery | 2 | ~6min | ~3min |
-| 14. Admin & Audit | 2/4 | ~6min | ~3min |
+| 14. Admin & Audit | 3/4 | ~9min | ~3min |
 
 **Recent Trend:**
 - v1.0 + v1.1 shipped in 6 days (2026-02-10 → 2026-02-15)
@@ -49,9 +49,9 @@ Progress: [██████████████████░░] 95% (v1
 - Phase 11 completed 2026-02-16 (calendar integration, 6min total, 4/4 must-haves verified)
 - Phase 12 completed 2026-02-16 (detail views, 7min total, 8/8 must-haves verified)
 - Phase 13 completed 2026-02-16 (photo gallery, 6min total, 7/7 must-haves verified)
-- Phase 14 in progress 2026-02-16 (admin & audit, plan 01: 2min, plan 02: 4min, 2/4 plans complete)
+- Phase 14 in progress 2026-02-16 (admin & audit, plan 01: 2min, plan 02: 4min, plan 03: 3min, 3/4 plans complete)
 
-*Updated: 2026-02-16 after Phase 14 Plan 02 completion*
+*Updated: 2026-02-16 after Phase 14 Plan 03 completion*
 
 ## Accumulated Context
 
@@ -98,6 +98,21 @@ Recent decisions affecting current work:
 - **Dynamic property access for DOM**: Use `?` operator for Fable JS interop when Browser.Dom types don't expose properties (v2.0 Phase 13)
 - **stopPropagation pattern**: Prevent event bubbling for nested click handlers (modal overlay vs image) (v2.0 Phase 13)
 - **Curried callback pattern**: Pass photo URL handler to child components for state lifting (v2.0 Phase 13)
+- **AFTER triggers for audit logging**: Capture final state after all trigger chains execute (v2.0 Phase 14)
+- **JSONB for audit snapshots**: Schema-flexible change tracking, queryable with -> operators (v2.0 Phase 14)
+- **BRIN index for time-series**: 90% smaller than B-tree for monotonically increasing timestamp (v2.0 Phase 14)
+- **SECURITY DEFINER for auth.users lookup**: Enable email capture without granting direct table access (v2.0 Phase 14)
+- **pg_trigger_depth() recursion guard**: Prevent infinite loop if triggers added to audit table (v2.0 Phase 14)
+- **gen_random_uuid() for workouts audit**: workouts.id is BIGSERIAL, audit.record_id is UUID for consistency (v2.0 Phase 14)
+- **Admin RLS policies for role management**: user_roles INSERT/DELETE gated by is_admin() function (v2.0 Phase 14)
+- **Admin bypass for workouts viewing**: Admins see ALL workouts including soft-deleted for restoration (v2.0 Phase 14)
+- **Audit log read-only RLS**: Only SELECT policy, triggers write and humans read (v2.0 Phase 14)
+- **JSONB as obj type in F#**: Avoid snake_case mismatch, use dynamic ? operator for field access (v2.0 Phase 14)
+- **Result<T, string> for Audit.fs**: Consistent error handling pattern across all audit query functions (v2.0 Phase 14)
+- **Two separate role functions**: addAdminRole/removeAdminRole for clarity over single role parameter function (v2.0 Phase 14)
+- **Explicit role filter on delete**: .eq("role", "admin") prevents accidental deletion of other roles (v2.0 Phase 14)
+- **Korean label formatters for audit UI**: formatOperation (INSERT→추가), formatTableName (workouts→운동 기록) (v2.0 Phase 14)
+- **Timestamp substring display**: entry.ts.Substring(5, 11) for compact table cells ("02/16 14:30") (v2.0 Phase 14)
 - **AFTER triggers for audit logging**: Capture final state after all trigger chains execute (v2.0 Phase 14)
 - **JSONB for audit snapshots**: Schema-flexible change tracking, queryable with -> operators (v2.0 Phase 14)
 - **BRIN index for time-series**: 90% smaller than B-tree for monotonically increasing timestamp (v2.0 Phase 14)
@@ -165,9 +180,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Completed 14-02-PLAN.md (Admin Audit Policies)
+Stopped at: Completed 14-03-PLAN.md (Admin Role Management and Audit UI)
 Resume file: None
 
 ---
 
-**Next step:** Execute 14-03-PLAN.md (Admin UI for role management and audit viewing)
+**Next step:** Execute 14-04-PLAN.md (Admin UI Integration)
