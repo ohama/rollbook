@@ -64,6 +64,26 @@ let getTeamProfiles () : JS.Promise<ProfileRecord array> =
             return unbox<ProfileRecord array> data
     }
 
+/// Get all team workouts for a specific date (for daily detail view)
+let getTeamWorkoutsForDate (date: string) : JS.Promise<WorkoutRecord array> =
+    promise {
+        let query =
+            supabase
+                ?from("workouts")
+                ?select("*")
+                ?eq("workout_date", date)
+                ?is("deleted_at", null)
+                ?order("created_at", createObj ["ascending" ==> true])
+
+        let! result = query
+        let data = result?data
+
+        if isNull data then
+            return [||]
+        else
+            return unbox<WorkoutRecord array> data
+    }
+
 /// Group workouts by user and create team member summaries
 /// Sorted by workout count descending (most active first)
 let groupWorkoutsByUser (workouts: WorkoutWithProfile array) (allProfiles: ProfileRecord array) : TeamMemberSummary array =
