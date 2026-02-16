@@ -37,6 +37,8 @@
     <Compile Include="Components/PhotoGallery.fs" />
     <Compile Include="Components/OfflineIndicator.fs" />
     <Compile Include="Components/AuditLogList.fs" />
+    <Compile Include="Components/AdminRoleManager.fs" />
+    <Compile Include="Components/RestoreConfirmModal.fs" />
     <!-- Admin UI components -->
     <Compile Include="admin/MemberList.fs" />
     <Compile Include="admin/MemberActions.fs" />
