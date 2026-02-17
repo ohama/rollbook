@@ -281,7 +281,7 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
     let (currentMonth, setCurrentMonth) = React.useState(System.DateTime.Now.Month)
 
     // View scope state
-    let (viewScope, setViewScope) = React.useState(Personal)  // Default to "나"
+    let (viewScope, setViewScope) = React.useState(TeamView)  // Default to "우리"
     let viewScopeRef = React.useRef(viewScope)
     React.useEffect((fun () -> viewScopeRef.current <- viewScope), [| box viewScope |])
 
@@ -301,7 +301,7 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
     let (selectedDate, setSelectedDate) = React.useState<string option>(None)
 
     // Calendar selected date records (output)
-    let (calendarSelectedDate, setCalendarSelectedDate) = React.useState<string option>(None)
+    let (calendarSelectedDate, setCalendarSelectedDate) = React.useState<string option>(Some (getTodayDateString()))
     let (calendarDateRecords, setCalendarDateRecords) = React.useState<WorkoutRecord array>([||])
     let (userDisplayName, setUserDisplayName) = React.useState<string>("")
     let (profileMap, setProfileMap) = React.useState<Map<string, string>>(Map.empty)
@@ -322,19 +322,37 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
 
     // Load monthly workouts for calendar (switches between personal and team)
     React.useEffect((fun () ->
-        setCalendarSelectedDate None
+        let today = getTodayDateString()
+        let todayYear = System.DateTime.Now.Year
+        let todayMonth = System.DateTime.Now.Month
+        // If viewing current month, select today; otherwise reset
+        let selectedDate =
+            if currentYear = todayYear && currentMonth = todayMonth then Some today
+            else None
+        setCalendarSelectedDate selectedDate
         setCalendarDateRecords [||]
         promise {
             try
                 let startDate = formatDateString currentYear currentMonth 1
                 let endDate = formatDateString currentYear currentMonth (getDaysInMonth currentYear currentMonth)
-                match viewScope with
+                match viewScopeRef.current with
                 | Personal ->
                     let! workouts = getWorkouts user.id (Some startDate) (Some endDate)
                     setMonthlyWorkouts workouts
                 | TeamView ->
                     let! allWorkouts = getAllWorkouts startDate endDate
                     setMonthlyWorkouts allWorkouts
+                // Load selected date records
+                match selectedDate with
+                | Some date ->
+                    match viewScopeRef.current with
+                    | Personal ->
+                        let! records = getWorkoutsForDate user.id date
+                        setCalendarDateRecords records
+                    | TeamView ->
+                        let! records = getAllWorkoutsForDate date
+                        setCalendarDateRecords records
+                | None -> ()
             with ex -> ()
         } |> Promise.start
     ), [| box currentYear; box currentMonth; box refreshKey; box viewScope |])
@@ -624,24 +642,58 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                             Html.button [
                                 prop.onClick (fun _ -> setViewScope Personal)
                                 prop.className (
-                                    "flex-1 px-6 py-3 rounded-lg font-medium transition-colors " +
+                                    "flex-1 px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 " +
                                     if viewScope = Personal then
                                         "bg-indigo-600 text-white"
                                     else
                                         "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                 )
-                                prop.text "나"
+                                prop.children [
+                                    Svg.svg [
+                                        svg.width 20; svg.height 20
+                                        svg.viewBox(0, 0, 24, 24)
+                                        svg.fill "none"
+                                        svg.stroke "currentColor"
+                                        svg.custom("strokeWidth", 2)
+                                        svg.custom("strokeLinecap", "round")
+                                        svg.custom("strokeLinejoin", "round")
+                                        svg.children [
+                                            // Thumbs up icon
+                                            Svg.path [ svg.d "M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" ]
+                                            Svg.path [ svg.d "M4 22h-2a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2" ]
+                                        ]
+                                    ]
+                                    Html.span [ prop.text "나" ]
+                                ]
                             ]
                             Html.button [
                                 prop.onClick (fun _ -> setViewScope TeamView)
                                 prop.className (
-                                    "flex-1 px-6 py-3 rounded-lg font-medium transition-colors " +
+                                    "flex-1 px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 " +
                                     if viewScope = TeamView then
                                         "bg-indigo-600 text-white"
                                     else
                                         "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                 )
-                                prop.text "우리"
+                                prop.children [
+                                    Svg.svg [
+                                        svg.width 20; svg.height 20
+                                        svg.viewBox(0, 0, 24, 24)
+                                        svg.fill "none"
+                                        svg.stroke "currentColor"
+                                        svg.custom("strokeWidth", 2)
+                                        svg.custom("strokeLinecap", "round")
+                                        svg.custom("strokeLinejoin", "round")
+                                        svg.children [
+                                            // Handshake / two hands icon
+                                            Svg.path [ svg.d "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" ]
+                                            Svg.circle [ svg.cx 9; svg.cy 7; svg.r 4 ]
+                                            Svg.path [ svg.d "M23 21v-2a4 4 0 0 0-3-3.87" ]
+                                            Svg.path [ svg.d "M16 3.13a4 4 0 0 1 0 7.75" ]
+                                        ]
+                                    ]
+                                    Html.span [ prop.text "우리" ]
+                                ]
                             ]
                         ]
                     ]

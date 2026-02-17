@@ -14,7 +14,7 @@ import { equals, comparePrimitives, int32ToString, createObj } from "../fable_mo
 import { collect, singleton, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
 import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { singleton as singleton_1, ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
-import { unwrap, value as value_127, defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
+import { unwrap, value as value_170, defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
 import { split, printf, toText } from "../fable_modules/fable-library-js.4.28.0/String.js";
 import { day, month, now, year } from "../fable_modules/fable-library-js.4.28.0/Date.js";
 import { RecordEditState } from "../Supabase/Types.js";
@@ -270,7 +270,7 @@ export function EditableRecordRow(editableRecordRowInputProps) {
 }
 
 export function DashboardPage(dashboardPageInputProps) {
-    let elems_15, elems_2, elems_1, elems, elems_14;
+    let elems_19, elems_2, elems_1, elems, elems_18;
     const onLogout = dashboardPageInputProps.onLogout;
     const user = dashboardPageInputProps.user;
     const patternInput = reactApi.useState(false);
@@ -290,7 +290,7 @@ export function DashboardPage(dashboardPageInputProps) {
     patternInput_4 = reactApi.useState(initial_4);
     const setCurrentMonth = patternInput_4[1];
     const currentMonth = patternInput_4[0] | 0;
-    const patternInput_5 = reactApi.useState(new ViewScope(0, []));
+    const patternInput_5 = reactApi.useState(new ViewScope(1, []));
     const viewScope = patternInput_5[0];
     const setViewScope = patternInput_5[1];
     const viewScopeRef = reactApi.useRef(viewScope);
@@ -310,7 +310,9 @@ export function DashboardPage(dashboardPageInputProps) {
     const patternInput_11 = reactApi.useState(undefined);
     const patternInput_12 = reactApi.useState(undefined);
     const selectedDate = patternInput_12[0];
-    const patternInput_13 = reactApi.useState(undefined);
+    let patternInput_13;
+    const initial_13 = getTodayDateString();
+    patternInput_13 = reactApi.useState(initial_13);
     const setCalendarSelectedDate = patternInput_13[1];
     const calendarSelectedDate = patternInput_13[0];
     const patternInput_14 = reactApi.useState([]);
@@ -341,54 +343,72 @@ export function DashboardPage(dashboardPageInputProps) {
     }, dependencies_2);
     const dependencies_4 = [currentYear, currentMonth, refreshKey, viewScope];
     reactApi.useEffect(() => {
-        setCalendarSelectedDate(undefined);
+        const today_1 = getTodayDateString();
+        const selectedDate_1 = ((currentYear === year(now())) && (currentMonth === month(now()))) ? today_1 : undefined;
+        setCalendarSelectedDate(selectedDate_1);
         setCalendarDateRecords([]);
         const pr_1 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
+            let matchValue;
             const startDate = formatDateString(currentYear, currentMonth, 1);
             const endDate = formatDateString(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
-            return (viewScope.tag === 1) ? (getAllWorkouts(startDate, endDate).then((_arg_3) => {
+            return ((matchValue = viewScopeRef.current, (matchValue.tag === 1) ? (getAllWorkouts(startDate, endDate).then((_arg_3) => {
                 setMonthlyWorkouts(_arg_3);
                 return Promise.resolve();
             })) : (getWorkouts(user.id, startDate, endDate).then((_arg_2) => {
                 setMonthlyWorkouts(_arg_2);
                 return Promise.resolve();
+            })))).then(() => PromiseBuilder__Delay_62FBFDE1(promise, () => {
+                if (selectedDate_1 == null) {
+                    return Promise.resolve();
+                }
+                else {
+                    const date = selectedDate_1;
+                    const matchValue_1 = viewScopeRef.current;
+                    return (matchValue_1.tag === 1) ? (getAllWorkoutsForDate(date).then((_arg_5) => {
+                        setCalendarDateRecords(_arg_5);
+                        return Promise.resolve();
+                    })) : (getWorkoutsForDate(user.id, date).then((_arg_4) => {
+                        setCalendarDateRecords(_arg_4);
+                        return Promise.resolve();
+                    }));
+                }
             }));
-        }).catch((_arg_4) => {
+        }).catch((_arg_6) => {
             return Promise.resolve();
         }))));
         void pr_1;
     }, dependencies_4);
     reactApi.useEffect(() => {
-        const pr_2 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getTeamProfiles().then((_arg_5) => {
-            const map = ofArray_1(map_1((p) => [p.id, ((p.display_name != null) && (value_127(p.display_name) !== "")) ? value_127(p.display_name) : p.email], _arg_5), {
+        const pr_2 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (getTeamProfiles().then((_arg_7) => {
+            const map = ofArray_1(map_1((p) => [p.id, ((p.display_name != null) && (value_170(p.display_name) !== "")) ? value_170(p.display_name) : p.email], _arg_7), {
                 Compare: comparePrimitives,
             });
             patternInput_16[1](map);
-            const matchValue = tryFind(user.id, map);
-            if (matchValue == null) {
+            const matchValue_2 = tryFind(user.id, map);
+            if (matchValue_2 == null) {
                 setUserDisplayName(defaultArg(user.email, "사용자"));
                 return Promise.resolve();
             }
             else {
-                setUserDisplayName(matchValue);
+                setUserDisplayName(matchValue_2);
                 return Promise.resolve();
             }
-        }))).catch((_arg_6) => {
+        }))).catch((_arg_8) => {
             return Promise.resolve();
         }))));
         void pr_2;
     }, []);
-    const loadCalendarDateRecords = (date) => {
+    const loadCalendarDateRecords = (date_1) => {
         const pr_3 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
-            const matchValue_1 = viewScopeRef.current;
-            return (matchValue_1.tag === 1) ? (getAllWorkoutsForDate(date).then((_arg_8) => {
-                setCalendarDateRecords(_arg_8);
+            const matchValue_3 = viewScopeRef.current;
+            return (matchValue_3.tag === 1) ? (getAllWorkoutsForDate(date_1).then((_arg_10) => {
+                setCalendarDateRecords(_arg_10);
                 return Promise.resolve();
-            })) : (getWorkoutsForDate(user.id, date).then((_arg_7) => {
-                setCalendarDateRecords(_arg_7);
+            })) : (getWorkoutsForDate(user.id, date_1).then((_arg_9) => {
+                setCalendarDateRecords(_arg_9);
                 return Promise.resolve();
             }));
-        }).catch((_arg_9) => {
+        }).catch((_arg_11) => {
             return Promise.resolve();
         }))));
         void pr_3;
@@ -415,9 +435,9 @@ export function DashboardPage(dashboardPageInputProps) {
         setEditState(new RecordEditState(4, []));
         const pr_6 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
             const targetDate = defaultArg(selectedDate, getTodayDateString());
-            return ((editState.tag === 3) ? (updateWorkoutById(editState.fields[0], text).then((_arg_17) => {
+            return ((editState.tag === 3) ? (updateWorkoutById(editState.fields[0], text).then((_arg_19) => {
                 return Promise.resolve();
-            })) : (createTextRecord(user.id, targetDate, text).then((_arg_18) => {
+            })) : (createTextRecord(user.id, targetDate, text).then((_arg_20) => {
                 return Promise.resolve();
             }))).then(() => PromiseBuilder__Delay_62FBFDE1(promise, () => {
                 setEditState(new RecordEditState(0, []));
@@ -427,17 +447,17 @@ export function DashboardPage(dashboardPageInputProps) {
                     return Promise.resolve();
                 }));
             }));
-        }).catch((_arg_19) => {
+        }).catch((_arg_21) => {
             setEditState(new RecordEditState(6, ["저장 실패. 다시 시도해주세요."]));
             return Promise.resolve();
         }))));
         void pr_6;
     };
-    return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100"], (elems_15 = [createElement("header", createObj(ofArray([["className", "bg-white shadow-sm"], (elems_2 = [createElement("div", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-4 flex items-center justify-between"], (elems_1 = [createElement("h1", {
+    return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gray-100"], (elems_19 = [createElement("header", createObj(ofArray([["className", "bg-white shadow-sm"], (elems_2 = [createElement("div", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-4 flex items-center justify-between"], (elems_1 = [createElement("h1", {
         className: "text-xl font-bold text-indigo-600",
         children: "Rollbook",
     }), createElement("div", createObj(ofArray([["className", "flex items-center gap-2"], (elems = [createElement("button", {
-        onClick: (_arg_28) => {
+        onClick: (_arg_30) => {
             if (equals(activeTab, new TabMode(3, []))) {
                 setActiveTab(new TabMode(0, []));
             }
@@ -448,9 +468,9 @@ export function DashboardPage(dashboardPageInputProps) {
         className: "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors " + (equals(activeTab, new TabMode(3, [])) ? "bg-green-600 text-white" : "bg-green-100 text-green-700 hover:bg-green-200"),
         children: "관리",
     }), createElement("button", {
-        onClick: (_arg_29) => {
+        onClick: (_arg_31) => {
             patternInput[1](true);
-            const pr_9 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signOut().then((_arg_27) => {
+            const pr_9 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signOut().then((_arg_29) => {
                 onLogout();
                 return Promise.resolve();
             }))));
@@ -459,9 +479,9 @@ export function DashboardPage(dashboardPageInputProps) {
         disabled: loading,
         className: "px-4 py-2 rounded-lg text-sm font-medium transition-colors " + (loading ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"),
         children: loading ? "로그아웃 중..." : "로그아웃",
-    })], ["children", reactApi.Children.toArray(Array.from(elems))])])))], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))], ["children", reactApi.Children.toArray(Array.from(elems_2))])]))), createElement("main", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-8"], (elems_14 = toList(delay(() => {
+    })], ["children", reactApi.Children.toArray(Array.from(elems))])])))], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))], ["children", reactApi.Children.toArray(Array.from(elems_2))])]))), createElement("main", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-8"], (elems_18 = toList(delay(() => {
         let elems_7, value_35, elems_4, elements_1, arg_5, d, parts, arg, arg_1, arg_2, value_60, elems_6, elements_2;
-        return append(singleton(createElement("div", createObj(ofArray([["className", "flex items-center justify-between bg-white rounded-lg shadow-sm p-4 mb-4"], (elems_7 = [createElement("button", createObj(ofArray([["onClick", (_arg_30) => {
+        return append(singleton(createElement("div", createObj(ofArray([["className", "flex items-center justify-between bg-white rounded-lg shadow-sm p-4 mb-4"], (elems_7 = [createElement("button", createObj(ofArray([["onClick", (_arg_32) => {
             goToPrevMonth();
         }], (value_35 = "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors", ["className", value_35]), (elems_4 = [createElement("svg", createObj(ofArray([["width", 20], ["height", 20], ["viewBox", (((((0 + " ") + 0) + " ") + 24) + " ") + 24], ["fill", "none"], ["stroke", "currentColor"], ["strokeWidth", 2.5], ["strokeLinecap", "round"], ["strokeLinejoin", "round"], (elements_1 = ofArray([createElement("polyline", {
             points: "14,18 8,12 14,6",
@@ -470,41 +490,51 @@ export function DashboardPage(dashboardPageInputProps) {
         })]), ["children", reactApi.Children.toArray(Array.from(elements_1))])])))], ["children", reactApi.Children.toArray(Array.from(elems_4))])]))), createElement("h2", {
             className: "text-lg font-semibold text-gray-800",
             children: (calendarSelectedDate == null) ? ((arg_5 = (day(now()) | 0), toText(printf("%d년 %d월 %d일"))(currentYear)(currentMonth)(arg_5))) : ((d = calendarSelectedDate, (parts = split(d, ["-"], undefined, 0), (parts.length === 3) ? ((arg = item(0, parts), (arg_1 = (parse(item(1, parts), 511, false, 32) | 0), (arg_2 = (parse(item(2, parts), 511, false, 32) | 0), toText(printf("%s년 %d월 %d일"))(arg)(arg_1)(arg_2))))) : d))),
-        }), createElement("button", createObj(ofArray([["onClick", (_arg_31) => {
+        }), createElement("button", createObj(ofArray([["onClick", (_arg_33) => {
             goToNextMonth();
         }], (value_60 = "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors", ["className", value_60]), (elems_6 = [createElement("svg", createObj(ofArray([["width", 20], ["height", 20], ["viewBox", (((((0 + " ") + 0) + " ") + 24) + " ") + 24], ["fill", "none"], ["stroke", "currentColor"], ["strokeWidth", 2.5], ["strokeLinecap", "round"], ["strokeLinejoin", "round"], (elements_2 = ofArray([createElement("polyline", {
             points: "10,6 16,12 10,18",
         }), createElement("polyline", {
             points: "16,6 22,12 16,18",
         })]), ["children", reactApi.Children.toArray(Array.from(elements_2))])])))], ["children", reactApi.Children.toArray(Array.from(elems_6))])])))], ["children", reactApi.Children.toArray(Array.from(elems_7))])])))), delay(() => {
-            let elems_8;
-            return append(singleton(createElement("div", createObj(ofArray([["className", "flex gap-2 mb-6"], (elems_8 = [createElement("button", {
-                onClick: (_arg_32) => {
-                    setViewScope(new ViewScope(0, []));
-                },
-                className: "flex-1 px-6 py-3 rounded-lg font-medium transition-colors " + (equals(viewScope, new ViewScope(0, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
+            let elems_12, elems_9, elements_3, elems_11, elements_4;
+            return append(singleton(createElement("div", createObj(ofArray([["className", "flex gap-2 mb-6"], (elems_12 = [createElement("button", createObj(ofArray([["onClick", (_arg_34) => {
+                setViewScope(new ViewScope(0, []));
+            }], ["className", "flex-1 px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 " + (equals(viewScope, new ViewScope(0, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300")], (elems_9 = [createElement("svg", createObj(ofArray([["width", 20], ["height", 20], ["viewBox", (((((0 + " ") + 0) + " ") + 24) + " ") + 24], ["fill", "none"], ["stroke", "currentColor"], ["strokeWidth", 2], ["strokeLinecap", "round"], ["strokeLinejoin", "round"], (elements_3 = ofArray([createElement("path", {
+                d: "M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z",
+            }), createElement("path", {
+                d: "M4 22h-2a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2",
+            })]), ["children", reactApi.Children.toArray(Array.from(elements_3))])]))), createElement("span", {
                 children: "나",
-            }), createElement("button", {
-                onClick: (_arg_33) => {
-                    setViewScope(new ViewScope(1, []));
-                },
-                className: "flex-1 px-6 py-3 rounded-lg font-medium transition-colors " + (equals(viewScope, new ViewScope(1, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"),
+            })], ["children", reactApi.Children.toArray(Array.from(elems_9))])]))), createElement("button", createObj(ofArray([["onClick", (_arg_35) => {
+                setViewScope(new ViewScope(1, []));
+            }], ["className", "flex-1 px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 " + (equals(viewScope, new ViewScope(1, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300")], (elems_11 = [createElement("svg", createObj(ofArray([["width", 20], ["height", 20], ["viewBox", (((((0 + " ") + 0) + " ") + 24) + " ") + 24], ["fill", "none"], ["stroke", "currentColor"], ["strokeWidth", 2], ["strokeLinecap", "round"], ["strokeLinejoin", "round"], (elements_4 = ofArray([createElement("path", {
+                d: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2",
+            }), createElement("circle", {
+                cx: 9,
+                cy: 7,
+                r: 4,
+            }), createElement("path", {
+                d: "M23 21v-2a4 4 0 0 0-3-3.87",
+            }), createElement("path", {
+                d: "M16 3.13a4 4 0 0 1 0 7.75",
+            })]), ["children", reactApi.Children.toArray(Array.from(elements_4))])]))), createElement("span", {
                 children: "우리",
-            })], ["children", reactApi.Children.toArray(Array.from(elems_8))])])))), delay(() => {
-                let matchValue_3, elems_12;
-                return append((matchValue_3 = activeTab, (matchValue_3.tag === 1) ? ((viewScope.tag === 1) ? singleton(createElement(TeamViewPage, {
+            })], ["children", reactApi.Children.toArray(Array.from(elems_11))])])))], ["children", reactApi.Children.toArray(Array.from(elems_12))])])))), delay(() => {
+                let matchValue_5, elems_16;
+                return append((matchValue_5 = activeTab, (matchValue_5.tag === 1) ? ((viewScope.tag === 1) ? singleton(createElement(TeamViewPage, {
                     year: currentYear,
                     month: currentMonth,
                 })) : singleton(createElement(ProgressViewPage, {
                     userId: user.id,
                     year: currentYear,
                     month: currentMonth,
-                }))) : ((matchValue_3.tag === 2) ? singleton(createElement("div", {
+                }))) : ((matchValue_5.tag === 2) ? singleton(createElement("div", {
                     className: "p-6 text-center text-gray-600",
                     children: "팀 뷰는 \'Progress\' 탭에서 \'우리\'를 선택하세요",
-                })) : ((matchValue_3.tag === 3) ? singleton(createElement(AdminPage, null)) : singleton(createElement("div", createObj(singleton_1((elems_12 = toList(delay(() => {
-                    let elems_9;
-                    return append(singleton(createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-4 mt-4"], (elems_9 = [createElement(CalendarGrid, {
+                })) : ((matchValue_5.tag === 3) ? singleton(createElement(AdminPage, null)) : singleton(createElement("div", createObj(singleton_1((elems_16 = toList(delay(() => {
+                    let elems_13;
+                    return append(singleton(createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-4 mt-4"], (elems_13 = [createElement(CalendarGrid, {
                         userId: user.id,
                         year: currentYear,
                         month: currentMonth,
@@ -517,54 +547,54 @@ export function DashboardPage(dashboardPageInputProps) {
                         },
                         onDateDoubleClick: (dateString_1) => {
                             setCalendarSelectedDate(dateString_1);
-                            const pr_7 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (createTextRecord(user.id, dateString_1, "운동했어").then((_arg_20) => {
+                            const pr_7 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (createTextRecord(user.id, dateString_1, "운동했어").then((_arg_22) => {
                                 const startDate_3 = formatDateString(currentYear, currentMonth, 1);
                                 const endDate_3 = formatDateString(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
-                                return getWorkouts(user.id, startDate_3, endDate_3).then((_arg_21) => {
-                                    setMonthlyWorkouts(_arg_21);
-                                    return getWorkoutsForDate(user.id, dateString_1).then((_arg_22) => {
-                                        setCalendarDateRecords(_arg_22);
+                                return getWorkouts(user.id, startDate_3, endDate_3).then((_arg_23) => {
+                                    setMonthlyWorkouts(_arg_23);
+                                    return getWorkoutsForDate(user.id, dateString_1).then((_arg_24) => {
+                                        setCalendarDateRecords(_arg_24);
                                         return Promise.resolve();
                                     });
                                 });
-                            }))).catch((_arg_23) => {
+                            }))).catch((_arg_25) => {
                                 return Promise.resolve();
                             }))));
                             void pr_7;
                         },
                         selectedDate: unwrap(calendarSelectedDate),
-                    })], ["children", reactApi.Children.toArray(Array.from(elems_9))])])))), delay(() => {
-                        let matchValue_4, date_3, elems_11;
-                        return append((matchValue_4 = calendarSelectedDate, (matchValue_4 == null) ? singleton(defaultOf()) : ((date_3 = matchValue_4, singleton(createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-4 mt-4"], (elems_11 = toList(delay(() => {
+                    })], ["children", reactApi.Children.toArray(Array.from(elems_13))])])))), delay(() => {
+                        let matchValue_6, date_4, elems_15;
+                        return append((matchValue_6 = calendarSelectedDate, (matchValue_6 == null) ? singleton(defaultOf()) : ((date_4 = matchValue_6, singleton(createElement("div", createObj(ofArray([["className", "bg-white rounded-xl shadow-sm p-4 mt-4"], (elems_15 = toList(delay(() => {
                             let arg_7;
                             return append(singleton(createElement("h3", {
                                 className: "text-sm font-semibold text-gray-600 mb-3",
-                                children: (arg_7 = (calendarDateRecords.length | 0), toText(printf("%s 기록 (%d)"))(date_3)(arg_7)),
+                                children: (arg_7 = (calendarDateRecords.length | 0), toText(printf("%s 기록 (%d)"))(date_4)(arg_7)),
                             })), delay(() => {
-                                let elems_10;
+                                let elems_14;
                                 return (calendarDateRecords.length === 0) ? singleton(createElement("div", {
                                     className: "text-center text-gray-400 py-4",
                                     children: "기록이 없습니다",
-                                })) : singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_10 = toList(delay(() => collect((record_1) => {
+                                })) : singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_14 = toList(delay(() => collect((record_1) => {
                                     const recordDisplayName = defaultArg(tryFind(record_1.user_id, patternInput_16[0]), patternInput_15[0]);
                                     return singleton(createElement(EditableRecordRow, {
                                         record: record_1,
                                         displayName: recordDisplayName,
                                         currentUserId: user.id,
                                         onSaved: () => {
-                                            loadCalendarDateRecords(date_3);
+                                            loadCalendarDateRecords(date_4);
                                             const pr_4 = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
                                                 const startDate_1 = formatDateString(currentYear, currentMonth, 1);
                                                 const endDate_1 = formatDateString(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
-                                                const matchValue_2 = viewScopeRef.current;
-                                                return (matchValue_2.tag === 1) ? (getAllWorkouts(startDate_1, endDate_1).then((_arg_11) => {
-                                                    setMonthlyWorkouts(_arg_11);
+                                                const matchValue_4 = viewScopeRef.current;
+                                                return (matchValue_4.tag === 1) ? (getAllWorkouts(startDate_1, endDate_1).then((_arg_13) => {
+                                                    setMonthlyWorkouts(_arg_13);
                                                     return Promise.resolve();
-                                                })) : (getWorkouts(user.id, startDate_1, endDate_1).then((_arg_10) => {
-                                                    setMonthlyWorkouts(_arg_10);
+                                                })) : (getWorkouts(user.id, startDate_1, endDate_1).then((_arg_12) => {
+                                                    setMonthlyWorkouts(_arg_12);
                                                     return Promise.resolve();
                                                 }));
-                                            }).catch((_arg_12) => {
+                                            }).catch((_arg_14) => {
                                                 return Promise.resolve();
                                             }))));
                                             void pr_4;
@@ -573,15 +603,15 @@ export function DashboardPage(dashboardPageInputProps) {
                                             setExpandedPhotoUrl(url);
                                         },
                                     }));
-                                }, calendarDateRecords))), ["children", reactApi.Children.toArray(Array.from(elems_10))])]))));
+                                }, calendarDateRecords))), ["children", reactApi.Children.toArray(Array.from(elems_14))])]))));
                             }));
-                        })), ["children", reactApi.Children.toArray(Array.from(elems_11))])]))))))), delay(() => {
-                            const matchValue_5 = patternInput_9[0];
-                            if (matchValue_5 == null) {
+                        })), ["children", reactApi.Children.toArray(Array.from(elems_15))])]))))))), delay(() => {
+                            const matchValue_7 = patternInput_9[0];
+                            if (matchValue_7 == null) {
                                 return singleton(defaultOf());
                             }
                             else {
-                                const url_1 = matchValue_5;
+                                const url_1 = matchValue_7;
                                 return singleton(createElement(PhotoModal, {
                                     photoUrl: url_1,
                                     onClose: () => {
@@ -591,41 +621,41 @@ export function DashboardPage(dashboardPageInputProps) {
                             }
                         }));
                     }));
-                })), ["children", reactApi.Children.toArray(Array.from(elems_12))])))))))), delay(() => {
-                    let elems_13;
-                    const matchValue_7 = editState;
-                    return (matchValue_7.tag === 1) ? singleton(createElement(RecordEditModal, {
+                })), ["children", reactApi.Children.toArray(Array.from(elems_16))])))))))), delay(() => {
+                    let elems_17;
+                    const matchValue_9 = editState;
+                    return (matchValue_9.tag === 1) ? singleton(createElement(RecordEditModal, {
                         initialText: "",
                         saving: false,
                         onSave: handleSaveText,
                         onCancel: () => {
                             setEditState(new RecordEditState(0, []));
                         },
-                    })) : ((matchValue_7.tag === 3) ? singleton(createElement(RecordEditModal, {
-                        editingRecordId: matchValue_7.fields[0],
-                        initialText: matchValue_7.fields[1],
+                    })) : ((matchValue_9.tag === 3) ? singleton(createElement(RecordEditModal, {
+                        editingRecordId: matchValue_9.fields[0],
+                        initialText: matchValue_9.fields[1],
                         saving: false,
                         onSave: handleSaveText,
                         onCancel: () => {
                             setEditState(new RecordEditState(0, []));
                         },
-                    })) : ((matchValue_7.tag === 4) ? singleton(createElement(RecordEditModal, {
+                    })) : ((matchValue_9.tag === 4) ? singleton(createElement(RecordEditModal, {
                         initialText: "",
                         saving: true,
-                        onSave: (_arg_34) => {
+                        onSave: (_arg_36) => {
                         },
                         onCancel: () => {
                         },
-                    })) : ((matchValue_7.tag === 6) ? singleton(createElement("div", createObj(ofArray([["className", "fixed bottom-4 left-4 right-4 bg-red-100 text-red-700 p-3 rounded-lg shadow-lg z-50 text-center"], (elems_13 = [matchValue_7.fields[0], createElement("button", {
-                        onClick: (_arg_35) => {
+                    })) : ((matchValue_9.tag === 6) ? singleton(createElement("div", createObj(ofArray([["className", "fixed bottom-4 left-4 right-4 bg-red-100 text-red-700 p-3 rounded-lg shadow-lg z-50 text-center"], (elems_17 = [matchValue_9.fields[0], createElement("button", {
+                        onClick: (_arg_37) => {
                             setEditState(new RecordEditState(0, []));
                         },
                         className: "ml-2 underline",
                         children: "닫기",
-                    })], ["children", reactApi.Children.toArray(Array.from(elems_13))])])))) : singleton(defaultOf()))));
+                    })], ["children", reactApi.Children.toArray(Array.from(elems_17))])])))) : singleton(defaultOf()))));
                 }));
             }));
         }));
-    })), ["children", reactApi.Children.toArray(Array.from(elems_14))])])))], ["children", reactApi.Children.toArray(Array.from(elems_15))])])));
+    })), ["children", reactApi.Children.toArray(Array.from(elems_18))])])))], ["children", reactApi.Children.toArray(Array.from(elems_19))])])));
 }
 
