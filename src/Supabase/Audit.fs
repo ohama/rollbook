@@ -24,7 +24,8 @@ let getRecentChanges (limit: int) : JS.Promise<Result<AuditEntry array, string>>
         try
             let! response =
                 supabase
-                    ?from("record_version", createObj ["schema" ==> "audit"])
+                    ?schema("audit")
+                    ?from("record_version")
                     ?select("id, ts, op, user_email, table_name, record, old_record")
                     ?order("ts", createObj ["ascending" ==> false])
                     ?limit(limit)
@@ -98,7 +99,8 @@ let getChangesByTable (tableName: string) (limit: int) : JS.Promise<Result<Audit
         try
             let! response =
                 supabase
-                    ?from("record_version", createObj ["schema" ==> "audit"])
+                    ?schema("audit")
+                    ?from("record_version")
                     ?select("id, ts, op, user_email, table_name, record, old_record")
                     ?eq("table_name", tableName)
                     ?order("ts", createObj ["ascending" ==> false])
@@ -125,7 +127,8 @@ let getChangesByUser (userId: string) (limit: int) : JS.Promise<Result<AuditEntr
         try
             let! response =
                 supabase
-                    ?from("record_version", createObj ["schema" ==> "audit"])
+                    ?schema("audit")
+                    ?from("record_version")
                     ?select("id, ts, op, user_email, table_name, record, old_record")
                     ?eq("user_id", userId)
                     ?order("ts", createObj ["ascending" ==> false])
