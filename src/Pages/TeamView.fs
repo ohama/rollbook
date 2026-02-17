@@ -126,7 +126,7 @@ let TeamViewPage (year: int) (month: int) =
                 | None ->
                     match calendarViewState with
                     | CalendarView ->
-                        CalendarGrid "" year month allWorkouts (fun () -> ()) (fun () -> ()) handleDateClick
+                        CalendarGrid "" year month allWorkouts (fun () -> ()) (fun () -> ()) handleDateClick (fun _ -> ()) None
                     | DailyDetailView selectedDate ->
                         Components.TeamDayDetailView.TeamDayDetailView selectedDate selectedDateRecords
                             (fun () -> setCalendarViewState CalendarView)

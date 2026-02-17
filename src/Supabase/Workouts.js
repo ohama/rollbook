@@ -148,7 +148,35 @@ export function updateWorkout(userId, date, updates) {
 
 /**
  * Get workout records for a user with optional date range filtering
+ * Get all users' workouts for a date range (no user filter, relies on RLS)
  */
+export function getAllWorkouts(startDate, endDate) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const query = (((((supabase.from("workouts")).select("*")).gte("workout_date", startDate)).lte("workout_date", endDate)).is("deleted_at", defaultOf())).order("workout_date", {
+            ascending: false,
+        });
+        return query.then((_arg) => {
+            const data = _arg.data;
+            return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
+        });
+    }));
+}
+
+/**
+ * Get all users' workouts for a specific date (no user filter)
+ */
+export function getAllWorkoutsForDate(date) {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+        const query = ((((supabase.from("workouts")).select("*")).eq("workout_date", date)).is("deleted_at", defaultOf())).order("created_at", {
+            ascending: true,
+        });
+        return query.then((_arg) => {
+            const data = _arg.data;
+            return (data == null) ? (Promise.resolve([])) : (Promise.resolve(data));
+        });
+    }));
+}
+
 export function getWorkouts(userId, startDate, endDate) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         let date;

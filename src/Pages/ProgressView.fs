@@ -122,7 +122,7 @@ let ProgressViewPage (userId: string) (year: int) (month: int) =
                 | Calendar ->
                     match calendarViewState with
                     | CalendarView ->
-                        CalendarGrid userId year month workouts (fun () -> ()) (fun () -> ()) handleDateClick
+                        CalendarGrid userId year month workouts (fun () -> ()) (fun () -> ()) handleDateClick (fun _ -> ()) None
                     | DailyDetailView selectedDate ->
                         Components.DailyDetailView.DailyDetailView selectedDate selectedDateRecords userId
                             (fun () -> setCalendarViewState CalendarView)

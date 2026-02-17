@@ -171,6 +171,43 @@ let updateWorkout (userId: string) (date: string) (updates: obj) : JS.Promise<Wo
     }
 
 /// Get workout records for a user with optional date range filtering
+/// Get all users' workouts for a date range (no user filter, relies on RLS)
+let getAllWorkouts (startDate: string) (endDate: string) : JS.Promise<WorkoutRecord array> =
+    promise {
+        let query =
+            supabase
+                ?from("workouts")
+                ?select("*")
+                ?gte("workout_date", startDate)
+                ?lte("workout_date", endDate)
+                ?is("deleted_at", null)
+                ?order("workout_date", createObj ["ascending" ==> false])
+        let! result = query
+        let data = result?data
+        if isNull data then
+            return [||]
+        else
+            return unbox<WorkoutRecord array> data
+    }
+
+/// Get all users' workouts for a specific date (no user filter)
+let getAllWorkoutsForDate (date: string) : JS.Promise<WorkoutRecord array> =
+    promise {
+        let query =
+            supabase
+                ?from("workouts")
+                ?select("*")
+                ?eq("workout_date", date)
+                ?is("deleted_at", null)
+                ?order("created_at", createObj ["ascending" ==> true])
+        let! result = query
+        let data = result?data
+        if isNull data then
+            return [||]
+        else
+            return unbox<WorkoutRecord array> data
+    }
+
 let getWorkouts (userId: string) (startDate: string option) (endDate: string option) : JS.Promise<WorkoutRecord array> =
     promise {
         // Start with base query filtering soft-deleted records

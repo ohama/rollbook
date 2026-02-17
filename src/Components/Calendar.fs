@@ -22,7 +22,7 @@ let countRecordsByDate (workouts: WorkoutRecord array) : Map<string, int> =
     |> Map.ofArray
 
 [<ReactComponent>]
-let CalendarGrid (userId: string) (year: int) (month: int) (workouts: WorkoutRecord array) (onPrevMonth: unit -> unit) (onNextMonth: unit -> unit) (onDateClick: string -> unit) =
+let CalendarGrid (userId: string) (year: int) (month: int) (workouts: WorkoutRecord array) (onPrevMonth: unit -> unit) (onNextMonth: unit -> unit) (onDateClick: string -> unit) (onDateDoubleClick: string -> unit) (selectedDate: string option) =
     // Calculate calendar data
     let daysInMonth = getDaysInMonth year month
     let firstDayOfWeek = getFirstDayOfMonth year month
@@ -49,27 +49,6 @@ let CalendarGrid (userId: string) (year: int) (month: int) (workouts: WorkoutRec
     Html.div [
         prop.className "space-y-2"
         prop.children [
-            // Header with navigation
-            Html.div [
-                prop.className "flex justify-between items-center mb-4"
-                prop.children [
-                    Html.button [
-                        prop.onClick (fun _ -> onPrevMonth())
-                        prop.className "px-3 py-1 rounded-lg text-gray-600 hover:bg-gray-100 font-medium"
-                        prop.text "← 이전"
-                    ]
-                    Html.h2 [
-                        prop.className "text-lg font-semibold text-gray-800"
-                        prop.text (formatMonthYear year month)
-                    ]
-                    Html.button [
-                        prop.onClick (fun _ -> onNextMonth())
-                        prop.className "px-3 py-1 rounded-lg text-gray-600 hover:bg-gray-100 font-medium"
-                        prop.text "다음 →"
-                    ]
-                ]
-            ]
-
             // Day of week headers
             Html.div [
                 prop.className "grid grid-cols-7 gap-1 text-center text-sm font-semibold text-gray-600 mb-2"
@@ -98,18 +77,22 @@ let CalendarGrid (userId: string) (year: int) (month: int) (workouts: WorkoutRec
                                 ]
                             | None -> ()
 
-                            // Click handler
+                            // Click handlers
                             prop.onClick (fun _ -> onDateClick dayRecord.DateString)
+                            prop.onDoubleClick (fun e -> e.preventDefault(); onDateDoubleClick dayRecord.DateString)
+
+                            let isSelected = selectedDate = Some dayRecord.DateString
 
                             // Styling based on state
                             prop.className (
                                 "aspect-square flex items-center justify-center rounded-lg relative transition-colors " +
-                                if dayRecord.IsToday then
-                                    "border-2 border-indigo-600 font-bold "
-                                else
-                                    ""
-                                +
-                                if dayRecord.HasWorkout then
+                                if isSelected then
+                                    "bg-blue-500 text-white font-bold"
+                                elif dayRecord.IsToday && dayRecord.HasWorkout then
+                                    "ring-2 ring-indigo-600 bg-green-200 text-green-900 font-bold hover:bg-green-300"
+                                elif dayRecord.IsToday then
+                                    "ring-2 ring-indigo-600 bg-indigo-100 text-indigo-800 font-bold hover:bg-indigo-200"
+                                elif dayRecord.HasWorkout then
                                     "bg-green-100 text-green-800 hover:bg-green-200"
                                 else
                                     "text-gray-700 hover:bg-gray-100"

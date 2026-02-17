@@ -119,7 +119,7 @@ export function TeamViewPage(teamViewPageInputProps) {
                             const userRecords = selectedDateRecords.filter((r) => (r.user_id === matchValue_1.fields[1]));
                             return singleton(createElement("div", createObj(ofArray([["className", "space-y-4"], (elems_4 = toList(delay(() => {
                                 let elems_2, value_25;
-                                return append(singleton(createElement("div", createObj(ofArray([["className", "flex items-center gap-3 mb-4"], (elems_2 = [createElement("button", createObj(ofArray([["onClick", (_arg_5) => {
+                                return append(singleton(createElement("div", createObj(ofArray([["className", "flex items-center gap-3 mb-4"], (elems_2 = [createElement("button", createObj(ofArray([["onClick", (_arg_6) => {
                                     setCalendarViewState(new CalendarViewState(1, [selectedDate_1]));
                                 }], (value_25 = "w-11 h-11 flex items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors", ["className", value_25]), ["children", "←"]]))), createElement("h2", {
                                     className: "text-lg font-semibold text-gray-800",
@@ -132,9 +132,9 @@ export function TeamViewPage(teamViewPageInputProps) {
                                     })) : singleton(createElement("div", createObj(ofArray([["className", "space-y-2"], (elems_3 = toList(delay(() => map_1((record) => createElement(RecordItem, {
                                         record: record,
                                         currentUserId: "",
-                                        onEdit: (_arg_6) => {
+                                        onEdit: (_arg_7) => {
                                         },
-                                        onDelete: (_arg_7) => {
+                                        onDelete: (_arg_8) => {
                                         },
                                         onPhotoClick: (url) => {
                                             setExpandedPhotoUrl(url);
@@ -176,6 +176,8 @@ export function TeamViewPage(teamViewPageInputProps) {
                                         return Promise.resolve();
                                     }))));
                                     void pr_1;
+                                },
+                                onDateDoubleClick: (_arg_5) => {
                                 },
                             }));
                     }

@@ -131,9 +131,9 @@ export function ProgressViewPage(progressViewPageInputProps) {
                         onBack: () => {
                             setCalendarViewState(new CalendarViewState(0, []));
                         },
-                        onEdit: (_arg_6) => {
+                        onEdit: (_arg_7) => {
                         },
-                        onDelete: (_arg_7) => {
+                        onDelete: (_arg_8) => {
                         },
                     })) : singleton(createElement(CalendarGrid, {
                         userId: userId,
@@ -153,6 +153,8 @@ export function ProgressViewPage(progressViewPageInputProps) {
                                 return Promise.resolve();
                             }))));
                             void pr_1;
+                        },
+                        onDateDoubleClick: (_arg_6) => {
                         },
                     }));
                 }
