@@ -66,42 +66,79 @@ let PhotoUploadButton (userId: string) (onUploadComplete: unit -> unit) =
                 setUploadState (PhotoUploadState.Error "사진 업로드 실패. 다시 시도해주세요.")
         } |> Async.StartImmediate
 
+    let isUploading =
+        match uploadState with
+        | PhotoUploadState.Compressing | PhotoUploadState.Uploading _ -> true
+        | _ -> false
+
+    let onFileChange (e: Event) =
+        let input = e.target :?> HTMLInputElement
+        if not (isNull input.files) && input.files.length > 0 then
+            handleFileSelected (input.files.[0])
+            // Reset input value so same file can be re-selected
+            input.value <- ""
+
     Html.div [
-        prop.className "relative"
         prop.children [
-            // Hidden file input
+            // Hidden file input for camera (with capture)
             Html.input [
-                prop.id "photo-upload-input"
+                prop.id "photo-camera-input"
                 prop.type' "file"
                 prop.accept "image/*"
-                // capture="environment" opens rear camera on mobile
                 prop.custom ("capture", "environment")
-                prop.className "absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                prop.onChange (fun (e: Event) ->
-                    let input = e.target :?> HTMLInputElement
-                    if not (isNull input.files) && input.files.length > 0 then
-                        handleFileSelected (input.files.[0])
-                )
-                prop.disabled (
-                    match uploadState with
-                    | PhotoUploadState.Compressing | PhotoUploadState.Uploading _ -> true
-                    | _ -> false
-                )
+                prop.className "hidden"
+                prop.onChange onFileChange
+                prop.disabled isUploading
+            ]
+            // Hidden file input for gallery (no capture)
+            Html.input [
+                prop.id "photo-gallery-input"
+                prop.type' "file"
+                prop.accept "image/*"
+                prop.className "hidden"
+                prop.onChange onFileChange
+                prop.disabled isUploading
             ]
 
-            // Visual button - render all states
+            // Visual buttons - render all states
             match uploadState with
             | PhotoUploadState.Idle ->
                 Html.div [
-                    prop.className "flex items-center gap-2 px-4 py-3 bg-indigo-100 text-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-200 transition-colors"
+                    prop.className "flex gap-2"
                     prop.children [
-                        Html.span [
-                            prop.className "text-xl"
-                            prop.text "📷"
+                        Html.button [
+                            prop.className "flex items-center gap-2 px-4 py-3 bg-indigo-100 text-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-200 transition-colors"
+                            prop.onClick (fun _ ->
+                                let el = Browser.Dom.document.getElementById("photo-camera-input")
+                                if not (isNull el) then el.click()
+                            )
+                            prop.children [
+                                Html.span [
+                                    prop.className "text-xl"
+                                    prop.text "📷"
+                                ]
+                                Html.span [
+                                    prop.className "font-medium"
+                                    prop.text "사진 촬영"
+                                ]
+                            ]
                         ]
-                        Html.span [
-                            prop.className "font-medium"
-                            prop.text "사진 올리기"
+                        Html.button [
+                            prop.className "flex items-center gap-2 px-4 py-3 bg-purple-100 text-purple-700 rounded-lg cursor-pointer hover:bg-purple-200 transition-colors"
+                            prop.onClick (fun _ ->
+                                let el = Browser.Dom.document.getElementById("photo-gallery-input")
+                                if not (isNull el) then el.click()
+                            )
+                            prop.children [
+                                Html.span [
+                                    prop.className "text-xl"
+                                    prop.text "🖼️"
+                                ]
+                                Html.span [
+                                    prop.className "font-medium"
+                                    prop.text "앨범에서 선택"
+                                ]
+                            ]
                         ]
                     ]
                 ]

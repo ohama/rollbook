@@ -722,6 +722,56 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                             ]
                                         ]
                                     ]
+                                    // Gallery icon (photo from album) - same as camera but without capture attribute
+                                    Html.button [
+                                        prop.className "w-8 h-8 rounded-full bg-purple-100 hover:bg-purple-200 flex items-center justify-center transition-colors text-purple-600"
+                                        prop.onClick (fun _ ->
+                                            let targetDate = calendarSelectedDate |> Option.defaultValue (getTodayDateString())
+                                            let userId = user.id
+                                            let onDone = fun () ->
+                                                loadCalendarDateRecords targetDate
+                                                reloadMonthlyWorkouts()
+                                            emitJsExpr (userId, targetDate, onDone) """
+                                                (function(userId, targetDate, onDone) {
+                                                    var inp = document.createElement('input');
+                                                    inp.type = 'file';
+                                                    inp.accept = 'image/*';
+                                                    inp.onchange = async function() {
+                                                        if (!inp.files || inp.files.length === 0) return;
+                                                        try {
+                                                            var compress = (await import('browser-image-compression')).default;
+                                                            var compressed = await compress(inp.files[0], { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/jpeg' });
+                                                            var { supabase } = await import('/src/Supabase/Client.js');
+                                                            var path = userId + '/' + targetDate + '_' + Date.now() + '.jpg';
+                                                            var { data, error } = await supabase.storage.from('workout-photos').upload(path, compressed, { cacheControl: '3600', upsert: true });
+                                                            if (error) { alert('업로드 실패: ' + error.message); return; }
+                                                            var { data: urlData } = await supabase.storage.from('workout-photos').createSignedUrl(data.path, 3600);
+                                                            var url = urlData ? urlData.signedUrl : '';
+                                                            await supabase.from('workouts').insert({ user_id: userId, workout_date: targetDate, record_type: 'photo', photo_url: url });
+                                                            onDone();
+                                                        } catch(e) { alert('사진 오류: ' + e.message); }
+                                                    };
+                                                    inp.click();
+                                                })($0, $1, $2)
+                                            """
+                                        )
+                                        prop.children [
+                                            Svg.svg [
+                                                svg.width 16; svg.height 16
+                                                svg.viewBox(0, 0, 24, 24)
+                                                svg.fill "none"
+                                                svg.stroke "currentColor"
+                                                svg.custom("strokeWidth", 2)
+                                                svg.custom("strokeLinecap", "round")
+                                                svg.custom("strokeLinejoin", "round")
+                                                svg.children [
+                                                    Svg.rect [ svg.x 3; svg.y 3; svg.width 18; svg.height 18; svg.custom("rx", 2); svg.custom("ry", 2) ]
+                                                    Svg.circle [ svg.cx 8.5; svg.cy 8.5; svg.r 1.5 ]
+                                                    Svg.path [ svg.d "M21 15l-5-5L5 21" ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
                                     // Text icon (text record)
                                     Html.button [
                                         prop.onClick (fun _ ->
