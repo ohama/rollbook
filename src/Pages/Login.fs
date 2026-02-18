@@ -75,4 +75,11 @@ let LoginPage (onNavigate: string -> unit) (onLoginSuccess: unit -> unit) =
                 LinkButton "회원가입" (fun () -> onNavigate "signup")
             ]
         ]
+
+        Html.div [
+            prop.className "mt-3 text-center"
+            prop.children [
+                LinkButton "← 처음으로" (fun () -> onNavigate "landing")
+            ]
+        ]
     ]

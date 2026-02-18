@@ -80,5 +80,12 @@ let ForgotPasswordPage (onNavigate: string -> unit) =
                         LinkButton "로그인으로 돌아가기" (fun () -> onNavigate "login")
                     ]
                 ]
+
+                Html.div [
+                    prop.className "mt-3 text-center"
+                    prop.children [
+                        LinkButton "← 처음으로" (fun () -> onNavigate "landing")
+                    ]
+                ]
             ]
     ]

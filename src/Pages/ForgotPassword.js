@@ -92,12 +92,20 @@ export function ForgotPasswordPage(forgotPasswordPageInputProps) {
                         onClick: handleReset,
                     })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))), delay(() => {
                         let elems_2;
-                        return singleton(createElement("div", createObj(ofArray([["className", "mt-6 text-center"], (elems_2 = [createElement(LinkButton, {
+                        return append(singleton(createElement("div", createObj(ofArray([["className", "mt-6 text-center"], (elems_2 = [createElement(LinkButton, {
                             text: "로그인으로 돌아가기",
                             onClick: () => {
                                 onNavigate("login");
                             },
-                        })], ["children", reactApi.Children.toArray(Array.from(elems_2))])]))));
+                        })], ["children", reactApi.Children.toArray(Array.from(elems_2))])])))), delay(() => {
+                            let elems_3;
+                            return singleton(createElement("div", createObj(ofArray([["className", "mt-3 text-center"], (elems_3 = [createElement(LinkButton, {
+                                text: "← 처음으로",
+                                onClick: () => {
+                                    onNavigate("landing");
+                                },
+                            })], ["children", reactApi.Children.toArray(Array.from(elems_3))])]))));
+                        }));
                     }));
                 }));
             })), createElement("div", {

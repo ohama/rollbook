@@ -9,10 +9,11 @@ import { initializeSync } from "./offline/Sync.js";
 import { onAuthStateChange } from "./Supabase/Auth.js";
 import { singleton, append, delay, toList } from "./fable_modules/fable-library-js.4.28.0/Seq.js";
 import { OfflineIndicator } from "./Components/OfflineIndicator.js";
+import { LoginPage } from "./Pages/Login.js";
 import { SignupPage } from "./Pages/Signup.js";
 import { ForgotPasswordPage } from "./Pages/ForgotPassword.js";
 import { ResetPasswordPage } from "./Pages/ResetPassword.js";
-import { LoginPage } from "./Pages/Login.js";
+import { LandingPage } from "./Pages/Landing.js";
 import { DashboardPage } from "./Pages/Dashboard.js";
 import { createObj } from "./fable_modules/fable-library-js.4.28.0/Util.js";
 import { ofArray } from "./fable_modules/fable-library-js.4.28.0/List.js";
@@ -40,12 +41,12 @@ export class Page extends Union {
         this.fields = fields;
     }
     cases() {
-        return ["LoginPage", "SignupPage", "ForgotPasswordPage", "ResetPasswordPage"];
+        return ["LandingPage", "LoginPage", "SignupPage", "ForgotPasswordPage", "ResetPasswordPage"];
     }
 }
 
 export function Page_$reflection() {
-    return union_type("Main.Page", [], Page, () => [[], [], [], []]);
+    return union_type("Main.Page", [], Page, () => [[], [], [], [], []]);
 }
 
 export class AppState extends Record {
@@ -70,7 +71,7 @@ export function App() {
         initializeSync();
         const hash = window.location.hash;
         if (hash.indexOf("type=recovery") >= 0) {
-            setState(new AppState(state.authState, new Page(3, [])));
+            setState(new AppState(state.authState, new Page(4, [])));
         }
         const unsubscribe = onAuthStateChange((event, session) => {
             switch (event) {
@@ -79,7 +80,7 @@ export function App() {
                     break;
                 }
                 case "PASSWORD_RECOVERY": {
-                    setState(new AppState(state.authState, new Page(3, [])));
+                    setState(new AppState(state.authState, new Page(4, [])));
                     break;
                 }
                 case "USER_UPDATED": {
@@ -108,7 +109,7 @@ export function App() {
         };
     });
     const navigateTo = (page) => {
-        setState(new AppState(state.authState, (page === "signup") ? (new Page(1, [])) : ((page === "forgot-password") ? (new Page(2, [])) : ((page === "reset-password") ? (new Page(3, [])) : (new Page(0, []))))));
+        setState(new AppState(state.authState, (page === "login") ? (new Page(1, [])) : ((page === "signup") ? (new Page(2, [])) : ((page === "forgot-password") ? (new Page(3, [])) : ((page === "reset-password") ? (new Page(4, [])) : (new Page(0, [])))))));
     };
     const xs_4 = toList(delay(() => append(singleton(createElement(OfflineIndicator, null)), delay(() => {
         let elems_1, elems;
@@ -116,17 +117,19 @@ export function App() {
         switch (matchValue.tag) {
             case 1: {
                 const matchValue_1 = state.currentPage;
-                return (matchValue_1.tag === 1) ? singleton(createElement(SignupPage, {
-                    onNavigate: navigateTo,
-                })) : ((matchValue_1.tag === 2) ? singleton(createElement(ForgotPasswordPage, {
-                    onNavigate: navigateTo,
-                })) : ((matchValue_1.tag === 3) ? singleton(createElement(ResetPasswordPage, {
-                    onNavigate: navigateTo,
-                })) : singleton(createElement(LoginPage, {
+                return (matchValue_1.tag === 1) ? singleton(createElement(LoginPage, {
                     onNavigate: navigateTo,
                     onLoginSuccess: () => {
                     },
-                }))));
+                })) : ((matchValue_1.tag === 2) ? singleton(createElement(SignupPage, {
+                    onNavigate: navigateTo,
+                })) : ((matchValue_1.tag === 3) ? singleton(createElement(ForgotPasswordPage, {
+                    onNavigate: navigateTo,
+                })) : ((matchValue_1.tag === 4) ? singleton(createElement(ResetPasswordPage, {
+                    onNavigate: navigateTo,
+                })) : singleton(createElement(LandingPage, {
+                    onNavigate: navigateTo,
+                })))));
             }
             case 2:
                 return singleton(createElement(DashboardPage, {

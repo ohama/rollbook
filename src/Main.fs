@@ -4,6 +4,7 @@ open Feliz
 open Browser.Dom
 open Supabase.Auth
 open Supabase.Types
+open Pages.Landing
 open Pages.Login
 open Pages.Signup
 open Pages.ForgotPassword
@@ -20,6 +21,7 @@ type AuthState =
 
 /// Current page for simple routing
 type Page =
+    | LandingPage
     | LoginPage
     | SignupPage
     | ForgotPasswordPage
@@ -35,7 +37,7 @@ type AppState = {
 let App () =
     let state, setState = React.useState({
         authState = Loading
-        currentPage = LoginPage
+        currentPage = LandingPage
     })
 
     // Subscribe to auth state changes on mount
@@ -58,7 +60,7 @@ let App () =
                 | None ->
                     setState { state with authState = Anonymous }
             | SignedOut ->
-                setState { state with authState = Anonymous; currentPage = LoginPage }
+                setState { state with authState = Anonymous; currentPage = LandingPage }
             | PasswordRecovery ->
                 setState { state with currentPage = ResetPasswordPage }
             | UserUpdated ->
@@ -77,10 +79,11 @@ let App () =
     let navigateTo (page: string) =
         let newPage =
             match page with
+            | "login" -> LoginPage
             | "signup" -> SignupPage
             | "forgot-password" -> ForgotPasswordPage
             | "reset-password" -> ResetPasswordPage
-            | _ -> LoginPage
+            | _ -> LandingPage
         setState { state with currentPage = newPage }
 
     // Handle successful login
@@ -90,7 +93,7 @@ let App () =
 
     // Handle logout
     let onLogout () =
-        setState { state with authState = Anonymous; currentPage = LoginPage }
+        setState { state with authState = Anonymous; currentPage = LandingPage }
 
     // Render based on auth state
     React.fragment [
@@ -118,6 +121,7 @@ let App () =
 
         | Anonymous ->
             match state.currentPage with
+            | LandingPage -> Pages.Landing.LandingPage navigateTo
             | LoginPage -> Pages.Login.LoginPage navigateTo onLoginSuccess
             | SignupPage -> Pages.Signup.SignupPage navigateTo
             | ForgotPasswordPage -> Pages.ForgotPassword.ForgotPasswordPage navigateTo

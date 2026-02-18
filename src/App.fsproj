@@ -43,6 +43,7 @@
     <Compile Include="admin/MemberList.fs" />
     <Compile Include="admin/MemberActions.fs" />
     <!-- Pages (depend on Components and Supabase) -->
+    <Compile Include="Pages/Landing.fs" />
     <Compile Include="Pages/Login.fs" />
     <Compile Include="Pages/Signup.fs" />
     <Compile Include="Pages/ForgotPassword.fs" />

@@ -92,12 +92,20 @@ export function LoginPage(loginPageInputProps) {
                     onClick: handleLogin,
                 })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))), delay(() => {
                     let elems_2;
-                    return singleton(createElement("div", createObj(ofArray([["className", "mt-6 text-center text-gray-600"], (elems_2 = ["계정이 없으신가요? ", createElement(LinkButton, {
+                    return append(singleton(createElement("div", createObj(ofArray([["className", "mt-6 text-center text-gray-600"], (elems_2 = ["계정이 없으신가요? ", createElement(LinkButton, {
                         text: "회원가입",
                         onClick: () => {
                             onNavigate("signup");
                         },
-                    })], ["children", reactApi.Children.toArray(Array.from(elems_2))])]))));
+                    })], ["children", reactApi.Children.toArray(Array.from(elems_2))])])))), delay(() => {
+                        let elems_3;
+                        return singleton(createElement("div", createObj(ofArray([["className", "mt-3 text-center"], (elems_3 = [createElement(LinkButton, {
+                            text: "← 처음으로",
+                            onClick: () => {
+                                onNavigate("landing");
+                            },
+                        })], ["children", reactApi.Children.toArray(Array.from(elems_3))])]))));
+                    }));
                 }));
             }));
         })))),
