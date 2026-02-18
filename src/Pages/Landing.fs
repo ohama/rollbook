@@ -1,9 +1,32 @@
 module Pages.Landing
 
 open Feliz
+open Fable.Core.JsInterop
+open Supabase.Auth
 
 [<ReactComponent>]
-let LandingPage (onNavigate: string -> unit) =
+let LandingPage (onNavigate: string -> unit) (onLoginSuccess: unit -> unit) =
+    let memberId, setMemberId = React.useState("")
+    let password, setPassword = React.useState("")
+    let loading, setLoading = React.useState(false)
+    let error, setError = React.useState(None: string option)
+
+    let handleLogin () =
+        if memberId = "" || password = "" then
+            setError (Some "아이디와 비밀번호를 입력하세요")
+        else
+            setLoading true
+            setError None
+            promise {
+                let! result = signInWithMemberId memberId password
+                match result.error with
+                | Some err ->
+                    setLoading false
+                    setError (Some err.message)
+                | None ->
+                    setLoading false
+                    onLoginSuccess()
+            } |> Promise.start
     Html.div [
         prop.className "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col"
         prop.children [
@@ -44,16 +67,49 @@ let LandingPage (onNavigate: string -> unit) =
                         prop.text "픽제주 헬스 클럽"
                     ]
 
-                    // Buttons
+                    // Login form + Buttons
                     Html.div [
                         prop.className "w-full max-w-sm"
-                        prop.style [ style.marginTop 80 ]
+                        prop.style [ style.marginTop 40 ]
                         prop.children [
+                            // Error message
+                            match error with
+                            | Some msg ->
+                                Html.div [
+                                    prop.className "mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center"
+                                    prop.text msg
+                                ]
+                            | None -> Html.none
+
+                            // ID input
+                            Html.input [
+                                prop.className "w-2/3 mx-auto block px-4 py-4 rounded-xl border border-gray-300 text-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                                prop.type' "text"
+                                prop.placeholder "아이디"
+                                prop.value memberId
+                                prop.onChange setMemberId
+                            ]
+
+                            Html.div [ prop.className "h-4" ]
+
+                            // Password input
+                            Html.input [
+                                prop.className "w-2/3 mx-auto block px-4 py-4 rounded-xl border border-gray-300 text-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                                prop.type' "password"
+                                prop.placeholder "비밀번호"
+                                prop.value password
+                                prop.onChange setPassword
+                                prop.onKeyDown (fun e -> if e.key = "Enter" then handleLogin())
+                            ]
+
+                            Html.div [ prop.className "h-4" ]
+
                             // 로그인 - big primary button
                             Html.button [
-                                prop.className "w-full py-6 px-6 rounded-2xl font-bold text-white text-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] transition-all"
-                                prop.onClick (fun _ -> onNavigate "login")
-                                prop.text "로그인"
+                                prop.className "w-full py-6 px-6 rounded-2xl font-bold text-white text-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50"
+                                prop.disabled loading
+                                prop.onClick (fun _ -> handleLogin())
+                                prop.text (if loading then "로그인 중..." else "로그인")
                             ]
 
                             // 가입 + 패스워드 분실 - smaller buttons in a row
