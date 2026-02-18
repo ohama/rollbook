@@ -15,6 +15,7 @@ let parseWorkoutWithProfile (raw: WorkoutWithProfileRaw) : WorkoutWithProfile =
                 id = raw.profiles.id
                 email = raw.profiles.email
                 display_name = raw.profiles.display_name
+                member_id = raw.profiles.member_id
             }
     {
         user_id = raw.user_id
@@ -31,7 +32,7 @@ let getTeamWorkouts (startDate: string) (endDate: string) : JS.Promise<WorkoutWi
         let query =
             supabase
                 ?from("workouts")
-                ?select("user_id, workout_date, profiles!workouts_user_id_fkey(id, email, display_name)")
+                ?select("user_id, workout_date, profiles!workouts_user_id_fkey(id, email, display_name, member_id)")
                 ?gte("workout_date", startDate)
                 ?lte("workout_date", endDate)
                 ?order("workout_date", createObj ["ascending" ==> false])
@@ -52,7 +53,7 @@ let getTeamProfiles () : JS.Promise<ProfileRecord array> =
         let query =
             supabase
                 ?from("profiles")
-                ?select("id, email, display_name")
+                ?select("id, email, display_name, member_id")
                 ?order("email", createObj ["ascending" ==> true])
 
         let! result = query

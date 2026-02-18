@@ -31,7 +31,7 @@ let getAllProfiles () : JS.Promise<Result<ProfileRecord array, string>> =
             let! response =
                 supabase
                     ?from("profiles")
-                    ?select("id, email, display_name, created_at")
+                    ?select("id, email, display_name, member_id, created_at")
                     ?order("created_at", createObj ["ascending" ==> false])
 
             let error = response?error

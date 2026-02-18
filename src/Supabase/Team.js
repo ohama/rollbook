@@ -13,7 +13,7 @@ import { contains, ofArray as ofArray_1 } from "../fable_modules/fable-library-j
  * Parse raw workout with profile into F# record
  */
 export function parseWorkoutWithProfile(raw) {
-    const profile = (raw.profiles == null) ? undefined : (new ProfileRecord(raw.profiles.id, raw.profiles.email, raw.profiles.display_name));
+    const profile = (raw.profiles == null) ? undefined : (new ProfileRecord(raw.profiles.id, raw.profiles.email, raw.profiles.display_name, raw.profiles.member_id));
     return new WorkoutWithProfile(raw.user_id, raw.workout_date, profile);
 }
 
@@ -23,7 +23,7 @@ export function parseWorkoutWithProfile(raw) {
  */
 export function getTeamWorkouts(startDate, endDate) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
-        const query = ((((supabase.from("workouts")).select("user_id, workout_date, profiles!workouts_user_id_fkey(id, email, display_name)")).gte("workout_date", startDate)).lte("workout_date", endDate)).order("workout_date", {
+        const query = ((((supabase.from("workouts")).select("user_id, workout_date, profiles!workouts_user_id_fkey(id, email, display_name, member_id)")).gte("workout_date", startDate)).lte("workout_date", endDate)).order("workout_date", {
             ascending: false,
         });
         return query.then((_arg) => {
@@ -38,7 +38,7 @@ export function getTeamWorkouts(startDate, endDate) {
  */
 export function getTeamProfiles() {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
-        const query = ((supabase.from("profiles")).select("id, email, display_name")).order("email", {
+        const query = ((supabase.from("profiles")).select("id, email, display_name, member_id")).order("email", {
             ascending: true,
         });
         return query.then((_arg) => {

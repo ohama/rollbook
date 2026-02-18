@@ -15,7 +15,7 @@ export function isAdmin() {
  * Get all profiles (admin only - RLS will enforce)
  */
 export function getAllProfiles() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => ((((supabase.from("profiles")).select("id, email, display_name, created_at")).order("created_at", {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => ((((supabase.from("profiles")).select("id, email, display_name, member_id, created_at")).order("created_at", {
         ascending: false,
     })).then((_arg) => {
         const response = _arg;

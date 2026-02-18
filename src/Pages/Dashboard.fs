@@ -11,6 +11,8 @@ open Supabase.Team
 open Pages.ProgressView
 open Pages.TeamView
 open Pages.AdminPage
+open Pages.ProfilePage
+open Supabase.Admin
 open Components.PhotoUpload
 open Components.PhotoGallery
 open Components.RecordItem
@@ -24,7 +26,7 @@ open Offline.Sync
 open Utils.DateHelpers
 
 /// Tab mode for dashboard navigation
-type TabMode = Home | Progress | Team | Admin
+type TabMode = Home | Progress | Team | Admin | Profile
 
 /// View scope for dashboard content (나 vs 우리)
 type ViewScope = Personal | TeamView
@@ -150,8 +152,24 @@ let WorkoutToggle (userId: string) (refreshKey: int) =
 [<ReactComponent>]
 let EditableRecordRow (record: WorkoutRecord) (displayName: string) (currentUserId: string) (onSaved: unit -> unit) (onPhotoClick: string -> unit) =
     let (editText, setEditText) = React.useState(record.text_content |> Option.defaultValue "")
+    let (editing, setEditing) = React.useState(false)
     let (saving, setSaving) = React.useState(false)
     let (deleting, setDeleting) = React.useState(false)
+
+    let saveText () =
+        if editText <> (record.text_content |> Option.defaultValue "") then
+            setSaving true
+            promise {
+                try
+                    let! _ = updateWorkoutById record.id editText
+                    setSaving false
+                    setEditing false
+                    onSaved()
+                with ex ->
+                    setSaving false
+            } |> Promise.start
+        else
+            setEditing false
 
     let deleteButton =
         if record.user_id = currentUserId then
@@ -202,43 +220,22 @@ let EditableRecordRow (record: WorkoutRecord) (displayName: string) (currentUser
             // 내용
             match record.record_type with
             | "text" ->
-                if record.user_id = currentUserId then
+                if record.user_id = currentUserId && editing then
                     Html.input [
                         prop.className "flex-1 min-w-0 px-2 py-1 border rounded text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-400"
                         prop.value editText
+                        prop.autoFocus true
                         prop.onChange (fun (v: string) -> setEditText v)
+                        prop.onBlur (fun _ -> saveText())
+                        prop.onKeyDown (fun e -> if e.key = "Enter" then saveText())
                         prop.disabled (saving || deleting)
                     ]
-                    Html.button [
-                        prop.className "text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50"
-                        prop.disabled (saving || deleting)
-                        prop.title "수정"
-                        prop.onClick (fun _ ->
-                            setSaving true
-                            promise {
-                                try
-                                    let! _ = updateWorkoutById record.id editText
-                                    setSaving false
-                                    onSaved()
-                                with ex ->
-                                    setSaving false
-                            } |> Promise.start
-                        )
-                        prop.children [
-                            Svg.svg [
-                                svg.width 18; svg.height 18
-                                svg.viewBox(0, 0, 24, 24)
-                                svg.fill "none"
-                                svg.stroke "currentColor"
-                                svg.custom("strokeWidth", 2)
-                                svg.custom("strokeLinecap", "round")
-                                svg.custom("strokeLinejoin", "round")
-                                svg.children [
-                                    Svg.path [ svg.d "M12 20h9" ]
-                                    Svg.path [ svg.d "M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" ]
-                                ]
-                            ]
-                        ]
+                    deleteButton
+                elif record.user_id = currentUserId then
+                    Html.span [
+                        prop.className "flex-1 min-w-0 text-gray-800 cursor-pointer hover:text-blue-600"
+                        prop.onClick (fun _ -> setEditing true)
+                        prop.text (record.text_content |> Option.defaultValue "(빈 메모)")
                     ]
                     deleteButton
                 else
@@ -304,6 +301,8 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
     let (calendarSelectedDate, setCalendarSelectedDate) = React.useState<string option>(Some (getTodayDateString()))
     let (calendarDateRecords, setCalendarDateRecords) = React.useState<WorkoutRecord array>([||])
     let (userDisplayName, setUserDisplayName) = React.useState<string>("")
+    let (userMemberId, setUserMemberId) = React.useState<string>("")
+    let (userIsAdmin, setUserIsAdmin) = React.useState(false)
     let (profileMap, setProfileMap) = React.useState<Map<string, string>>(Map.empty)
 
     // Load today's records
@@ -367,14 +366,23 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                     |> Array.map (fun p ->
                         let name =
                             if p.display_name.IsSome && p.display_name.Value <> "" then p.display_name.Value
-                            else p.email
+                            else p.member_id
                         (p.id, name))
                     |> Map.ofArray
                 setProfileMap map
-                // Set own display name
-                match Map.tryFind user.id map with
-                | Some name -> setUserDisplayName name
-                | None -> setUserDisplayName (user.email |> Option.defaultValue "사용자")
+                // Set own display name and member_id
+                match profiles |> Array.tryFind (fun p -> p.id = user.id) with
+                | Some myProfile ->
+                    setUserDisplayName (
+                        if myProfile.display_name.IsSome && myProfile.display_name.Value <> "" then myProfile.display_name.Value
+                        else myProfile.member_id
+                    )
+                    setUserMemberId myProfile.member_id
+                | None ->
+                    setUserDisplayName (user.email |> Option.defaultValue "사용자")
+                // Check admin role
+                let! adminCheck = isAdmin()
+                setUserIsAdmin adminCheck
             with ex -> ()
         } |> Promise.start
     ), [||])
@@ -473,12 +481,39 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
         setCalendarSelectedDate (Some dateString)
         loadCalendarDateRecords dateString
 
-    // Calendar double click: add "운동했어" text record
+    // Calendar double click: add default message text record
     let handleCalendarDoubleClick (dateString: string) =
         setCalendarSelectedDate (Some dateString)
         promise {
             try
-                let! _ = createTextRecord user.id dateString "운동했어"
+                let storedMsg = Browser.Dom.window.localStorage.getItem("rollbook-default-msg")
+                let template = if isNull storedMsg || storedMsg = "" then "운동했어" else storedMsg
+
+                // Count unique workout days this month for current user
+                let workoutDaysCount =
+                    monthlyWorkouts
+                    |> Array.filter (fun w -> w.user_id = user.id)
+                    |> Array.map (fun w -> w.workout_date)
+                    |> Array.distinct
+                    |> Array.length
+
+                let storedGoal = Browser.Dom.window.localStorage.getItem("rollbook-monthly-goal")
+                let goal = if isNull storedGoal || storedGoal = "" then "20" else storedGoal
+
+                // Format date: "2026-02-18" -> "2월 18일"
+                let dateParts = dateString.Split('-')
+                let dateFormatted =
+                    if dateParts.Length = 3 then
+                        sprintf "%d월 %d일" (int dateParts.[1]) (int dateParts.[2])
+                    else dateString
+
+                let msg =
+                    template
+                        .Replace("%DATE", dateFormatted)
+                        .Replace("%COUNT", string (workoutDaysCount + 1))
+                        .Replace("%GOAL", goal)
+
+                let! _ = createTextRecord user.id dateString msg
                 // Reload
                 let startDate = formatDateString currentYear currentMonth 1
                 let endDate = formatDateString currentYear currentMonth (getDaysInMonth currentYear currentMonth)
@@ -529,28 +564,51 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                 prop.className "bg-white shadow-sm"
                 prop.children [
                     Html.div [
-                        prop.className "max-w-4xl mx-auto px-4 py-4 flex items-center justify-between"
+                        prop.className "max-w-4xl mx-auto px-4 py-4 pb-6 flex items-center"
                         prop.children [
-                            Html.h1 [
-                                prop.className "text-xl font-bold text-indigo-600"
-                                prop.text "Rollbook"
-                            ]
+                            // Left: 관리 button (admin only) - fixed width
                             Html.div [
-                                prop.className "flex items-center gap-2"
+                                prop.className "flex-1 flex justify-start"
+                                prop.children [
+                                    if userIsAdmin then
+                                        Html.button [
+                                            prop.onClick (fun _ ->
+                                                if activeTab = Admin then setActiveTab Home
+                                                else setActiveTab Admin
+                                            )
+                                            prop.className (
+                                                "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors " +
+                                                if activeTab = Admin then
+                                                    "bg-green-600 text-white"
+                                                else
+                                                    "bg-green-100 text-green-700 hover:bg-green-200"
+                                            )
+                                            prop.text "관리"
+                                        ]
+                                ]
+                            ]
+                            // Center: 픽제주 헬스 클럽
+                            Html.h1 [
+                                prop.className "text-2xl font-bold text-indigo-600 whitespace-nowrap"
+                                prop.text "픽제주 헬스 클럽"
+                            ]
+                            // Right: member_id + 로그아웃
+                            Html.div [
+                                prop.className "flex-1 flex items-center justify-end gap-2"
                                 prop.children [
                                     Html.button [
                                         prop.onClick (fun _ ->
-                                            if activeTab = Admin then setActiveTab Home
-                                            else setActiveTab Admin
+                                            if activeTab = Profile then setActiveTab Home
+                                            else setActiveTab Profile
                                         )
                                         prop.className (
                                             "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors " +
-                                            if activeTab = Admin then
-                                                "bg-green-600 text-white"
+                                            if activeTab = Profile then
+                                                "bg-indigo-600 text-white"
                                             else
-                                                "bg-green-100 text-green-700 hover:bg-green-200"
+                                                "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                                         )
-                                        prop.text "관리"
+                                        prop.text (if userMemberId <> "" then userMemberId else "프로필")
                                     ]
                                     Html.button [
                                         prop.onClick (fun _ -> handleLogout())
@@ -562,7 +620,7 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                             else
                                                 "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
                                         )
-                                        prop.text (if loading then "로그아웃 중..." else "로그아웃")
+                                        prop.text (if loading then "..." else "로그아웃")
                                     ]
                                 ]
                             ]
@@ -598,20 +656,98 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                     ]
                                 ]
                             ]
-                            Html.h2 [
-                                prop.className "text-lg font-semibold text-gray-800"
-                                prop.text (
-                                    match calendarSelectedDate with
-                                    | Some d ->
-                                        // "2026-02-16" -> "2026년 2월 16일"
-                                        let parts = d.Split('-')
-                                        if parts.Length = 3 then
-                                            sprintf "%s년 %d월 %d일" parts.[0] (int parts.[1]) (int parts.[2])
-                                        else d
-                                    | None ->
-                                        let today = System.DateTime.Now
-                                        sprintf "%d년 %d월 %d일" currentYear currentMonth today.Day
-                                )
+                            Html.div [
+                                prop.className "flex items-center gap-2"
+                                prop.children [
+                                    Html.h2 [
+                                        prop.className "text-lg font-semibold text-gray-800"
+                                        prop.text (
+                                            match calendarSelectedDate with
+                                            | Some d ->
+                                                let parts = d.Split('-')
+                                                if parts.Length = 3 then
+                                                    sprintf "%s년 %d월 %d일" parts.[0] (int parts.[1]) (int parts.[2])
+                                                else d
+                                            | None ->
+                                                let today = System.DateTime.Now
+                                                sprintf "%d년 %d월 %d일" currentYear currentMonth today.Day
+                                        )
+                                    ]
+                                    // Camera icon (photo record) - uses JS interop for file handling
+                                    Html.button [
+                                        prop.className "w-8 h-8 rounded-full bg-indigo-100 hover:bg-indigo-200 flex items-center justify-center transition-colors text-indigo-600"
+                                        prop.onClick (fun _ ->
+                                            let targetDate = calendarSelectedDate |> Option.defaultValue (getTodayDateString())
+                                            let userId = user.id
+                                            let onDone = fun () ->
+                                                loadCalendarDateRecords targetDate
+                                                reloadMonthlyWorkouts()
+                                            emitJsExpr (userId, targetDate, onDone) """
+                                                (function(userId, targetDate, onDone) {
+                                                    var inp = document.createElement('input');
+                                                    inp.type = 'file';
+                                                    inp.accept = 'image/*';
+                                                    inp.capture = 'environment';
+                                                    inp.onchange = async function() {
+                                                        if (!inp.files || inp.files.length === 0) return;
+                                                        try {
+                                                            var compress = (await import('browser-image-compression')).default;
+                                                            var compressed = await compress(inp.files[0], { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/jpeg' });
+                                                            var { supabase } = await import('/src/Supabase/Client.js');
+                                                            var path = userId + '/' + targetDate + '_' + Date.now() + '.jpg';
+                                                            var { data, error } = await supabase.storage.from('workout-photos').upload(path, compressed, { cacheControl: '3600', upsert: true });
+                                                            if (error) { alert('업로드 실패: ' + error.message); return; }
+                                                            var { data: urlData } = await supabase.storage.from('workout-photos').createSignedUrl(data.path, 3600);
+                                                            var url = urlData ? urlData.signedUrl : '';
+                                                            await supabase.from('workouts').insert({ user_id: userId, workout_date: targetDate, record_type: 'photo', photo_url: url });
+                                                            onDone();
+                                                        } catch(e) { alert('사진 오류: ' + e.message); }
+                                                    };
+                                                    inp.click();
+                                                })($0, $1, $2)
+                                            """
+                                        )
+                                        prop.children [
+                                            Svg.svg [
+                                                svg.width 16; svg.height 16
+                                                svg.viewBox(0, 0, 24, 24)
+                                                svg.fill "none"
+                                                svg.stroke "currentColor"
+                                                svg.custom("strokeWidth", 2)
+                                                svg.custom("strokeLinecap", "round")
+                                                svg.custom("strokeLinejoin", "round")
+                                                svg.children [
+                                                    Svg.path [ svg.d "M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" ]
+                                                    Svg.circle [ svg.cx 12; svg.cy 13; svg.r 4 ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                    // Text icon (text record)
+                                    Html.button [
+                                        prop.onClick (fun _ ->
+                                            let targetDate = calendarSelectedDate |> Option.defaultValue (getTodayDateString())
+                                            setSelectedDate (Some targetDate)
+                                            setEditState RecordEditState.CreatingText
+                                        )
+                                        prop.className "w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors text-green-600"
+                                        prop.children [
+                                            Svg.svg [
+                                                svg.width 16; svg.height 16
+                                                svg.viewBox(0, 0, 24, 24)
+                                                svg.fill "none"
+                                                svg.stroke "currentColor"
+                                                svg.custom("strokeWidth", 2)
+                                                svg.custom("strokeLinecap", "round")
+                                                svg.custom("strokeLinejoin", "round")
+                                                svg.children [
+                                                    Svg.path [ svg.d "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" ]
+                                                    Svg.path [ svg.d "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
                             ]
                             Html.button [
                                 prop.onClick (fun _ -> goToNextMonth())
@@ -713,30 +849,69 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                     ]
                                 ]
 
-                                // Selected date records (output)
+                                // Selected date records (compact chips + expand)
                                 match calendarSelectedDate with
                                 | Some date ->
+                                    let grouped =
+                                        calendarDateRecords
+                                        |> Array.groupBy (fun r -> r.user_id)
+                                        |> Array.map (fun (uid, records) ->
+                                            let name = Map.tryFind uid profileMap |> Option.defaultValue userDisplayName
+                                            let hasText = records |> Array.exists (fun r -> r.record_type = "text")
+                                            let hasPhoto = records |> Array.exists (fun r -> r.record_type = "photo")
+                                            let hasWorkout = records |> Array.exists (fun r -> r.record_type = "workout")
+                                            (uid, name, records, hasText, hasPhoto, hasWorkout))
                                     Html.div [
                                         prop.className "bg-white rounded-xl shadow-sm p-4 mt-4"
                                         prop.children [
-                                            Html.h3 [
-                                                prop.className "text-sm font-semibold text-gray-600 mb-3"
-                                                prop.text (sprintf "%s 기록 (%d)" date calendarDateRecords.Length)
-                                            ]
                                             if calendarDateRecords.Length = 0 then
                                                 Html.div [
                                                     prop.className "text-center text-gray-400 py-4"
                                                     prop.text "기록이 없습니다"
                                                 ]
                                             else
+                                                // Chips row
                                                 Html.div [
-                                                    prop.className "space-y-2"
+                                                    prop.className "flex flex-wrap gap-2 mb-3"
                                                     prop.children [
-                                                        for record in calendarDateRecords do
-                                                            let recordDisplayName = Map.tryFind record.user_id profileMap |> Option.defaultValue userDisplayName
-                                                            EditableRecordRow record recordDisplayName user.id (fun () -> loadCalendarDateRecords date; reloadMonthlyWorkouts()) (fun url -> setExpandedPhotoUrl (Some url))
+                                                        for (uid, name, _, hasText, hasPhoto, hasWorkout) in grouped do
+                                                            let icons =
+                                                                (if hasWorkout then " 💪" else "") +
+                                                                (if hasPhoto then " 📷" else "") +
+                                                                (if hasText then " ✏️" else "")
+                                                            let isExpanded = selectedDate = Some uid
+                                                            Html.button [
+                                                                prop.key uid
+                                                                prop.onClick (fun _ ->
+                                                                    if isExpanded then setSelectedDate None
+                                                                    else setSelectedDate (Some uid)
+                                                                )
+                                                                prop.className (
+                                                                    "px-3 py-1.5 rounded-full text-sm font-medium transition-all " +
+                                                                    if isExpanded then
+                                                                        "bg-indigo-600 text-white shadow-md"
+                                                                    else
+                                                                        "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                                )
+                                                                prop.text (sprintf "%s%s" name icons)
+                                                            ]
                                                     ]
                                                 ]
+                                                // Expanded detail for selected user
+                                                match selectedDate with
+                                                | Some expandedUid ->
+                                                    match grouped |> Array.tryFind (fun (uid, _, _, _, _, _) -> uid = expandedUid) with
+                                                    | Some (_, _, records, _, _, _) ->
+                                                        Html.div [
+                                                            prop.className "space-y-2 pt-2 border-t"
+                                                            prop.children [
+                                                                for record in records do
+                                                                    let recordDisplayName = Map.tryFind record.user_id profileMap |> Option.defaultValue userDisplayName
+                                                                    EditableRecordRow record recordDisplayName user.id (fun () -> loadCalendarDateRecords date; reloadMonthlyWorkouts()) (fun url -> setExpandedPhotoUrl (Some url))
+                                                            ]
+                                                        ]
+                                                    | None -> Html.none
+                                                | None -> Html.none
                                         ]
                                     ]
                                 | None -> Html.none
@@ -762,6 +937,8 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                         ]
                     | Admin ->
                         AdminPage()
+                    | Profile ->
+                        ProfilePage user userMemberId onLogout (fun () -> setActiveTab Home)
 
                     // Text record edit modal (renders on top when active)
                     match editState with

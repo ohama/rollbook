@@ -70,6 +70,7 @@ type ProfileRecord = {
     id: string           // user_id (UUID)
     email: string
     display_name: string option
+    member_id: string
 }
 
 /// Nested profile data from Supabase join (uses "profiles" key from foreign key join)
@@ -78,6 +79,7 @@ type NestedProfile =
     abstract id: string
     abstract email: string
     abstract display_name: string option
+    abstract member_id: string
 
 /// Workout record with nested profile from join query
 [<AllowNullLiteral>]

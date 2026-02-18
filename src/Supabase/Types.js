@@ -33,16 +33,17 @@ export function WorkoutResponse_$reflection() {
 }
 
 export class ProfileRecord extends Record {
-    constructor(id, email, display_name) {
+    constructor(id, email, display_name, member_id) {
         super();
         this.id = id;
         this.email = email;
         this.display_name = display_name;
+        this.member_id = member_id;
     }
 }
 
 export function ProfileRecord_$reflection() {
-    return record_type("Supabase.Types.ProfileRecord", [], ProfileRecord, () => [["id", string_type], ["email", string_type], ["display_name", option_type(string_type)]]);
+    return record_type("Supabase.Types.ProfileRecord", [], ProfileRecord, () => [["id", string_type], ["email", string_type], ["display_name", option_type(string_type)], ["member_id", string_type]]);
 }
 
 export class WorkoutWithProfile extends Record {
