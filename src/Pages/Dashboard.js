@@ -531,7 +531,7 @@ export function DashboardPage(dashboardPageInputProps) {
         children: loading ? "..." : "로그아웃",
     })))))))), ["children", reactApi.Children.toArray(Array.from(elems))])])))], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))], ["children", reactApi.Children.toArray(Array.from(elems_2))])]))), createElement("main", createObj(ofArray([["className", "max-w-4xl mx-auto px-4 py-8"], (elems_24 = toList(delay(() => {
         let elems_12, value_42, elems_4, elements_1, elems_9, arg_9, d, parts, arg_4, arg_5, arg_6, value_68, elems_6, elements_2, value_97, elems_8, elements_3, value_119, elems_11, elements_4;
-        return append(singleton(createElement("div", createObj(ofArray([["className", "flex items-center justify-between bg-white rounded-lg shadow-sm p-4 mb-4"], (elems_12 = [createElement("button", createObj(ofArray([["onClick", (_arg_34) => {
+        return append((!equals(activeTab, new TabMode(3, [])) && !equals(activeTab, new TabMode(4, []))) ? singleton(createElement("div", createObj(ofArray([["className", "flex items-center justify-between bg-white rounded-lg shadow-sm p-4 mb-4"], (elems_12 = [createElement("button", createObj(ofArray([["onClick", (_arg_34) => {
             goToPrevMonth();
         }], (value_42 = "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors", ["className", value_42]), (elems_4 = [createElement("svg", createObj(ofArray([["width", 20], ["height", 20], ["viewBox", (((((0 + " ") + 0) + " ") + 24) + " ") + 24], ["fill", "none"], ["stroke", "currentColor"], ["strokeWidth", 2.5], ["strokeLinecap", "round"], ["strokeLinejoin", "round"], (elements_1 = ofArray([createElement("polyline", {
             points: "14,18 8,12 14,6",
@@ -588,9 +588,9 @@ export function DashboardPage(dashboardPageInputProps) {
             points: "10,6 16,12 10,18",
         }), createElement("polyline", {
             points: "16,6 22,12 16,18",
-        })]), ["children", reactApi.Children.toArray(Array.from(elements_4))])])))], ["children", reactApi.Children.toArray(Array.from(elems_11))])])))], ["children", reactApi.Children.toArray(Array.from(elems_12))])])))), delay(() => {
+        })]), ["children", reactApi.Children.toArray(Array.from(elements_4))])])))], ["children", reactApi.Children.toArray(Array.from(elems_11))])])))], ["children", reactApi.Children.toArray(Array.from(elems_12))])])))) : empty_1(), delay(() => {
             let elems_17, elems_14, elements_5, elems_16, elements_6;
-            return append(singleton(createElement("div", createObj(ofArray([["className", "flex gap-2 mb-6"], (elems_17 = [createElement("button", createObj(ofArray([["onClick", (_arg_38) => {
+            return append((!equals(activeTab, new TabMode(3, [])) && !equals(activeTab, new TabMode(4, []))) ? singleton(createElement("div", createObj(ofArray([["className", "flex gap-2 mb-6"], (elems_17 = [createElement("button", createObj(ofArray([["onClick", (_arg_38) => {
                 setViewScope(new ViewScope(0, []));
             }], ["className", "flex-1 px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 " + (equals(viewScope, new ViewScope(0, [])) ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300")], (elems_14 = [createElement("svg", createObj(ofArray([["width", 20], ["height", 20], ["viewBox", (((((0 + " ") + 0) + " ") + 24) + " ") + 24], ["fill", "none"], ["stroke", "currentColor"], ["strokeWidth", 2], ["strokeLinecap", "round"], ["strokeLinejoin", "round"], (elements_5 = ofArray([createElement("path", {
                 d: "M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z",
@@ -612,7 +612,7 @@ export function DashboardPage(dashboardPageInputProps) {
                 d: "M16 3.13a4 4 0 0 1 0 7.75",
             })]), ["children", reactApi.Children.toArray(Array.from(elements_6))])]))), createElement("span", {
                 children: "우리",
-            })], ["children", reactApi.Children.toArray(Array.from(elems_16))])])))], ["children", reactApi.Children.toArray(Array.from(elems_17))])])))), delay(() => {
+            })], ["children", reactApi.Children.toArray(Array.from(elems_16))])])))], ["children", reactApi.Children.toArray(Array.from(elems_17))])])))) : empty_1(), delay(() => {
                 let matchValue_5, elems_22;
                 return append((matchValue_5 = activeTab, (matchValue_5.tag === 1) ? ((viewScope.tag === 1) ? singleton(createElement(TeamViewPage, {
                     year: currentYear,

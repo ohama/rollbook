@@ -631,8 +631,9 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
             Html.main [
                 prop.className "max-w-4xl mx-auto px-4 py-8"
                 prop.children [
-                    // Row 1: Date navigation (single line, horizontal)
-                    Html.div [
+                    // Row 1: Date navigation (hidden on Admin/Profile tabs)
+                    if activeTab <> Admin && activeTab <> Profile then
+                      Html.div [
                         prop.className "flex items-center justify-between bg-white rounded-lg shadow-sm p-4 mb-4"
                         prop.children [
                             Html.button [
@@ -767,10 +768,11 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                 ]
                             ]
                         ]
-                    ]
+                      ]
 
-                    // Row 2: View scope tabs (나/우리)
-                    Html.div [
+                    // Row 2: View scope tabs (나/우리) - hidden on Admin/Profile tabs
+                    if activeTab <> Admin && activeTab <> Profile then
+                      Html.div [
                         prop.className "flex gap-2 mb-6"
                         prop.children [
                             Html.button [
@@ -830,7 +832,7 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                 ]
                             ]
                         ]
-                    ]
+                      ]
 
                     // Tab navigation removed - Admin accessed from top bar
 

@@ -9,9 +9,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Rollbook - 운동 기록',
-        short_name: 'Rollbook',
-        description: '원탭 운동 기록 앱',
+        name: '픽제주 헬스 클럽',
+        short_name: '픽제주',
+        description: '픽제주 헬스 클럽 운동 기록',
         theme_color: '#4f46e5',
         background_color: '#ffffff',
         display: 'standalone',
