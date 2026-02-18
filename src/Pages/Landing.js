@@ -14,17 +14,14 @@ export function LandingPage(landingPageInputProps) {
     const onLoginSuccess = landingPageInputProps.onLoginSuccess;
     const onNavigate = landingPageInputProps.onNavigate;
     const patternInput = reactApi.useState("");
-    const setMemberId = patternInput[1];
     const memberId = patternInput[0];
     const patternInput_1 = reactApi.useState("");
-    const setPassword = patternInput_1[1];
     const password = patternInput_1[0];
     const patternInput_2 = reactApi.useState(false);
     const setLoading = patternInput_2[1];
     const loading = patternInput_2[0];
     const patternInput_3 = reactApi.useState(undefined);
     const setError = patternInput_3[1];
-    const error = patternInput_3[0];
     const handleLogin = () => {
         if ((memberId === "") ? true : (password === "")) {
             setError("아이디와 비밀번호를 입력하세요");
@@ -33,8 +30,7 @@ export function LandingPage(landingPageInputProps) {
             setLoading(true);
             setError(undefined);
             const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signInWithMemberId(memberId, password).then((_arg) => {
-                const result = _arg;
-                const matchValue = result.error;
+                const matchValue = _arg.error;
                 if (matchValue == null) {
                     setLoading(false);
                     onLoginSuccess();
@@ -74,20 +70,20 @@ export function LandingPage(landingPageInputProps) {
     }), createElement("div", createObj(ofArray([["className", "w-full max-w-sm"], ["style", {
         marginTop: 40,
     }], (elems_2 = toList(delay(() => {
-        let matchValue_1, msg;
-        return append((matchValue_1 = error, (matchValue_1 == null) ? singleton(defaultOf()) : ((msg = matchValue_1, singleton(createElement("div", {
+        let matchValue_1;
+        return append((matchValue_1 = patternInput_3[0], (matchValue_1 == null) ? singleton(defaultOf()) : singleton(createElement("div", {
             className: "mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center",
-            children: msg,
-        }))))), delay(() => {
+            children: matchValue_1,
+        }))), delay(() => {
             let value_47;
-            return append(singleton(createElement("input", createObj(ofArray([(value_47 = "w-2/3 mx-auto block px-4 py-4 rounded-xl border border-gray-300 text-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent", ["className", value_47]), ["type", "text"], ["placeholder", "아이디"], ["value", memberId], ["onChange", (ev) => {
-                setMemberId(ev.target.value);
+            return append(singleton(createElement("input", createObj(ofArray([(value_47 = "w-full px-4 py-4 rounded-xl border border-gray-300 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent", ["className", value_47]), ["type", "text"], ["placeholder", "아이디"], ["value", memberId], ["onChange", (ev) => {
+                patternInput[1](ev.target.value);
             }]])))), delay(() => append(singleton(createElement("div", {
                 className: "h-4",
             })), delay(() => {
                 let value_58;
-                return append(singleton(createElement("input", createObj(ofArray([(value_58 = "w-2/3 mx-auto block px-4 py-4 rounded-xl border border-gray-300 text-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent", ["className", value_58]), ["type", "password"], ["placeholder", "비밀번호"], ["value", password], ["onChange", (ev_1) => {
-                    setPassword(ev_1.target.value);
+                return append(singleton(createElement("input", createObj(ofArray([(value_58 = "w-full px-4 py-4 rounded-xl border border-gray-300 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent", ["className", value_58]), ["type", "password"], ["placeholder", "패스워드"], ["value", password], ["onChange", (ev_1) => {
+                    patternInput_1[1](ev_1.target.value);
                 }], ["onKeyDown", (e) => {
                     if (e.key === "Enter") {
                         handleLogin();

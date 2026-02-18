@@ -83,7 +83,7 @@ let LandingPage (onNavigate: string -> unit) (onLoginSuccess: unit -> unit) =
 
                             // ID input
                             Html.input [
-                                prop.className "w-2/3 mx-auto block px-4 py-4 rounded-xl border border-gray-300 text-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                                prop.className "w-full px-4 py-4 rounded-xl border border-gray-300 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                                 prop.type' "text"
                                 prop.placeholder "아이디"
                                 prop.value memberId
@@ -94,9 +94,9 @@ let LandingPage (onNavigate: string -> unit) (onLoginSuccess: unit -> unit) =
 
                             // Password input
                             Html.input [
-                                prop.className "w-2/3 mx-auto block px-4 py-4 rounded-xl border border-gray-300 text-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                                prop.className "w-full px-4 py-4 rounded-xl border border-gray-300 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                                 prop.type' "password"
-                                prop.placeholder "비밀번호"
+                                prop.placeholder "패스워드"
                                 prop.value password
                                 prop.onChange setPassword
                                 prop.onKeyDown (fun e -> if e.key = "Enter" then handleLogin())
