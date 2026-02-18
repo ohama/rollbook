@@ -14,12 +14,13 @@ let isAdmin () : JS.Promise<bool> =
                     ?from("user_roles")
                     ?select("role")
                     ?eq("role", "admin")
-                    ?single()
 
-            let error = response?error
-            match box error with
-            | null -> return true  // Found admin role
-            | _ -> return false    // No admin role or error
+            let data = response?data
+            if isNull data then
+                return false
+            else
+                let roles = unbox<obj array> data
+                return roles.Length > 0
         with _ ->
             return false
     }

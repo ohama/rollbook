@@ -4,18 +4,16 @@ open Feliz
 open Fable.Core.JsInterop
 open Fable.Core
 open Supabase.Admin
-open Supabase.Audit
+open Supabase.Workouts
 open Supabase.Types
 open Admin.MemberList
 open Admin.MemberActions
-open Components.AuditLogList
-open Components.AdminRoleManager
-open Components.RestoreConfirmModal
+open Utils.DateHelpers
 
 type AdminState =
     | Loading
     | NotAdmin
-    | Ready of profiles: ProfileRecord array * deletedWorkouts: WorkoutRecord array
+    | Ready of profiles: ProfileRecord array * workoutCounts: Map<string, int>
     | Error of message: string
 
 type DeleteTarget = {
@@ -23,36 +21,45 @@ type DeleteTarget = {
     displayName: string
 }
 
-type RestoreTarget = Components.RestoreConfirmModal.RestoreTarget
-
 [<ReactComponent>]
-let AdminPage () =
+let AdminPage (onBack: unit -> unit) =
     let state, setState = React.useState(Loading)
     let deleteTarget, setDeleteTarget = React.useState<DeleteTarget option>(None)
-    let restoreTarget, setRestoreTarget = React.useState<RestoreTarget option>(None)
     let refreshKey, setRefreshKey = React.useState(0)
 
-    // Check admin status and load profiles + deleted workouts
+    // Check admin status and load profiles
     React.useEffect((fun () ->
         promise {
-            // First check if user is admin
             let! isAdminResult = isAdmin ()
             if not isAdminResult then
                 setState NotAdmin
             else
-                // Load profiles and deleted workouts in parallel
                 let! profilesResult = getAllProfiles ()
-                let! deletedResult = getDeletedWorkouts ()
 
-                match profilesResult, deletedResult with
-                | Result.Ok profiles, Result.Ok deleted ->
-                    setState (Ready (profiles, deleted))
-                | Result.Error msg, _ | _, Result.Error msg ->
+                // Get this month's workouts for counting
+                let now = System.DateTime.Now
+                let startDate = formatDateString now.Year now.Month 1
+                let endDate = formatDateString now.Year now.Month (getDaysInMonth now.Year now.Month)
+                let! monthWorkouts = getAllWorkouts startDate endDate
+
+                // Count unique workout days per user
+                let counts =
+                    monthWorkouts
+                    |> Array.groupBy (fun w -> w.user_id)
+                    |> Array.map (fun (uid, records) ->
+                        let uniqueDays = records |> Array.map (fun r -> r.workout_date) |> Array.distinct |> Array.length
+                        (uid, uniqueDays))
+                    |> Map.ofArray
+
+                match profilesResult with
+                | Result.Ok profiles ->
+                    setState (Ready (profiles, counts))
+                | Result.Error msg ->
                     setState (Error msg)
         } |> Promise.start
     ), [| box refreshKey |])
 
-    // Handle delete click - receives userId and needs to find profile for display name
+    // Handle delete click
     let handleDelete (userId: string) =
         match state with
         | Ready (profiles, _) ->
@@ -71,7 +78,7 @@ let AdminPage () =
                 match result with
                 | Result.Ok () ->
                     setDeleteTarget None
-                    setRefreshKey (refreshKey + 1)  // Reload profiles
+                    setRefreshKey (refreshKey + 1)
                 | Result.Error msg ->
                     setState (Error (sprintf "삭제 실패: %s" msg))
                     setDeleteTarget None
@@ -81,30 +88,25 @@ let AdminPage () =
     let handleCancelDelete () =
         setDeleteTarget None
 
-    // Restore handlers
-    let handleRestoreClick (workoutId: int64) (workoutDate: string) =
-        setRestoreTarget (Some { workoutId = workoutId; workoutDate = workoutDate })
-
-    let handleRestoreConfirm () =
-        setRestoreTarget None
-        setRefreshKey (refreshKey + 1)  // Reload data
-
-    let handleRestoreCancel () =
-        setRestoreTarget None
-
     Html.div [
         prop.className "min-h-screen bg-gray-100 p-4"
         prop.children [
             Html.div [
                 prop.className "max-w-2xl mx-auto"
                 prop.children [
-                    // Header
+                    Html.button [
+                        prop.onClick (fun _ -> onBack())
+                        prop.className "mb-4 text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+                        prop.children [
+                            Html.span [ prop.text "<" ]
+                            Html.span [ prop.text "돌아가기" ]
+                        ]
+                    ]
                     Html.h1 [
                         prop.className "text-2xl font-bold mb-6"
                         prop.text "관리자"
                     ]
 
-                    // Content based on state
                     match state with
                     | Loading ->
                         Html.div [
@@ -124,10 +126,6 @@ let AdminPage () =
                                     prop.className "text-red-600 font-medium"
                                     prop.text "접근 권한이 없습니다."
                                 ]
-                                Html.p [
-                                    prop.className "text-red-500 text-sm mt-2"
-                                    prop.text "관리자만 이 페이지에 접근할 수 있습니다."
-                                ]
                             ]
                         ]
                     | Error msg ->
@@ -140,74 +138,13 @@ let AdminPage () =
                                 ]
                             ]
                         ]
-                    | Ready (profiles, deletedWorkouts) ->
-                        Html.div [
-                            prop.className "space-y-6"
-                            prop.children [
-                                // Section 1: Member list (existing)
-                                MemberList profiles handleDelete
-
-                                // Section 2: Admin role manager (new)
-                                AdminRoleManager profiles (fun () -> setRefreshKey (refreshKey + 1))
-
-                                // Section 3: Audit log (new)
-                                AuditLogList 20  // Show last 20 changes
-
-                                // Section 4: Deleted workouts (new)
-                                Html.div [
-                                    prop.className "bg-white rounded-lg shadow p-4"
-                                    prop.children [
-                                        Html.h2 [
-                                            prop.className "text-lg font-semibold mb-4"
-                                            prop.text "삭제된 기록"
-                                        ]
-                                        if deletedWorkouts.Length = 0 then
-                                            Html.p [
-                                                prop.className "text-gray-500 text-center py-4"
-                                                prop.text "삭제된 기록이 없습니다."
-                                            ]
-                                        else
-                                            Html.div [
-                                                prop.className "space-y-2"
-                                                prop.children [
-                                                    for workout in deletedWorkouts do
-                                                        Html.div [
-                                                            prop.className "flex items-center justify-between py-2 px-3 border rounded"
-                                                            prop.children [
-                                                                Html.div [
-                                                                    Html.span [
-                                                                        prop.className "font-medium"
-                                                                        prop.text workout.workout_date
-                                                                    ]
-                                                                    Html.span [
-                                                                        prop.className "text-xs text-gray-500 ml-2"
-                                                                        prop.text (sprintf "ID: %d" workout.id)
-                                                                    ]
-                                                                ]
-                                                                Html.button [
-                                                                    prop.className "px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
-                                                                    prop.text "복구"
-                                                                    prop.onClick (fun _ -> handleRestoreClick workout.id workout.workout_date)
-                                                                ]
-                                                            ]
-                                                        ]
-                                                ]
-                                            ]
-                                    ]
-                                ]
-                            ]
-                        ]
+                    | Ready (profiles, workoutCounts) ->
+                        MemberList profiles workoutCounts handleDelete
 
                     // Delete confirmation modal
                     match deleteTarget with
                     | Some target ->
                         DeleteConfirmModal target.displayName handleConfirmDelete handleCancelDelete
-                    | None -> Html.none
-
-                    // Restore confirmation modal
-                    match restoreTarget with
-                    | Some target ->
-                        RestoreConfirmModal target handleRestoreConfirm handleRestoreCancel
                     | None -> Html.none
                 ]
             ]

@@ -8,7 +8,10 @@ import { FSharpResult$2 } from "../fable_modules/fable-library-js.4.28.0/Result.
  * Check if current user has admin role
  */
 export function isAdmin() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => (((((supabase.from("user_roles")).select("role")).eq("role", "admin")).single()).then((_arg) => (equals(_arg.error, defaultOf()) ? (Promise.resolve(true)) : (Promise.resolve(false)))))).catch((_arg_1) => (Promise.resolve(false))))));
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => ((((supabase.from("user_roles")).select("role")).eq("role", "admin")).then((_arg) => {
+        const data = _arg.data;
+        return (data == null) ? (Promise.resolve(false)) : (Promise.resolve(data.length > 0));
+    }))).catch((_arg_1) => (Promise.resolve(false))))));
 }
 
 /**

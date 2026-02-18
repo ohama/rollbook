@@ -1,11 +1,11 @@
 import { createElement } from "react";
 import React from "react";
 import { reactApi } from "../fable_modules/Feliz.2.9.0/Interop.fs.js";
+import { substring, printf, toText } from "../fable_modules/fable-library-js.4.28.0/String.js";
 import { createObj } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { empty, singleton, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
 import { ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 import { defaultArg } from "../fable_modules/fable-library-js.4.28.0/Option.js";
-import { printf, toText, substring } from "../fable_modules/fable-library-js.4.28.0/String.js";
 import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "../fable_modules/Fable.Promise.3.2.0/Promise.fs.js";
 import { promise } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
@@ -31,9 +31,15 @@ export function ProfilePage(profilePageInputProps) {
     const patternInput_4 = reactApi.useState(false);
     const setPasswordLoading = patternInput_4[1];
     const passwordLoading = patternInput_4[0];
+    let msgKey;
+    const arg = user.id;
+    msgKey = toText(printf("rollbook-default-msg-%s"))(arg);
+    let goalKey;
+    const arg_1 = user.id;
+    goalKey = toText(printf("rollbook-monthly-goal-%s"))(arg_1);
     let patternInput_5;
     let initial_5;
-    const stored = window.localStorage.getItem("rollbook-default-msg");
+    const stored = window.localStorage.getItem(msgKey);
     initial_5 = ((stored == null) ? "운동했어" : stored);
     patternInput_5 = reactApi.useState(initial_5);
     const defaultMsg = patternInput_5[0];
@@ -41,7 +47,7 @@ export function ProfilePage(profilePageInputProps) {
     const setDefaultMsgSaved = patternInput_6[1];
     let patternInput_7;
     let initial_7;
-    const stored_1 = window.localStorage.getItem("rollbook-monthly-goal");
+    const stored_1 = window.localStorage.getItem(goalKey);
     initial_7 = ((stored_1 == null) ? "20" : stored_1);
     patternInput_7 = reactApi.useState(initial_7);
     const monthlyGoal = patternInput_7[0];
@@ -113,7 +119,7 @@ export function ProfilePage(profilePageInputProps) {
                             },
                         }), createElement("button", {
                             onClick: (_arg_6) => {
-                                window.localStorage.setItem("rollbook-default-msg", defaultMsg);
+                                window.localStorage.setItem(msgKey, defaultMsg);
                                 setDefaultMsgSaved(true);
                             },
                             className: "px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors",
@@ -139,7 +145,7 @@ export function ProfilePage(profilePageInputProps) {
                                 children: "일",
                             })), delay(() => append(singleton(createElement("button", {
                                 onClick: (_arg_7) => {
-                                    window.localStorage.setItem("rollbook-monthly-goal", monthlyGoal);
+                                    window.localStorage.setItem(goalKey, monthlyGoal);
                                     setGoalSaved(true);
                                 },
                                 className: "px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors",

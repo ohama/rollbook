@@ -486,7 +486,7 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
         setCalendarSelectedDate (Some dateString)
         promise {
             try
-                let storedMsg = Browser.Dom.window.localStorage.getItem("rollbook-default-msg")
+                let storedMsg = Browser.Dom.window.localStorage.getItem(sprintf "rollbook-default-msg-%s" user.id)
                 let template = if isNull storedMsg || storedMsg = "" then "운동했어" else storedMsg
 
                 // Count unique workout days this month for current user
@@ -497,7 +497,7 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                     |> Array.distinct
                     |> Array.length
 
-                let storedGoal = Browser.Dom.window.localStorage.getItem("rollbook-monthly-goal")
+                let storedGoal = Browser.Dom.window.localStorage.getItem(sprintf "rollbook-monthly-goal-%s" user.id)
                 let goal = if isNull storedGoal || storedGoal = "" then "20" else storedGoal
 
                 // Format date: "2026-02-18" -> "2월 18일"
@@ -566,9 +566,18 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                     Html.div [
                         prop.className "max-w-4xl mx-auto px-4 py-4 pb-6 flex items-center"
                         prop.children [
-                            // Left: 관리 button (admin only) - fixed width
+                            // Left: empty spacer
                             Html.div [
-                                prop.className "flex-1 flex justify-start"
+                                prop.className "flex-1"
+                            ]
+                            // Center: 픽제주 헬스 클럽
+                            Html.h1 [
+                                prop.className "text-2xl font-bold text-indigo-600 whitespace-nowrap"
+                                prop.text "픽제주 헬스 클럽"
+                            ]
+                            // Right: 관리 + member_id + 로그아웃
+                            Html.div [
+                                prop.className "flex-1 flex items-center justify-end gap-2"
                                 prop.children [
                                     if userIsAdmin then
                                         Html.button [
@@ -585,17 +594,6 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                                             )
                                             prop.text "관리"
                                         ]
-                                ]
-                            ]
-                            // Center: 픽제주 헬스 클럽
-                            Html.h1 [
-                                prop.className "text-2xl font-bold text-indigo-600 whitespace-nowrap"
-                                prop.text "픽제주 헬스 클럽"
-                            ]
-                            // Right: member_id + 로그아웃
-                            Html.div [
-                                prop.className "flex-1 flex items-center justify-end gap-2"
-                                prop.children [
                                     Html.button [
                                         prop.onClick (fun _ ->
                                             if activeTab = Profile then setActiveTab Home
@@ -936,7 +934,7 @@ let DashboardPage (user: User) (onLogout: unit -> unit) =
                             prop.text "팀 뷰는 'Progress' 탭에서 '우리'를 선택하세요"
                         ]
                     | Admin ->
-                        AdminPage()
+                        AdminPage (fun () -> setActiveTab Home)
                     | Profile ->
                         ProfilePage user userMemberId onLogout (fun () -> setActiveTab Home)
 

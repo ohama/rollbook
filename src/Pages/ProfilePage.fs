@@ -14,14 +14,17 @@ let ProfilePage (user: User) (memberId: string) (onLogout: unit -> unit) (onBack
     let (passwordMsg, setPasswordMsg) = React.useState<(string * bool) option>(None) // (message, isError)
     let (passwordLoading, setPasswordLoading) = React.useState(false)
 
+    let msgKey = sprintf "rollbook-default-msg-%s" user.id
+    let goalKey = sprintf "rollbook-monthly-goal-%s" user.id
+
     let (defaultMsg, setDefaultMsg) = React.useState(
-        let stored = Browser.Dom.window.localStorage.getItem("rollbook-default-msg")
+        let stored = Browser.Dom.window.localStorage.getItem(msgKey)
         if isNull stored then "운동했어" else stored
     )
     let (defaultMsgSaved, setDefaultMsgSaved) = React.useState(false)
 
     let (monthlyGoal, setMonthlyGoal) = React.useState(
-        let stored = Browser.Dom.window.localStorage.getItem("rollbook-monthly-goal")
+        let stored = Browser.Dom.window.localStorage.getItem(goalKey)
         if isNull stored then "20" else stored
     )
     let (goalSaved, setGoalSaved) = React.useState(false)
@@ -172,7 +175,7 @@ let ProfilePage (user: User) (memberId: string) (onLogout: unit -> unit) (onBack
                             ]
                             Html.button [
                                 prop.onClick (fun _ ->
-                                    Browser.Dom.window.localStorage.setItem("rollbook-default-msg", defaultMsg)
+                                    Browser.Dom.window.localStorage.setItem(msgKey, defaultMsg)
                                     setDefaultMsgSaved true
                                 )
                                 prop.className "px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
@@ -212,7 +215,7 @@ let ProfilePage (user: User) (memberId: string) (onLogout: unit -> unit) (onBack
                                     ]
                                     Html.button [
                                         prop.onClick (fun _ ->
-                                            Browser.Dom.window.localStorage.setItem("rollbook-monthly-goal", monthlyGoal)
+                                            Browser.Dom.window.localStorage.setItem(goalKey, monthlyGoal)
                                             setGoalSaved true
                                         )
                                         prop.className "px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
