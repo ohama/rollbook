@@ -14,10 +14,7 @@ export function AuthLayout(authLayoutInputProps) {
     const children = authLayoutInputProps.children;
     return createElement("div", createObj(ofArray([["className", "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4"], (elems_3 = [createElement("div", createObj(ofArray([["className", "w-full max-w-md"], (elems_2 = [createElement("div", createObj(ofArray([["className", "text-center mb-8"], (elems = [createElement("h1", {
         className: "text-3xl font-bold text-indigo-600",
-        children: "Rollbook",
-    }), createElement("p", {
-        className: "text-gray-600 mt-2",
-        children: "원탭 운동 기록",
+        children: "픽제주 헬스 클럽",
     })], ["children", reactApi.Children.toArray(Array.from(elems))])]))), createElement("div", {
         className: "bg-white rounded-2xl shadow-xl p-6 sm:p-8",
         children: reactApi.Children.toArray(Array.from(children)),
@@ -28,31 +25,34 @@ export function AuthLayout(authLayoutInputProps) {
  * Input field component with label and error state
  */
 export function FormInput(formInputInputProps) {
-    let elems;
+    let elems_1;
     const error = formInputInputProps.error;
     const onChange = formInputInputProps.onChange;
     const value = formInputInputProps.value;
     const placeholder = formInputInputProps.placeholder;
     const inputType = formInputInputProps.inputType;
     const label = formInputInputProps.label;
-    return createElement("div", createObj(ofArray([["className", "mb-4"], (elems = toList(delay(() => append(singleton(createElement("label", {
-        className: "block text-sm font-medium text-gray-700 mb-1",
-        children: label,
-    })), delay(() => append(singleton(createElement("input", {
-        type: inputType,
-        placeholder: placeholder,
-        value: value,
-        onChange: (ev) => {
-            onChange(ev.target.value);
-        },
-        className: "w-full px-4 py-3 rounded-lg border focus:ring-2 focus:outline-none transition-colors " + ((error == null) ? "border-gray-300 focus:ring-indigo-200 focus:border-indigo-500" : "border-red-500 focus:ring-red-200"),
-    })), delay(() => {
-        const matchValue = error;
-        return (matchValue == null) ? singleton(defaultOf()) : singleton(createElement("p", {
-            className: "mt-1 text-sm text-red-600",
-            children: matchValue,
+    return createElement("div", createObj(ofArray([["className", "mb-4"], (elems_1 = toList(delay(() => {
+        let elems;
+        return append(singleton(createElement("div", createObj(ofArray([["className", "flex items-center gap-3"], (elems = [createElement("label", {
+            className: "text-base font-medium text-gray-700 whitespace-nowrap w-28 text-right",
+            children: label,
+        }), createElement("input", {
+            type: inputType,
+            placeholder: placeholder,
+            value: value,
+            onChange: (ev) => {
+                onChange(ev.target.value);
+            },
+            className: "flex-1 px-4 py-3 rounded-lg border text-base focus:ring-2 focus:outline-none transition-colors " + ((error == null) ? "border-gray-300 focus:ring-indigo-200 focus:border-indigo-500" : "border-red-500 focus:ring-red-200"),
+        })], ["children", reactApi.Children.toArray(Array.from(elems))])])))), delay(() => {
+            const matchValue = error;
+            return (matchValue == null) ? singleton(defaultOf()) : singleton(createElement("p", {
+                className: "mt-1 text-sm text-red-600 pl-27",
+                children: matchValue,
+            }));
         }));
-    })))))), ["children", reactApi.Children.toArray(Array.from(elems))])])));
+    })), ["children", reactApi.Children.toArray(Array.from(elems_1))])])));
 }
 
 /**

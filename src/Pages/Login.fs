@@ -6,7 +6,7 @@ open Components.Layout
 open Supabase.Auth
 
 type LoginState = {
-    email: string
+    memberId: string
     password: string
     loading: bool
     error: string option
@@ -15,7 +15,7 @@ type LoginState = {
 [<ReactComponent>]
 let LoginPage (onNavigate: string -> unit) (onLoginSuccess: unit -> unit) =
     let state, setState = React.useState({
-        email = ""
+        memberId = ""
         password = ""
         loading = false
         error = None
@@ -25,7 +25,7 @@ let LoginPage (onNavigate: string -> unit) (onLoginSuccess: unit -> unit) =
         setState { state with loading = true; error = None }
 
         promise {
-            let! result = signInWithPassword state.email state.password
+            let! result = signInWithMemberId state.memberId state.password
 
             match result.error with
             | Some err ->
@@ -51,8 +51,8 @@ let LoginPage (onNavigate: string -> unit) (onLoginSuccess: unit -> unit) =
                 handleLogin()
             )
             prop.children [
-                FormInput "이메일" "email" "your@email.com" state.email
-                    (fun v -> setState { state with email = v }) None
+                FormInput "아이디" "text" "아이디 입력" state.memberId
+                    (fun v -> setState { state with memberId = v }) None
 
                 FormInput "비밀번호" "password" "" state.password
                     (fun v -> setState { state with password = v }) None

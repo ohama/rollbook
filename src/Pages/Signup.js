@@ -13,8 +13,9 @@ import { ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 
 export class SignupState extends Record {
-    constructor(email, password, confirmPassword, loading, error, success) {
+    constructor(memberId, email, password, confirmPassword, loading, error, success) {
         super();
+        this.memberId = memberId;
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
@@ -25,45 +26,47 @@ export class SignupState extends Record {
 }
 
 export function SignupState_$reflection() {
-    return record_type("Pages.Signup.SignupState", [], SignupState, () => [["email", string_type], ["password", string_type], ["confirmPassword", string_type], ["loading", bool_type], ["error", option_type(string_type)], ["success", bool_type]]);
+    return record_type("Pages.Signup.SignupState", [], SignupState, () => [["memberId", string_type], ["email", string_type], ["password", string_type], ["confirmPassword", string_type], ["loading", bool_type], ["error", option_type(string_type)], ["success", bool_type]]);
 }
 
 export function SignupPage(signupPageInputProps) {
     const onNavigate = signupPageInputProps.onNavigate;
     let patternInput;
-    const initial = new SignupState("", "", "", false, undefined, false);
+    const initial = new SignupState("", "", "", "", false, undefined, false);
     patternInput = reactApi.useState(initial);
     const state = patternInput[0];
     const setState = patternInput[1];
     const handleSignup = () => {
-        const matchValue = (state.password.length < 6) ? "비밀번호는 6자 이상이어야 합니다" : ((state.password !== state.confirmPassword) ? "비밀번호가 일치하지 않습니다" : undefined);
+        const matchValue = (state.memberId.length < 3) ? "아이디는 3자 이상이어야 합니다" : ((state.password.length < 6) ? "비밀번호는 6자 이상이어야 합니다" : ((state.password !== state.confirmPassword) ? "비밀번호가 일치하지 않습니다" : undefined));
         if (matchValue == null) {
-            setState(new SignupState(state.email, state.password, state.confirmPassword, true, undefined, state.success));
-            const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signUp(state.email, state.password, undefined).then((_arg) => {
+            setState(new SignupState(state.memberId, state.email, state.password, state.confirmPassword, true, undefined, state.success));
+            const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signUp(state.memberId, state.email, state.password, undefined).then((_arg) => {
                 const matchValue_1 = _arg.error;
                 if (matchValue_1 == null) {
-                    setState(new SignupState(state.email, state.password, state.confirmPassword, false, state.error, true));
+                    setState(new SignupState(state.memberId, state.email, state.password, state.confirmPassword, false, state.error, true));
                     return Promise.resolve();
                 }
                 else {
                     const err_1 = matchValue_1;
-                    setState(new SignupState(state.email, state.password, state.confirmPassword, false, err_1.message, state.success));
+                    setState(new SignupState(state.memberId, state.email, state.password, state.confirmPassword, false, err_1.message, state.success));
                     return Promise.resolve();
                 }
             }))));
             void pr;
         }
         else {
-            setState(new SignupState(state.email, state.password, state.confirmPassword, state.loading, matchValue, state.success));
+            setState(new SignupState(state.memberId, state.email, state.password, state.confirmPassword, state.loading, matchValue, state.success));
         }
     };
     return createElement(AuthLayout, {
-        children: toList(delay(() => append(singleton(createElement("h2", {
-            className: "text-xl font-semibold text-gray-800 mb-6",
+        children: toList(delay(() => append(singleton(createElement("div", {
+            className: "h-8",
+        })), delay(() => append(singleton(createElement("h2", {
+            className: "text-2xl font-semibold text-gray-800 mb-6 text-center",
             children: "회원가입",
         })), delay(() => {
             let children, elems, children_2;
-            return state.success ? singleton((children = ofArray([createElement(Alert, {
+            return append(state.success ? singleton((children = ofArray([createElement(Alert, {
                 message: "인증 이메일을 발송했습니다. 이메일을 확인해주세요.",
                 alertType: "success",
             }), createElement("div", createObj(ofArray([["className", "text-center mt-4"], (elems = [createElement(LinkButton, {
@@ -80,59 +83,73 @@ export function SignupPage(signupPageInputProps) {
                     alertType: "error",
                 }))))), delay(() => {
                     let elems_1;
-                    return append(singleton(createElement("form", createObj(ofArray([["onSubmit", (e) => {
+                    return singleton(createElement("form", createObj(ofArray([["onSubmit", (e) => {
                         e.preventDefault();
                         handleSignup();
-                    }], (elems_1 = [createElement(FormInput, {
+                    }], (elems_1 = [createElement("div", {
+                        className: "h-4",
+                    }), createElement(FormInput, {
+                        label: "아이디",
+                        inputType: "text",
+                        placeholder: "영문, 숫자 3자 이상",
+                        value: state.memberId,
+                        onChange: (v) => {
+                            setState(new SignupState(v, state.email, state.password, state.confirmPassword, state.loading, state.error, state.success));
+                        },
+                    }), createElement("div", {
+                        className: "h-4",
+                    }), createElement(FormInput, {
                         label: "이메일",
                         inputType: "email",
                         placeholder: "your@email.com",
                         value: state.email,
-                        onChange: (v) => {
-                            setState(new SignupState(v, state.password, state.confirmPassword, state.loading, state.error, state.success));
+                        onChange: (v_1) => {
+                            setState(new SignupState(state.memberId, v_1, state.password, state.confirmPassword, state.loading, state.error, state.success));
                         },
+                    }), createElement("div", {
+                        className: "h-4",
                     }), createElement(FormInput, {
-                        label: "비밀번호",
+                        label: "비밀번호 입력",
                         inputType: "password",
                         placeholder: "6자 이상",
                         value: state.password,
-                        onChange: (v_1) => {
-                            setState(new SignupState(state.email, v_1, state.confirmPassword, state.loading, state.error, state.success));
+                        onChange: (v_2) => {
+                            setState(new SignupState(state.memberId, state.email, v_2, state.confirmPassword, state.loading, state.error, state.success));
                         },
+                    }), createElement("div", {
+                        className: "h-4",
                     }), createElement(FormInput, {
                         label: "비밀번호 확인",
                         inputType: "password",
                         placeholder: "비밀번호 재입력",
                         value: state.confirmPassword,
-                        onChange: (v_2) => {
-                            setState(new SignupState(state.email, state.password, v_2, state.loading, state.error, state.success));
+                        onChange: (v_3) => {
+                            setState(new SignupState(state.memberId, state.email, state.password, v_3, state.loading, state.error, state.success));
                         },
+                    }), createElement("div", {
+                        className: "h-4",
                     }), createElement(PrimaryButton, {
                         text: "가입하기",
                         loading: state.loading,
                         onClick: handleSignup,
-                    })], ["children", reactApi.Children.toArray(Array.from(elems_1))])])))), delay(() => {
-                        let elems_2;
-                        return append(singleton(createElement("div", createObj(ofArray([["className", "mt-6 text-center text-gray-600"], (elems_2 = ["이미 계정이 있으신가요? ", createElement(LinkButton, {
-                            text: "로그인",
-                            onClick: () => {
-                                onNavigate("login");
-                            },
-                        })], ["children", reactApi.Children.toArray(Array.from(elems_2))])])))), delay(() => {
-                            let elems_3;
-                            return singleton(createElement("div", createObj(ofArray([["className", "mt-3 text-center"], (elems_3 = [createElement(LinkButton, {
-                                text: "← 처음으로",
-                                onClick: () => {
-                                    onNavigate("landing");
-                                },
-                            })], ["children", reactApi.Children.toArray(Array.from(elems_3))])]))));
-                        }));
-                    }));
+                    })], ["children", reactApi.Children.toArray(Array.from(elems_1))])]))));
                 }));
             })), createElement("div", {
                 children: reactApi.Children.toArray(Array.from(children_2)),
-            })));
-        })))),
+            }))), delay(() => append(singleton(createElement("div", {
+                className: "h-6",
+            })), delay(() => {
+                let elems_2;
+                return singleton(createElement("div", createObj(ofArray([["className", "text-center"], (elems_2 = [createElement("button", {
+                    type: "button",
+                    onClick: (_arg_1) => {
+                        onNavigate("landing");
+                    },
+                    className: "text-indigo-600 hover:text-indigo-800 text-base font-medium",
+                    children: "← 처음으로",
+                })], ["children", reactApi.Children.toArray(Array.from(elems_2))])]))));
+            }))));
+        })))))),
     });
 }
 

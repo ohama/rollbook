@@ -111,6 +111,8 @@ export function App() {
     const navigateTo = (page) => {
         setState(new AppState(state.authState, (page === "login") ? (new Page(1, [])) : ((page === "signup") ? (new Page(2, [])) : ((page === "forgot-password") ? (new Page(3, [])) : ((page === "reset-password") ? (new Page(4, [])) : (new Page(0, [])))))));
     };
+    const onLoginSuccess = () => {
+    };
     const xs_4 = toList(delay(() => append(singleton(createElement(OfflineIndicator, null)), delay(() => {
         let elems_1, elems;
         const matchValue = state.authState;
@@ -119,8 +121,7 @@ export function App() {
                 const matchValue_1 = state.currentPage;
                 return (matchValue_1.tag === 1) ? singleton(createElement(LoginPage, {
                     onNavigate: navigateTo,
-                    onLoginSuccess: () => {
-                    },
+                    onLoginSuccess: onLoginSuccess,
                 })) : ((matchValue_1.tag === 2) ? singleton(createElement(SignupPage, {
                     onNavigate: navigateTo,
                 })) : ((matchValue_1.tag === 3) ? singleton(createElement(ForgotPasswordPage, {
@@ -129,6 +130,7 @@ export function App() {
                     onNavigate: navigateTo,
                 })) : singleton(createElement(LandingPage, {
                     onNavigate: navigateTo,
+                    onLoginSuccess: onLoginSuccess,
                 })))));
             }
             case 2:

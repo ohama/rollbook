@@ -6,6 +6,7 @@ open Components.Layout
 open Supabase.Auth
 
 type SignupState = {
+    memberId: string
     email: string
     password: string
     confirmPassword: string
@@ -17,6 +18,7 @@ type SignupState = {
 [<ReactComponent>]
 let SignupPage (onNavigate: string -> unit) =
     let state, setState = React.useState({
+        memberId = ""
         email = ""
         password = ""
         confirmPassword = ""
@@ -26,7 +28,9 @@ let SignupPage (onNavigate: string -> unit) =
     })
 
     let validateForm () =
-        if state.password.Length < 6 then
+        if state.memberId.Length < 3 then
+            Some "아이디는 3자 이상이어야 합니다"
+        elif state.password.Length < 6 then
             Some "비밀번호는 6자 이상이어야 합니다"
         elif state.password <> state.confirmPassword then
             Some "비밀번호가 일치하지 않습니다"
@@ -41,7 +45,7 @@ let SignupPage (onNavigate: string -> unit) =
             setState { state with loading = true; error = None }
 
             promise {
-                let! result = signUp state.email state.password None
+                let! result = signUp state.memberId state.email state.password None
 
                 match result.error with
                 | Some err ->
@@ -51,8 +55,10 @@ let SignupPage (onNavigate: string -> unit) =
             } |> Promise.start
 
     AuthLayout [
+        Html.div [ prop.className "h-8" ]
+
         Html.h2 [
-            prop.className "text-xl font-semibold text-gray-800 mb-6"
+            prop.className "text-2xl font-semibold text-gray-800 mb-6 text-center"
             prop.text "회원가입"
         ]
 
@@ -78,32 +84,44 @@ let SignupPage (onNavigate: string -> unit) =
                         handleSignup()
                     )
                     prop.children [
+                        Html.div [ prop.className "h-4" ]
+
+                        FormInput "아이디" "text" "영문, 숫자 3자 이상" state.memberId
+                            (fun v -> setState { state with memberId = v }) None
+
+                        Html.div [ prop.className "h-4" ]
+
                         FormInput "이메일" "email" "your@email.com" state.email
                             (fun v -> setState { state with email = v }) None
 
-                        FormInput "비밀번호" "password" "6자 이상" state.password
+                        Html.div [ prop.className "h-4" ]
+
+                        FormInput "비밀번호 입력" "password" "6자 이상" state.password
                             (fun v -> setState { state with password = v }) None
+
+                        Html.div [ prop.className "h-4" ]
 
                         FormInput "비밀번호 확인" "password" "비밀번호 재입력" state.confirmPassword
                             (fun v -> setState { state with confirmPassword = v }) None
 
+                        Html.div [ prop.className "h-4" ]
+
                         PrimaryButton "가입하기" state.loading handleSignup
                     ]
                 ]
+            ]
 
-                Html.div [
-                    prop.className "mt-6 text-center text-gray-600"
-                    prop.children [
-                        Html.text "이미 계정이 있으신가요? "
-                        LinkButton "로그인" (fun () -> onNavigate "login")
-                    ]
-                ]
+        Html.div [ prop.className "h-6" ]
 
-                Html.div [
-                    prop.className "mt-3 text-center"
-                    prop.children [
-                        LinkButton "← 처음으로" (fun () -> onNavigate "landing")
-                    ]
+        Html.div [
+            prop.className "text-center"
+            prop.children [
+                Html.button [
+                    prop.type' "button"
+                    prop.onClick (fun _ -> onNavigate "landing")
+                    prop.className "text-indigo-600 hover:text-indigo-800 text-base font-medium"
+                    prop.text "← 처음으로"
                 ]
             ]
+        ]
     ]

@@ -5,7 +5,7 @@ import React from "react";
 import { reactApi } from "../fable_modules/Feliz.2.9.0/Interop.fs.js";
 import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "../fable_modules/Fable.Promise.3.2.0/Promise.fs.js";
 import { promise } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
-import { signInWithPassword } from "../Supabase/Auth.js";
+import { signInWithMemberId } from "../Supabase/Auth.js";
 import { PrimaryButton, LinkButton, FormInput, Alert, AuthLayout } from "../Components/Layout.js";
 import { singleton, append, delay, toList } from "../fable_modules/fable-library-js.4.28.0/Seq.js";
 import { defaultOf } from "../fable_modules/fable-library-js.4.28.0/Util.js";
@@ -13,9 +13,9 @@ import { createObj } from "../fable_modules/fable-library-js.4.28.0/Util.js";
 import { ofArray } from "../fable_modules/fable-library-js.4.28.0/List.js";
 
 export class LoginState extends Record {
-    constructor(email, password, loading, error) {
+    constructor(memberId, password, loading, error) {
         super();
-        this.email = email;
+        this.memberId = memberId;
         this.password = password;
         this.loading = loading;
         this.error = error;
@@ -23,7 +23,7 @@ export class LoginState extends Record {
 }
 
 export function LoginState_$reflection() {
-    return record_type("Pages.Login.LoginState", [], LoginState, () => [["email", string_type], ["password", string_type], ["loading", bool_type], ["error", option_type(string_type)]]);
+    return record_type("Pages.Login.LoginState", [], LoginState, () => [["memberId", string_type], ["password", string_type], ["loading", bool_type], ["error", option_type(string_type)]]);
 }
 
 export function LoginPage(loginPageInputProps) {
@@ -35,17 +35,17 @@ export function LoginPage(loginPageInputProps) {
     const state = patternInput[0];
     const setState = patternInput[1];
     const handleLogin = () => {
-        setState(new LoginState(state.email, state.password, true, undefined));
-        const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signInWithPassword(state.email, state.password).then((_arg) => {
+        setState(new LoginState(state.memberId, state.password, true, undefined));
+        const pr = PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (signInWithMemberId(state.memberId, state.password).then((_arg) => {
             const matchValue = _arg.error;
             if (matchValue == null) {
-                setState(new LoginState(state.email, state.password, false, state.error));
+                setState(new LoginState(state.memberId, state.password, false, state.error));
                 onLoginSuccess();
                 return Promise.resolve();
             }
             else {
                 const err = matchValue;
-                setState(new LoginState(state.email, state.password, false, err.message));
+                setState(new LoginState(state.memberId, state.password, false, err.message));
                 return Promise.resolve();
             }
         }))));
@@ -66,10 +66,10 @@ export function LoginPage(loginPageInputProps) {
                     e.preventDefault();
                     handleLogin();
                 }], (elems_1 = [createElement(FormInput, {
-                    label: "이메일",
-                    inputType: "email",
-                    placeholder: "your@email.com",
-                    value: state.email,
+                    label: "아이디",
+                    inputType: "text",
+                    placeholder: "아이디 입력",
+                    value: state.memberId,
                     onChange: (v) => {
                         setState(new LoginState(v, state.password, state.loading, state.error));
                     },
@@ -79,7 +79,7 @@ export function LoginPage(loginPageInputProps) {
                     placeholder: "",
                     value: state.password,
                     onChange: (v_1) => {
-                        setState(new LoginState(state.email, v_1, state.loading, state.error));
+                        setState(new LoginState(state.memberId, v_1, state.loading, state.error));
                     },
                 }), createElement("div", createObj(ofArray([["className", "flex justify-end mb-4"], (elems = [createElement(LinkButton, {
                     text: "비밀번호를 잊으셨나요?",

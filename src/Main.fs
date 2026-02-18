@@ -121,7 +121,7 @@ let App () =
 
         | Anonymous ->
             match state.currentPage with
-            | LandingPage -> Pages.Landing.LandingPage navigateTo
+            | LandingPage -> Pages.Landing.LandingPage navigateTo onLoginSuccess
             | LoginPage -> Pages.Login.LoginPage navigateTo onLoginSuccess
             | SignupPage -> Pages.Signup.SignupPage navigateTo
             | ForgotPasswordPage -> Pages.ForgotPassword.ForgotPasswordPage navigateTo

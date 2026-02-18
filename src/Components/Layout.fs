@@ -17,11 +17,7 @@ let AuthLayout (children: ReactElement list) =
                         prop.children [
                             Html.h1 [
                                 prop.className "text-3xl font-bold text-indigo-600"
-                                prop.text "Rollbook"
-                            ]
-                            Html.p [
-                                prop.className "text-gray-600 mt-2"
-                                prop.text "원탭 운동 기록"
+                                prop.text "픽제주 헬스 클럽"
                             ]
                         ]
                     ]
@@ -47,26 +43,31 @@ let FormInput
     Html.div [
         prop.className "mb-4"
         prop.children [
-            Html.label [
-                prop.className "block text-sm font-medium text-gray-700 mb-1"
-                prop.text label
-            ]
-            Html.input [
-                prop.type' inputType
-                prop.placeholder placeholder
-                prop.value value
-                prop.onChange onChange
-                prop.className (
-                    "w-full px-4 py-3 rounded-lg border focus:ring-2 focus:outline-none transition-colors " +
-                    match error with
-                    | Some _ -> "border-red-500 focus:ring-red-200"
-                    | None -> "border-gray-300 focus:ring-indigo-200 focus:border-indigo-500"
-                )
+            Html.div [
+                prop.className "flex items-center gap-3"
+                prop.children [
+                    Html.label [
+                        prop.className "text-base font-medium text-gray-700 whitespace-nowrap w-28 text-right"
+                        prop.text label
+                    ]
+                    Html.input [
+                        prop.type' inputType
+                        prop.placeholder placeholder
+                        prop.value value
+                        prop.onChange onChange
+                        prop.className (
+                            "flex-1 px-4 py-3 rounded-lg border text-base focus:ring-2 focus:outline-none transition-colors " +
+                            match error with
+                            | Some _ -> "border-red-500 focus:ring-red-200"
+                            | None -> "border-gray-300 focus:ring-indigo-200 focus:border-indigo-500"
+                        )
+                    ]
+                ]
             ]
             match error with
             | Some msg ->
                 Html.p [
-                    prop.className "mt-1 text-sm text-red-600"
+                    prop.className "mt-1 text-sm text-red-600 pl-27"
                     prop.text msg
                 ]
             | None -> Html.none
